@@ -1,7 +1,7 @@
 import { useBuilderStore } from "@/store/useBuilderStore";
+import { useAdminStore } from "@/store/adminStore";
 
 const MATERIALS = ["Glass", "Plastic", "Frosted Glass", "Crystal", "Matte Glass", "Recycled"];
-const SILHOUETTES = ["Round", "Square", "Oval", "Cylindrical", "Custom"];
 const CAPACITIES = ["10ml", "30ml", "50ml", "75ml", "100ml", "150ml", "250ml"];
 const BOTTLE_COLORS = [
   { name: "Transparent", hex: "transparent" },
@@ -16,6 +16,10 @@ const BOTTLE_COLORS = [
 
 export function BottleStep() {
   const store = useBuilderStore();
+  const { builderBottles } = useAdminStore();
+
+  const activeBottles = builderBottles.filter((b) => b.active);
+  const SILHOUETTES = activeBottles.map((b) => b.name);
 
   return (
     <div className="space-y-10">

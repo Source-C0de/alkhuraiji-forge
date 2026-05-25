@@ -14,8 +14,12 @@ import { Route as ProcessRouteImport } from './routes/process'
 import { Route as IndustriesRouteImport } from './routes/industries'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BuilderRouteImport } from './routes/builder'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminContentRouteImport } from './routes/admin/content'
+import { Route as AdminBuilderRouteImport } from './routes/admin/builder'
 
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
@@ -42,6 +46,11 @@ const BuilderRoute = BuilderRouteImport.update({
   path: '/builder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -52,15 +61,34 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBuilderRoute = AdminBuilderRouteImport.update({
+  id: '/builder',
+  path: '/builder',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/builder': typeof BuilderRoute
   '/contact': typeof ContactRoute
   '/industries': typeof IndustriesRoute
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
+  '/admin/builder': typeof AdminBuilderRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,27 +98,38 @@ export interface FileRoutesByTo {
   '/industries': typeof IndustriesRoute
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
+  '/admin/builder': typeof AdminBuilderRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/builder': typeof BuilderRoute
   '/contact': typeof ContactRoute
   '/industries': typeof IndustriesRoute
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
+  '/admin/builder': typeof AdminBuilderRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/builder'
     | '/contact'
     | '/industries'
     | '/process'
     | '/services'
+    | '/admin/builder'
+    | '/admin/content'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,20 +139,28 @@ export interface FileRouteTypes {
     | '/industries'
     | '/process'
     | '/services'
+    | '/admin/builder'
+    | '/admin/content'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/builder'
     | '/contact'
     | '/industries'
     | '/process'
     | '/services'
+    | '/admin/builder'
+    | '/admin/content'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BuilderRoute: typeof BuilderRoute
   ContactRoute: typeof ContactRoute
   IndustriesRoute: typeof IndustriesRoute
@@ -158,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -172,12 +226,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/builder': {
+      id: '/admin/builder'
+      path: '/builder'
+      fullPath: '/admin/builder'
+      preLoaderRoute: typeof AdminBuilderRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminBuilderRoute: typeof AdminBuilderRoute
+  AdminContentRoute: typeof AdminContentRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminBuilderRoute: AdminBuilderRoute,
+  AdminContentRoute: AdminContentRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   BuilderRoute: BuilderRoute,
   ContactRoute: ContactRoute,
   IndustriesRoute: IndustriesRoute,
