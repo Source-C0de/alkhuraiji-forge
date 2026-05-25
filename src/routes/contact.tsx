@@ -40,19 +40,20 @@ function ContactPage() {
             <ContactCard icon={MessageCircle} title={t.contact.channels.whatsapp} body="+966 50 000 0000" href="https://wa.me/" />
             <ContactCard icon={Mail} title={t.contact.channels.email} body="partnerships@alkhuraiji.com" href="mailto:partnerships@alkhuraiji.com" />
             <ContactCard icon={Phone} title={t.contact.channels.callback} body="+966 11 000 0000" href="tel:+966110000000" />
-            <div className="overflow-hidden rounded-2xl border border-border bg-card">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all duration-300">
               <div className="relative aspect-[4/3] bg-blueprint">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="rounded-full border border-primary bg-background/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary backdrop-blur">
-                    <MapPin className="me-2 inline h-4 w-4" />
-                    Map placeholder
-                  </div>
-                </div>
+                <iframe
+                  title="Al Khuraiji industrial Company Location Map"
+                  src="https://maps.google.com/maps?q=Al%20Khuraiji%20industrial%20Company%2029%20Riyadh%2014334&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                  className="absolute inset-0 h-full w-full border-0 filter grayscale opacity-90 dark:opacity-85 hover:grayscale-0 transition-all duration-500"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
               <div className="border-t border-border p-5">
-                <div className="text-xs uppercase tracking-[0.18em] text-primary">{t.contact.channels.callback}</div>
-                <div className="mt-2 text-sm text-foreground/90">{t.contact.location}</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Headquarters & Manufacturing Plant</div>
+                <div className="mt-2 text-sm text-foreground/90 leading-relaxed font-light">{t.contact.location}</div>
               </div>
             </div>
           </div>

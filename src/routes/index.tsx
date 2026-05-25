@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatedHero } from "@/components/sections/AnimatedHero";
 import { StatsStrip } from "@/components/sections/StatsStrip";
+import { PartnerLogos } from "@/components/sections/PartnerLogos";
 import { CapabilitiesGrid } from "@/components/sections/CapabilitiesGrid";
+import { BuilderPromo } from "@/components/sections/BuilderPromo";
 import { ProcessTimeline } from "@/components/sections/ProcessTimeline";
 import { WhyUs } from "@/components/sections/WhyUs";
 import { IndustriesStrip } from "@/components/sections/IndustriesStrip";
@@ -13,10 +15,10 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "AlKhuraiji Factory — Precision Manufacturing & Private Label" },
-      { name: "description", content: "Engineering world-class manufacturing, OEM and private label production for global brands. 480+ partners across 38 countries." },
-      { property: "og:title", content: "AlKhuraiji Factory — Precision Manufacturing" },
-      { property: "og:description", content: "World-class manufacturing solutions for global brands." },
+      { title: "AlKhuraiji Beauty — Premium Private Label Cosmetic & Perfume Manufacturing" },
+      { name: "description", content: "Engineering world-class luxury cosmetics, OEM and private label perfume production for global brands." },
+      { property: "og:title", content: "AlKhuraiji Beauty — Luxury Manufacturing" },
+      { property: "og:description", content: "World-class luxury cosmetic manufacturing solutions for global brands." },
       { property: "og:url", content: "/" },
     ],
     links: [{ rel: "canonical", href: "/" }],
@@ -29,10 +31,12 @@ function Index() {
       <AnimatedHero />
       <StatsStrip />
       <CapabilitiesGrid />
+      <BuilderPromo />
       <ProcessTimeline />
       <WhyUs />
       <IndustriesStrip />
       <Testimonials />
+      <PartnerLogos />
       <CTABanner />
     </PageTransition>
   );

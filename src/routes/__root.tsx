@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/i18n/context";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
@@ -103,17 +104,22 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const isBuilder = router.state.location.pathname.startsWith("/builder") || router.state.location.pathname.startsWith("/cosmetics");
+
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <div className="relative flex min-h-screen flex-col">
-          <Navbar />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <Footer />
-        </div>
-      </I18nProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <I18nProvider>
+          <div className="relative flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1 flex flex-col">
+              <Outlet />
+            </main>
+            {!isBuilder && <Footer />}
+          </div>
+        </I18nProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
