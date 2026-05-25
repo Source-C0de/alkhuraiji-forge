@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/context";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import logo from "@/assets/logo.png";
 
 export function Navbar() {
@@ -27,6 +28,7 @@ export function Navbar() {
     { to: "/services", label: t.nav.services },
     { to: "/process", label: t.nav.process },
     { to: "/industries", label: t.nav.industries },
+    { to: "/builder", label: "Builder" },
     { to: "/contact", label: t.nav.contact },
   ] as const;
 
@@ -71,6 +73,7 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <LanguageSwitcher />
           <Link
             to="/contact"

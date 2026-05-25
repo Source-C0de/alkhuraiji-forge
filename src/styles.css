@@ -47,6 +47,31 @@
   --gold: oklch(0.78 0.13 80);
   --gold-soft: oklch(0.85 0.09 82);
 
+  --background: oklch(0.98 0.01 250);
+  --foreground: oklch(0.17 0.035 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.17 0.035 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0.035 255);
+  --primary: oklch(0.78 0.13 80);
+  --primary-foreground: oklch(0.98 0.01 250);
+  --secondary: oklch(0.94 0.02 250);
+  --secondary-foreground: oklch(0.17 0.035 255);
+  --muted: oklch(0.94 0.02 250);
+  --muted-foreground: oklch(0.45 0.02 255);
+  --accent: oklch(0.78 0.13 80);
+  --accent-foreground: oklch(0.98 0.01 250);
+  --destructive: oklch(0.65 0.22 28);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0 0 0 / 10%);
+  --input: oklch(0 0 0 / 12%);
+  --ring: oklch(0.78 0.13 80);
+
+  --font-sans: "Inter", "Cairo", system-ui, sans-serif;
+  --font-display: "Manrope", "Tajawal", system-ui, sans-serif;
+}
+
+.dark {
   --background: oklch(0.17 0.035 255);
   --foreground: oklch(0.97 0.005 250);
   --card: oklch(0.22 0.04 255);
@@ -66,9 +91,6 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.78 0.13 80);
-
-  --font-sans: "Inter", "Cairo", system-ui, sans-serif;
-  --font-display: "Manrope", "Tajawal", system-ui, sans-serif;
 }
 
 html[dir="rtl"] {
@@ -103,6 +125,13 @@ html[dir="rtl"] {
   }
   .shadow-gold-glow { box-shadow: 0 10px 40px -10px color-mix(in oklab, var(--gold) 50%, transparent); }
   .shadow-elevated { box-shadow: 0 20px 60px -20px oklch(0 0 0 / 0.5); }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes float-slow { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }

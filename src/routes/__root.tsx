@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/i18n/context";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
@@ -105,15 +106,17 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <div className="relative flex min-h-screen flex-col">
-          <Navbar />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <Footer />
-        </div>
-      </I18nProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <I18nProvider>
+          <div className="relative flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            <Footer />
+          </div>
+        </I18nProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
