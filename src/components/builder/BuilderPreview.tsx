@@ -73,13 +73,16 @@ export function BuilderPreview() {
         className="relative z-10 w-full max-w-sm aspect-[3/4] flex flex-col items-center justify-center cursor-grab active:cursor-grabbing perspective-1000"
       >
         {/* Placeholder for 3D Bottle */}
-        <div className="relative w-48 h-72 border border-border/50 shadow-2xl flex flex-col items-center"
+        <motion.div 
+          animate={{ x: state.step >= 4 ? 120 : 0 }}
+          transition={{ duration: 0.8, type: "spring" }}
+          className="relative w-48 h-72 border border-border/50 shadow-2xl flex flex-col items-center"
           style={{
             ...getMaterialStyle(),
             background: state.bottleColor === "Transparent" ? getMaterialStyle().background : getBottleColor(),
             borderRadius: state.bottleSilhouette === "Round" ? "100px" : state.bottleSilhouette === "Oval" ? "100px 100px 120px 120px" : state.bottleSilhouette === "Square" ? "8px" : state.bottleSilhouette === "Cylindrical" ? "30px" : "16px",
             transformStyle: "preserve-3d",
-            transition: "all 0.5s ease"
+            transition: "background 0.5s ease, border-radius 0.5s ease, backdrop-filter 0.5s ease"
           }}
         >
           {/* Bottle Neck (visible when cap is off) */}
@@ -151,15 +154,15 @@ export function BuilderPreview() {
 
           {/* Glass Reflection overlay */}
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none rounded-[inherit]" style={{ transform: "translateZ(1px)" }} />
-        </div>
+        </motion.div>
 
         {/* Packaging Preview side-by-side (shows on Step 4+) */}
         <AnimatePresence>
           {state.step >= 4 && (
             <motion.div
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: -160, opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ x: 0, opacity: 0 }}
+              animate={{ x: -140, opacity: 1 }}
+              exit={{ opacity: 0, x: 0 }}
               className="absolute top-1/2 -translate-y-1/2 w-52 h-80 bg-card border border-border shadow-2xl rounded-sm flex items-center justify-center -z-10"
               style={{
                 background: state.packaging.finish === "Matte" ? "#111" : "#f5f5f5",

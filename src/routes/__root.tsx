@@ -104,16 +104,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const isBuilder = router.state.location.pathname.startsWith("/builder");
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <I18nProvider>
           <div className="relative flex min-h-screen flex-col">
             <Navbar />
-            <main className="flex-1">
+            <main className="flex-1 flex flex-col">
               <Outlet />
             </main>
-            <Footer />
+            {!isBuilder && <Footer />}
           </div>
         </I18nProvider>
       </ThemeProvider>

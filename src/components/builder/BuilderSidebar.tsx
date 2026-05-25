@@ -63,7 +63,7 @@ export function BuilderSidebar() {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-screen">
+    <div className="flex flex-col h-full min-h-full">
       {step > 0 && (
         <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border p-4 px-8">
           <div className="flex items-center justify-between mb-2">
@@ -101,7 +101,7 @@ export function BuilderSidebar() {
       </div>
 
       {step > 0 && (
-        <div className="fixed lg:absolute bottom-0 left-0 w-full lg:w-1/2 z-20 bg-background/90 backdrop-blur-md border-t border-border p-4 px-8 flex justify-between items-center shadow-elevated">
+        <div className="sticky bottom-0 mt-auto w-full z-20 bg-background/90 backdrop-blur-md border-t border-border p-4 px-8 flex justify-between items-center shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.1)]">
           <button
             onClick={prevStep}
             className={`px-6 py-2 rounded-full border border-border text-sm font-medium transition hover:bg-muted ${step === 1 ? 'invisible' : ''}`}
