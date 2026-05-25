@@ -5,7 +5,7 @@ import { BlueprintGrid } from "@/components/ui-custom/BlueprintGrid";
 import { ProcessTimeline } from "@/components/sections/ProcessTimeline";
 import { CTABanner } from "@/components/sections/CTABanner";
 import { useI18n } from "@/i18n/context";
-import machinery from "@/assets/process-machinery.jpg";
+import machinery from "@/assets/process_1.png";
 
 export const Route = createFileRoute("/process")({
   component: ProcessPage,

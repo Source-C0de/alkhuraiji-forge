@@ -105,7 +105,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const isBuilder = router.state.location.pathname.startsWith("/builder");
+  const isBuilder = router.state.location.pathname.startsWith("/builder") || router.state.location.pathname.startsWith("/cosmetics");
 
   return (
     <QueryClientProvider client={queryClient}>

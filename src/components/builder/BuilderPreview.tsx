@@ -80,7 +80,10 @@ export function BuilderPreview() {
           style={{
             ...getMaterialStyle(),
             background: state.bottleColor === "Transparent" ? getMaterialStyle().background : getBottleColor(),
-            borderRadius: state.bottleSilhouette === "Round" ? "100px" : state.bottleSilhouette === "Oval" ? "100px 100px 120px 120px" : state.bottleSilhouette === "Square" ? "8px" : state.bottleSilhouette === "Cylindrical" ? "30px" : "16px",
+            borderRadius: state.bottleSilhouette.includes("Round") || state.bottleSilhouette.includes("Prestige") ? "100px" : 
+                          state.bottleSilhouette.includes("Oval") ? "100px 100px 120px 120px" : 
+                          state.bottleSilhouette.includes("Square") || state.bottleSilhouette.includes("Cube") ? "8px" : 
+                          state.bottleSilhouette.includes("Cylinder") || state.bottleSilhouette.includes("Cylindrical") ? "30px" : "16px",
             transformStyle: "preserve-3d",
             transition: "background 0.5s ease, border-radius 0.5s ease, backdrop-filter 0.5s ease"
           }}
