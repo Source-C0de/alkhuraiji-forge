@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ProcessRouteImport } from './routes/process'
 import { Route as IndustriesRouteImport } from './routes/industries'
+import { Route as CosmeticsRouteImport } from './routes/cosmetics'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BuilderRouteImport } from './routes/builder'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -34,6 +35,11 @@ const ProcessRoute = ProcessRouteImport.update({
 const IndustriesRoute = IndustriesRouteImport.update({
   id: '/industries',
   path: '/industries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CosmeticsRoute = CosmeticsRouteImport.update({
+  id: '/cosmetics',
+  path: '/cosmetics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/builder': typeof BuilderRoute
   '/contact': typeof ContactRoute
+  '/cosmetics': typeof CosmeticsRoute
   '/industries': typeof IndustriesRoute
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/builder': typeof BuilderRoute
   '/contact': typeof ContactRoute
+  '/cosmetics': typeof CosmeticsRoute
   '/industries': typeof IndustriesRoute
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/builder': typeof BuilderRoute
   '/contact': typeof ContactRoute
+  '/cosmetics': typeof CosmeticsRoute
   '/industries': typeof IndustriesRoute
   '/process': typeof ProcessRoute
   '/services': typeof ServicesRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/builder'
     | '/contact'
+    | '/cosmetics'
     | '/industries'
     | '/process'
     | '/services'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/builder'
     | '/contact'
+    | '/cosmetics'
     | '/industries'
     | '/process'
     | '/services'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/builder'
     | '/contact'
+    | '/cosmetics'
     | '/industries'
     | '/process'
     | '/services'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   BuilderRoute: typeof BuilderRoute
   ContactRoute: typeof ContactRoute
+  CosmeticsRoute: typeof CosmeticsRoute
   IndustriesRoute: typeof IndustriesRoute
   ProcessRoute: typeof ProcessRoute
   ServicesRoute: typeof ServicesRoute
@@ -189,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/industries'
       fullPath: '/industries'
       preLoaderRoute: typeof IndustriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cosmetics': {
+      id: '/cosmetics'
+      path: '/cosmetics'
+      fullPath: '/cosmetics'
+      preLoaderRoute: typeof CosmeticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -270,6 +290,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   BuilderRoute: BuilderRoute,
   ContactRoute: ContactRoute,
+  CosmeticsRoute: CosmeticsRoute,
   IndustriesRoute: IndustriesRoute,
   ProcessRoute: ProcessRoute,
   ServicesRoute: ServicesRoute,

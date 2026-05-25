@@ -121,7 +121,7 @@ export const dictionaries = {
         success: "Thank you. Our formulation experts will respond within 48 hours.",
       },
       channels: { whatsapp: "WhatsApp", email: "Email", callback: "Request Callback" },
-      location: "Industrial City — Riyadh, Saudi Arabia",
+      location: "Al Khuraiji industrial Company, 29, Riyadh 14334",
     },
     footer: {
       tagline: "Luxury cosmetic and perfume manufacturing, engineered for prestigious global brands.",
@@ -252,7 +252,7 @@ export const dictionaries = {
         success: "شكراً لك. سيرد خبراء التركيبات لدينا خلال 48 ساعة.",
       },
       channels: { whatsapp: "واتساب", email: "البريد", callback: "اطلب اتصالاً" },
-      location: "المدينة الصناعية — الرياض، المملكة العربية السعودية",
+      location: "شركة الخريجي الصناعية، 29، الرياض 14334",
     },
     footer: {
       tagline: "تصنيع مستحضرات التجميل والعطور الفاخرة، للعلامات العالمية المرموقة.",

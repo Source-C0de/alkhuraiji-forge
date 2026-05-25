@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatedHero } from "@/components/sections/AnimatedHero";
 import { StatsStrip } from "@/components/sections/StatsStrip";
+import { PartnerLogos } from "@/components/sections/PartnerLogos";
 import { CapabilitiesGrid } from "@/components/sections/CapabilitiesGrid";
 import { BuilderPromo } from "@/components/sections/BuilderPromo";
 import { ProcessTimeline } from "@/components/sections/ProcessTimeline";
@@ -35,6 +36,7 @@ function Index() {
       <WhyUs />
       <IndustriesStrip />
       <Testimonials />
+      <PartnerLogos />
       <CTABanner />
     </PageTransition>
   );

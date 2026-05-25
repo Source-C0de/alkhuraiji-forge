@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 import { 
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
 import { useBuilderStore } from "@/store/useBuilderStore";
+import { useTheme } from "@/components/ThemeProvider";
 
 export const Route = createFileRoute("/builder")({
   component: BuilderPage,
@@ -107,10 +108,23 @@ const FONTS = ["Modern Sans", "Elegant Serif", "Minimal Script"];
 const SHAPES = ["Rectangle", "Rounded", "Vertical Strip"];
 
 function BuilderPage() {
+  const navigate = useNavigate();
   const [category, setCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("bottle"); // bottle, cap, fragrance, packaging, branding
   const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+
+  const { theme } = useTheme();
+  const [resolvedTheme, setResolvedTheme] = useState("dark");
+
+  useEffect(() => {
+    if (theme === "system") {
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setResolvedTheme(isDark ? "dark" : "light");
+    } else {
+      setResolvedTheme(theme || "dark");
+    }
+  }, [theme]);
 
   // Client Representative Details
   const [clientName, setClientName] = useState("");
@@ -292,7 +306,7 @@ function BuilderPage() {
 
   if (!category) {
     return (
-      <div className="builder-theme min-h-screen bg-[#06060B] text-white pt-32 pb-16 px-4 flex flex-col items-center relative overflow-hidden">
+      <div className="builder-theme min-h-screen bg-background text-foreground pt-32 pb-16 px-4 flex flex-col items-center relative overflow-hidden transition-colors duration-300">
         {/* Soft immersive accent halo */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent opacity-40 pointer-events-none" />
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
@@ -305,7 +319,7 @@ function BuilderPage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-gold mb-6">
             Private Label Manufacturing Configurator
           </div>
-          <h1 className="font-display text-4xl md:text-6xl font-light tracking-tight text-white leading-tight mb-6">
+          <h1 className="font-display text-4xl md:text-6xl font-light tracking-tight text-foreground leading-tight mb-6">
             Craft Your Luxury <span className="text-gradient-gold font-medium">Brand Identity</span>
           </h1>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto font-light leading-relaxed">
@@ -320,14 +334,18 @@ function BuilderPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              onClick={() => cat.id === "perfume" ? setCategory(cat.id) : alert("Cosmetics and Home Fragrances coming soon!")}
-              className="group relative flex flex-col items-center text-center p-10 rounded-2xl border border-white/5 bg-card/30 backdrop-blur-xl hover:border-gold/30 hover:shadow-gold-glow transition-all duration-500 overflow-hidden"
+              onClick={() => {
+                if (cat.id === "perfume") { setCategory(cat.id); }
+                else if (cat.id === "cosmetics") { navigate({ to: "/cosmetics" }); }
+                else { alert("Home Fragrance and Personal Care coming soon!"); }
+              }}
+              className="group relative flex flex-col items-center text-center p-10 rounded-2xl border border-border bg-card/30 backdrop-blur-xl hover:border-gold/30 hover:shadow-gold-glow transition-all duration-500 overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-b from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-gold/20 group-hover:text-gold group-hover:border-gold/30 transition-all duration-500">
+              <div className="w-20 h-20 rounded-full bg-secondary/30 border border-border flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-gold/20 group-hover:text-gold group-hover:border-gold/30 transition-all duration-500">
                 <cat.icon className="w-10 h-10 text-muted-foreground group-hover:text-gold transition-colors" />
               </div>
-              <h3 className="font-display text-2xl font-medium mb-3 text-white">{cat.name}</h3>
+              <h3 className="font-display text-2xl font-medium mb-3 text-foreground">{cat.name}</h3>
               <p className="text-sm text-muted-foreground/80 font-light leading-relaxed">{cat.description}</p>
               
               <div className="mt-8 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
@@ -341,42 +359,42 @@ function BuilderPage() {
   }
 
   return (
-    <div className="h-screen w-screen bg-[#05050A] text-white flex flex-col lg:flex-row overflow-hidden relative">
+    <div className="h-screen w-screen bg-background text-foreground flex flex-col lg:flex-row overflow-hidden relative transition-colors duration-300">
       
       {/* Dynamic luxury dark space highlight backdrop */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#0d0d1e] via-[#05050a] to-[#020205] pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#f9f9fb] via-[#f0f0f5] to-[#e4e4eb] dark:from-[#0d0d1e] dark:via-[#05050a] dark:to-[#020205] pointer-events-none z-0 transition-all duration-300" />
 
       {/* Catalog Home */}
       <button 
         onClick={() => setCategory(null)}
-        className="absolute top-6 left-6 z-50 px-4 py-2 rounded-full border border-white/5 bg-white/5 hover:bg-white/10 hover:border-gold/30 transition-all text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-white"
+        className="absolute top-6 left-6 z-50 px-4 py-2 rounded-full border border-border bg-secondary/30 hover:bg-secondary/50 hover:border-gold/30 transition-all text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
       >
         ← Catalogs
       </button>
 
       {/* ================= COLUMN 1: LEFT SIDEBAR OPTIONS (380px) ================= */}
-      <aside className="w-full lg:w-[380px] lg:flex-shrink-0 border-r border-white/5 bg-[#07070F]/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20">
+      <aside className="w-full lg:w-[380px] lg:flex-shrink-0 border-r border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 transition-colors duration-300">
         
         {/* Brand configuration text entry */}
-        <div className="p-6 border-b border-white/5 flex-shrink-0">
+        <div className="p-6 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-soft">Premium OEM/ODM</span>
             <span className="text-xs font-semibold text-gold bg-gold/10 px-2 py-0.5 rounded-full">{progress}% Complete</span>
           </div>
           <div className="space-y-2">
-            <h2 className="font-display text-2xl font-light text-white">Your Brand Design</h2>
+            <h2 className="font-display text-2xl font-light text-foreground">Your Brand Design</h2>
             <input 
               type="text"
               value={store.label.name}
               onChange={(e) => store.updateLabel({ name: e.target.value.toUpperCase() })}
               placeholder="ENTER BRAND NAME..."
-              className="w-full bg-black/40 border border-white/10 focus:border-gold rounded-lg px-4 py-2.5 text-xs outline-none text-white tracking-widest font-medium uppercase transition-colors"
+              className="w-full bg-secondary/30 border border-border focus:border-gold rounded-lg px-4 py-2.5 text-xs outline-none text-foreground tracking-widest font-medium uppercase transition-colors"
             />
           </div>
         </div>
 
         {/* Tab Buttons (Bottle, Cap, Fragrance, Packaging, Branding) */}
-        <div className="flex border-b border-white/5 bg-black/20 overflow-x-auto scrollbar-hide flex-shrink-0">
+        <div className="flex border-b border-border bg-secondary/10 overflow-x-auto scrollbar-hide flex-shrink-0">
           {[
             { id: "bottle", label: "Bottle" },
             { id: "cap", label: "Cap" },
@@ -388,7 +406,7 @@ function BuilderPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 px-4 text-center text-[10px] font-bold uppercase tracking-wider transition-colors relative whitespace-nowrap ${
-                activeTab === tab.id ? "text-gold" : "text-muted-foreground hover:text-white"
+                activeTab === tab.id ? "text-gold" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {tab.label}
@@ -415,11 +433,11 @@ function BuilderPage() {
                         onClick={() => store.setBottleSilhouette(bottle.name)}
                         className={`p-4 rounded-xl border text-left transition-all duration-300 relative group overflow-hidden ${
                           store.bottleSilhouette === bottle.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
-                        <div className="text-xs font-semibold text-white mb-1">{bottle.name}</div>
+                        <div className="text-xs font-semibold text-foreground mb-1">{bottle.name}</div>
                         <div className="text-[9px] text-muted-foreground uppercase">{bottle.category}</div>
                         {store.bottleSilhouette === bottle.name && (
                           <div className="absolute right-3 top-3 h-4 w-4 bg-gold rounded-full flex items-center justify-center text-black">
@@ -441,7 +459,7 @@ function BuilderPage() {
                         className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
                           store.bottleMaterial === mat 
                             ? "bg-gold/10 border-gold text-gold font-semibold" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         {mat}
@@ -460,7 +478,7 @@ function BuilderPage() {
                         className={`py-2.5 rounded-lg border text-center text-xs font-medium transition-all ${
                           store.bottleCapacity === cap 
                             ? "bg-gold/10 border-gold text-gold font-bold" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         {cap}
@@ -477,11 +495,11 @@ function BuilderPage() {
                         key={color.name}
                         onClick={() => store.setBottleColor(color.name)}
                         className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
-                          store.bottleColor === color.name ? "border-gold bg-white/5" : "border-transparent hover:bg-white/5"
+                          store.bottleColor === color.name ? "border-gold bg-secondary/30" : "border-transparent hover:bg-secondary/20"
                         }`}
                       >
                         <div 
-                          className="w-10 h-10 rounded-full border border-white/20 shadow-lg relative overflow-hidden"
+                          className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
                           style={{ background: color.hex }}
                         >
                           {store.bottleColor === color.name && (
@@ -510,12 +528,12 @@ function BuilderPage() {
                         onClick={() => store.setCapStyle(cap.name)}
                         className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
                           store.capStyle === cap.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         <div>
-                          <div className="text-xs font-semibold text-white">{cap.name}</div>
+                          <div className="text-xs font-semibold text-foreground">{cap.name}</div>
                           <div className="text-[9px] text-muted-foreground mt-0.5">High-end premium crown finish</div>
                         </div>
                         <div className="text-xs font-bold text-gold">+{cap.price} SAR</div>
@@ -533,11 +551,11 @@ function BuilderPage() {
                           key={color.name}
                           onClick={() => store.setCapColor(color.name)}
                           className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
-                            store.capColor === color.name ? "border-gold bg-white/5" : "border-transparent hover:bg-white/5"
+                            store.capColor === color.name ? "border-gold bg-secondary/30" : "border-transparent hover:bg-secondary/20"
                           }`}
                         >
                           <div 
-                            className="w-10 h-10 rounded-full border border-white/20 shadow-lg relative overflow-hidden"
+                            className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
                             style={{ background: color.hex }}
                           >
                             {store.capColor === color.name && (
@@ -562,12 +580,12 @@ function BuilderPage() {
                         onClick={() => store.setPumpType(pump.name)}
                         className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
                           store.pumpType === pump.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         <div>
-                          <div className="text-xs font-semibold text-white">{pump.name}</div>
+                          <div className="text-xs font-semibold text-foreground">{pump.name}</div>
                           <div className="text-[9px] text-muted-foreground mt-0.5">High-fidelity wholesale spray valves</div>
                         </div>
                         <div className="text-xs font-bold text-gold">+{pump.price} SAR</div>
@@ -601,7 +619,7 @@ function BuilderPage() {
                                 className={`px-4 py-2 rounded-full border text-[10px] font-medium transition-all ${
                                   isAct 
                                     ? "bg-gold/20 border-gold text-gold shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]" 
-                                    : "bg-white/5 border-white/5 hover:border-white/20 text-white"
+                                    : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                                 }`}
                               >
                                 {note}
@@ -614,7 +632,7 @@ function BuilderPage() {
                   })}
                 </div>
 
-                <div className="pt-4 border-t border-white/5">
+                <div className="pt-4 border-t border-border">
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Scent Intensity & Blend</h3>
                   <div className="space-y-2.5">
                     {INTENSITIES.map((int) => (
@@ -623,12 +641,12 @@ function BuilderPage() {
                         onClick={() => store.updateFragrance({ intensity: int.name })}
                         className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
                           store.fragrance.intensity === int.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         <div>
-                          <div className="text-xs font-semibold text-white">{int.name}</div>
+                          <div className="text-xs font-semibold text-foreground">{int.name}</div>
                           <div className="text-[9px] text-muted-foreground mt-0.5">Custom scent density composition</div>
                         </div>
                         <div className="text-xs font-bold text-gold">+{int.price} SAR</div>
@@ -651,12 +669,12 @@ function BuilderPage() {
                         onClick={() => store.updatePackaging({ type: pack.name })}
                         className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
                           store.packaging.type === pack.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         <div>
-                          <div className="text-xs font-semibold text-white">{pack.name}</div>
+                          <div className="text-xs font-semibold text-foreground">{pack.name}</div>
                           <div className="text-[9px] text-muted-foreground mt-0.5">Heavy cardboard wholesale box base</div>
                         </div>
                         <div className="text-xs font-bold text-gold">+{pack.price} SAR</div>
@@ -675,7 +693,7 @@ function BuilderPage() {
                         className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
                           store.packaging.finish === finish.name 
                             ? "bg-gold/10 border-gold text-gold" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         {finish.name} (+{finish.price} SAR)
@@ -696,7 +714,7 @@ function BuilderPage() {
                           className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
                             isAct 
                               ? "bg-gold/10 border-gold text-gold" 
-                              : "bg-white/5 border-white/5 hover:border-white/20"
+                              : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                           }`}
                         >
                           {addon.name} (+{addon.price} SAR)
@@ -721,7 +739,7 @@ function BuilderPage() {
                         className={`py-3 rounded-lg border text-center text-[10px] transition-all ${
                           store.label.font === font 
                             ? "bg-gold/10 border-gold text-gold font-semibold" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                         style={{ fontFamily: font === "Elegant Serif" ? "serif" : "sans-serif" }}
                       >
@@ -741,7 +759,7 @@ function BuilderPage() {
                         className={`py-3 rounded-lg border text-center text-xs font-medium transition-all ${
                           store.label.shape === shape 
                             ? "bg-gold/10 border-gold text-gold" 
-                            : "bg-white/5 border-white/5 hover:border-white/20"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         {shape}
@@ -756,14 +774,14 @@ function BuilderPage() {
         </div>
 
         {/* Sticky Segment Navigation Controls */}
-        <div className="border-t border-white/5 bg-black/60 p-4 flex items-center justify-between gap-3 flex-shrink-0 z-20">
+        <div className="border-t border-border bg-background/80 p-4 flex items-center justify-between gap-3 flex-shrink-0 z-20 transition-colors duration-300">
           <button
             onClick={handlePrevTab}
             disabled={activeIndex === 0}
             className={`flex-1 py-3 px-4 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
               activeIndex === 0
-                ? "border-white/5 text-muted-foreground/30 cursor-not-allowed"
-                : "border-white/10 hover:border-gold/30 hover:bg-white/5 text-white active:scale-[0.98]"
+                ? "border-border text-muted-foreground/30 cursor-not-allowed"
+                : "border-border hover:border-gold/30 hover:bg-secondary/40 text-foreground active:scale-[0.98]"
             }`}
           >
             ← Previous
@@ -773,7 +791,7 @@ function BuilderPage() {
             disabled={activeIndex === TABS.length - 1}
             className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
               activeIndex === TABS.length - 1
-                ? "bg-white/5 border border-white/5 text-muted-foreground/30 cursor-not-allowed"
+                ? "bg-secondary/20 border border-border text-muted-foreground/30 cursor-not-allowed"
                 : "bg-gold hover:bg-gold-soft text-black active:scale-[0.98] shadow-gold-glow"
             }`}
           >
@@ -810,7 +828,7 @@ function BuilderPage() {
 
           {/* Core Dynamic Custom Perfume Bottle */}
           <motion.div
-            className="border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.85),_inset_0_0_20px_rgba(255,255,255,0.1)] flex flex-col items-center relative"
+            className="border border-white/15 dark:border-white/15 border-black/10 shadow-[0_30px_100px_rgba(0,0,0,0.85),_inset_0_0_20px_rgba(255,255,255,0.1)] flex flex-col items-center relative"
             animate={{ 
               scale,
               width: dims.width,
@@ -820,7 +838,7 @@ function BuilderPage() {
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
             style={{
               backdropFilter: store.bottleMaterial === "Frosted Glass" ? "blur(20px)" : store.bottleMaterial === "Crystal" ? "blur(4px)" : "blur(10px)",
-              background: store.bottleColor === "Transparent" ? "rgba(255,255,255,0.03)" : BOTTLE_COLORS.find(c => c.name === store.bottleColor)?.hex,
+              background: store.bottleColor === "Transparent" ? (resolvedTheme === "dark" ? "rgba(255,255,255,0.03)" : "rgba(255, 255, 255, 0.45)") : BOTTLE_COLORS.find(c => c.name === store.bottleColor)?.hex,
             }}
           >
             
@@ -859,7 +877,11 @@ function BuilderPage() {
 
             {/* Brand Imprint Label */}
             <div 
-              className="absolute top-1/2 left-1/2 w-32 min-h-24 bg-black/90 p-4 flex flex-col items-center justify-center text-center shadow-2xl border border-white/10"
+              className={`absolute top-1/2 left-1/2 w-32 min-h-24 p-4 flex flex-col items-center justify-center text-center shadow-2xl border transition-all duration-300 ${
+                resolvedTheme === "dark" 
+                  ? "bg-black/90 text-white border-white/10" 
+                  : "bg-white/95 text-black border-black/10"
+              }`}
               style={{
                 borderRadius: store.label.shape === "Rounded" ? "12px" : "0px",
                 height: store.label.shape === "Vertical Strip" ? "75%" : "auto",
@@ -868,7 +890,7 @@ function BuilderPage() {
               }}
             >
               <span className="text-[8px] uppercase tracking-[0.25em] text-gold-soft mb-1 font-bold">EAU DE PARFUM</span>
-              <span className="font-display font-medium text-lg leading-tight text-white tracking-widest break-words w-full">
+              <span className="font-display font-medium text-lg leading-tight tracking-widest break-words w-full">
                 {store.label.name || "YOUR BRAND"}
               </span>
               <span className="text-[7px] uppercase tracking-widest text-muted-foreground mt-3 font-semibold">
@@ -888,7 +910,7 @@ function BuilderPage() {
             { icon: Award, text: "IFRA Compliant" },
             { icon: Layers, text: "Sustainably Sourced" }
           ].map((badge) => (
-            <div key={badge.text} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/5 bg-white/5 backdrop-blur-md shadow-lg text-[10px] text-muted-foreground">
+            <div key={badge.text} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow-lg text-[10px] text-muted-foreground transition-colors duration-300">
               <badge.icon className="h-3.5 w-3.5 text-gold" />
               <span>{badge.text}</span>
             </div>
@@ -898,10 +920,10 @@ function BuilderPage() {
       </main>
 
       {/* ================= COLUMN 3: STICKY WHOLESALE PRICING (RIGHT) ================= */}
-      <aside className="w-full lg:w-[340px] lg:flex-shrink-0 border-l border-white/5 bg-[#07070F]/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 justify-between">
+      <aside className="w-full lg:w-[340px] lg:flex-shrink-0 border-l border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 justify-between transition-colors duration-300">
         
         {/* Selection items summaries with specific price markup indicators */}
-        <div className="p-6 border-b border-white/5 flex-1 overflow-y-auto scrollbar-hide">
+        <div className="p-6 border-b border-border flex-1 overflow-y-auto scrollbar-hide">
           <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-4">Design Specs & Pricing</h3>
           
           <div className="space-y-3.5">
@@ -914,10 +936,10 @@ function BuilderPage() {
               { label: "Olfactive Fragrance", value: store.fragrance.intensity || "Balanced", price: pricing.fragranceTotalPrice },
               { label: "Outer Box Pack", value: store.packaging.type, price: pricing.packagingTotalPrice }
             ].map((spec) => (
-              <div key={spec.label} className="flex justify-between items-start text-xs border-b border-white/5 pb-2">
+              <div key={spec.label} className="flex justify-between items-start text-xs border-b border-border pb-2">
                 <div className="space-y-0.5">
                   <div className="text-muted-foreground font-light text-[10px] uppercase tracking-wider">{spec.label}</div>
-                  <div className="text-white font-medium">{spec.value}</div>
+                  <div className="text-foreground font-medium">{spec.value}</div>
                 </div>
                 <div className="text-[10px] font-bold text-gold-soft whitespace-nowrap">+{spec.price} SAR</div>
               </div>
@@ -925,20 +947,20 @@ function BuilderPage() {
           </div>
 
           {/* Wholesale B2B parameters */}
-          <div className="mt-8 p-4 rounded-xl border border-white/5 bg-black/40 space-y-3 flex-shrink-0">
+          <div className="mt-8 p-4 rounded-xl border border-border bg-secondary/20 space-y-3 flex-shrink-0">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="h-4 w-4 text-gold-soft" />
-              <span>Est. Delivery: <strong className="text-white">18 - 24 Days</strong></span>
+              <span>Est. Delivery: <strong className="text-foreground">18 - 24 Days</strong></span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-gold-soft" />
-              <span>Wholesale MOQ: <strong className="text-white">100 Units</strong></span>
+              <span>Wholesale MOQ: <strong className="text-foreground">100 Units</strong></span>
             </div>
           </div>
         </div>
 
         {/* Dynamic bulk calculator */}
-        <div className="p-6 border-t border-white/5 bg-black/50 flex-shrink-0">
+        <div className="p-6 border-t border-border bg-secondary/15 flex-shrink-0">
           
           {/* Slider */}
           <div className="space-y-3 mb-6">
@@ -953,7 +975,7 @@ function BuilderPage() {
               step="100"
               value={store.quantity}
               onChange={(e) => store.setQuantity(Number(e.target.value))}
-              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-gold"
+              className="w-full h-1 bg-border rounded-lg appearance-none cursor-pointer accent-gold"
             />
             {pricing.discountPercent > 0 && (
               <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 font-semibold uppercase tracking-wider">
@@ -967,7 +989,7 @@ function BuilderPage() {
           <div className="space-y-4 mb-6">
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Wholesale Rate / Unit</span>
-              <span className="text-xs font-semibold text-white">{pricing.unitPrice.toFixed(2)} SAR</span>
+              <span className="text-xs font-semibold text-foreground">{pricing.unitPrice.toFixed(2)} SAR</span>
             </div>
             <div className="flex justify-between items-end">
               <span className="text-xs text-muted-foreground pb-1">Total Estimated wholesale</span>
@@ -992,7 +1014,7 @@ function BuilderPage() {
             </button>
             <button 
               onClick={() => setSuccessModalOpen(true)}
-              className="w-full py-2.5 rounded-xl border border-white/10 hover:border-gold/30 hover:bg-white/5 transition-all text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-white"
+              className="w-full py-2.5 rounded-xl border border-border hover:border-gold/30 hover:bg-secondary/40 transition-all text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
               Save Brand Design Draft
             </button>
