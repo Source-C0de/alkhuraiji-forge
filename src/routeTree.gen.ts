@@ -14,11 +14,23 @@ import { Route as ProcessRouteImport } from './routes/process'
 import { Route as IndustriesRouteImport } from './routes/industries'
 import { Route as CosmeticsRouteImport } from './routes/cosmetics'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ClientRouteImport } from './routes/client'
 import { Route as BuilderRouteImport } from './routes/builder'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClientIndexRouteImport } from './routes/client/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as ClientSupportRouteImport } from './routes/client/support'
+import { Route as ClientSettingsRouteImport } from './routes/client/settings'
+import { Route as ClientSamplesRouteImport } from './routes/client/samples'
+import { Route as ClientProjectsRouteImport } from './routes/client/projects'
+import { Route as ClientProductionRouteImport } from './routes/client/production'
+import { Route as ClientOrdersRouteImport } from './routes/client/orders'
+import { Route as ClientNewRequestRouteImport } from './routes/client/new-request'
+import { Route as ClientMessagingRouteImport } from './routes/client/messaging'
+import { Route as ClientDocumentsRouteImport } from './routes/client/documents'
+import { Route as ClientDesignApprovalsRouteImport } from './routes/client/design-approvals'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as AdminBuilderRouteImport } from './routes/admin/builder'
 
@@ -47,6 +59,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientRoute = ClientRouteImport.update({
+  id: '/client',
+  path: '/client',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BuilderRoute = BuilderRouteImport.update({
   id: '/builder',
   path: '/builder',
@@ -67,10 +84,65 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientIndexRoute = ClientIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClientRoute,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const ClientSupportRoute = ClientSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientSettingsRoute = ClientSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientSamplesRoute = ClientSamplesRouteImport.update({
+  id: '/samples',
+  path: '/samples',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientProjectsRoute = ClientProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientProductionRoute = ClientProductionRouteImport.update({
+  id: '/production',
+  path: '/production',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientOrdersRoute = ClientOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientNewRequestRoute = ClientNewRequestRouteImport.update({
+  id: '/new-request',
+  path: '/new-request',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientMessagingRoute = ClientMessagingRouteImport.update({
+  id: '/messaging',
+  path: '/messaging',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientDocumentsRoute = ClientDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientDesignApprovalsRoute = ClientDesignApprovalsRouteImport.update({
+  id: '/design-approvals',
+  path: '/design-approvals',
+  getParentRoute: () => ClientRoute,
 } as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
@@ -88,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/builder': typeof BuilderRoute
+  '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/cosmetics': typeof CosmeticsRoute
   '/industries': typeof IndustriesRoute
@@ -95,7 +168,18 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/client/design-approvals': typeof ClientDesignApprovalsRoute
+  '/client/documents': typeof ClientDocumentsRoute
+  '/client/messaging': typeof ClientMessagingRoute
+  '/client/new-request': typeof ClientNewRequestRoute
+  '/client/orders': typeof ClientOrdersRoute
+  '/client/production': typeof ClientProductionRoute
+  '/client/projects': typeof ClientProjectsRoute
+  '/client/samples': typeof ClientSamplesRoute
+  '/client/settings': typeof ClientSettingsRoute
+  '/client/support': typeof ClientSupportRoute
   '/admin/': typeof AdminIndexRoute
+  '/client/': typeof ClientIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -108,7 +192,18 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/client/design-approvals': typeof ClientDesignApprovalsRoute
+  '/client/documents': typeof ClientDocumentsRoute
+  '/client/messaging': typeof ClientMessagingRoute
+  '/client/new-request': typeof ClientNewRequestRoute
+  '/client/orders': typeof ClientOrdersRoute
+  '/client/production': typeof ClientProductionRoute
+  '/client/projects': typeof ClientProjectsRoute
+  '/client/samples': typeof ClientSamplesRoute
+  '/client/settings': typeof ClientSettingsRoute
+  '/client/support': typeof ClientSupportRoute
   '/admin': typeof AdminIndexRoute
+  '/client': typeof ClientIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +211,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/builder': typeof BuilderRoute
+  '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/cosmetics': typeof CosmeticsRoute
   '/industries': typeof IndustriesRoute
@@ -123,7 +219,18 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/client/design-approvals': typeof ClientDesignApprovalsRoute
+  '/client/documents': typeof ClientDocumentsRoute
+  '/client/messaging': typeof ClientMessagingRoute
+  '/client/new-request': typeof ClientNewRequestRoute
+  '/client/orders': typeof ClientOrdersRoute
+  '/client/production': typeof ClientProductionRoute
+  '/client/projects': typeof ClientProjectsRoute
+  '/client/samples': typeof ClientSamplesRoute
+  '/client/settings': typeof ClientSettingsRoute
+  '/client/support': typeof ClientSupportRoute
   '/admin/': typeof AdminIndexRoute
+  '/client/': typeof ClientIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -132,6 +239,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/builder'
+    | '/client'
     | '/contact'
     | '/cosmetics'
     | '/industries'
@@ -139,7 +247,18 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/client/design-approvals'
+    | '/client/documents'
+    | '/client/messaging'
+    | '/client/new-request'
+    | '/client/orders'
+    | '/client/production'
+    | '/client/projects'
+    | '/client/samples'
+    | '/client/settings'
+    | '/client/support'
     | '/admin/'
+    | '/client/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,13 +271,25 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/client/design-approvals'
+    | '/client/documents'
+    | '/client/messaging'
+    | '/client/new-request'
+    | '/client/orders'
+    | '/client/production'
+    | '/client/projects'
+    | '/client/samples'
+    | '/client/settings'
+    | '/client/support'
     | '/admin'
+    | '/client'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/admin'
     | '/builder'
+    | '/client'
     | '/contact'
     | '/cosmetics'
     | '/industries'
@@ -166,7 +297,18 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/client/design-approvals'
+    | '/client/documents'
+    | '/client/messaging'
+    | '/client/new-request'
+    | '/client/orders'
+    | '/client/production'
+    | '/client/projects'
+    | '/client/samples'
+    | '/client/settings'
+    | '/client/support'
     | '/admin/'
+    | '/client/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -174,6 +316,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   BuilderRoute: typeof BuilderRoute
+  ClientRoute: typeof ClientRouteWithChildren
   ContactRoute: typeof ContactRoute
   CosmeticsRoute: typeof CosmeticsRoute
   IndustriesRoute: typeof IndustriesRoute
@@ -218,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client': {
+      id: '/client'
+      path: '/client'
+      fullPath: '/client'
+      preLoaderRoute: typeof ClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/builder': {
       id: '/builder'
       path: '/builder'
@@ -246,12 +396,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client/': {
+      id: '/client/'
+      path: '/'
+      fullPath: '/client/'
+      preLoaderRoute: typeof ClientIndexRouteImport
+      parentRoute: typeof ClientRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/client/support': {
+      id: '/client/support'
+      path: '/support'
+      fullPath: '/client/support'
+      preLoaderRoute: typeof ClientSupportRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/settings': {
+      id: '/client/settings'
+      path: '/settings'
+      fullPath: '/client/settings'
+      preLoaderRoute: typeof ClientSettingsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/samples': {
+      id: '/client/samples'
+      path: '/samples'
+      fullPath: '/client/samples'
+      preLoaderRoute: typeof ClientSamplesRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/projects': {
+      id: '/client/projects'
+      path: '/projects'
+      fullPath: '/client/projects'
+      preLoaderRoute: typeof ClientProjectsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/production': {
+      id: '/client/production'
+      path: '/production'
+      fullPath: '/client/production'
+      preLoaderRoute: typeof ClientProductionRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/orders': {
+      id: '/client/orders'
+      path: '/orders'
+      fullPath: '/client/orders'
+      preLoaderRoute: typeof ClientOrdersRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/new-request': {
+      id: '/client/new-request'
+      path: '/new-request'
+      fullPath: '/client/new-request'
+      preLoaderRoute: typeof ClientNewRequestRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/messaging': {
+      id: '/client/messaging'
+      path: '/messaging'
+      fullPath: '/client/messaging'
+      preLoaderRoute: typeof ClientMessagingRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/documents': {
+      id: '/client/documents'
+      path: '/documents'
+      fullPath: '/client/documents'
+      preLoaderRoute: typeof ClientDocumentsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/design-approvals': {
+      id: '/client/design-approvals'
+      path: '/design-approvals'
+      fullPath: '/client/design-approvals'
+      preLoaderRoute: typeof ClientDesignApprovalsRouteImport
+      parentRoute: typeof ClientRoute
     }
     '/admin/content': {
       id: '/admin/content'
@@ -284,11 +511,43 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface ClientRouteChildren {
+  ClientDesignApprovalsRoute: typeof ClientDesignApprovalsRoute
+  ClientDocumentsRoute: typeof ClientDocumentsRoute
+  ClientMessagingRoute: typeof ClientMessagingRoute
+  ClientNewRequestRoute: typeof ClientNewRequestRoute
+  ClientOrdersRoute: typeof ClientOrdersRoute
+  ClientProductionRoute: typeof ClientProductionRoute
+  ClientProjectsRoute: typeof ClientProjectsRoute
+  ClientSamplesRoute: typeof ClientSamplesRoute
+  ClientSettingsRoute: typeof ClientSettingsRoute
+  ClientSupportRoute: typeof ClientSupportRoute
+  ClientIndexRoute: typeof ClientIndexRoute
+}
+
+const ClientRouteChildren: ClientRouteChildren = {
+  ClientDesignApprovalsRoute: ClientDesignApprovalsRoute,
+  ClientDocumentsRoute: ClientDocumentsRoute,
+  ClientMessagingRoute: ClientMessagingRoute,
+  ClientNewRequestRoute: ClientNewRequestRoute,
+  ClientOrdersRoute: ClientOrdersRoute,
+  ClientProductionRoute: ClientProductionRoute,
+  ClientProjectsRoute: ClientProjectsRoute,
+  ClientSamplesRoute: ClientSamplesRoute,
+  ClientSettingsRoute: ClientSettingsRoute,
+  ClientSupportRoute: ClientSupportRoute,
+  ClientIndexRoute: ClientIndexRoute,
+}
+
+const ClientRouteWithChildren =
+  ClientRoute._addFileChildren(ClientRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   BuilderRoute: BuilderRoute,
+  ClientRoute: ClientRouteWithChildren,
   ContactRoute: ContactRoute,
   CosmeticsRoute: CosmeticsRoute,
   IndustriesRoute: IndustriesRoute,

@@ -62,6 +62,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const isAdminOrClient = router.state.location.pathname.startsWith("/admin") || router.state.location.pathname.startsWith("/client");
   const isBuilder = router.state.location.pathname.startsWith("/builder") || router.state.location.pathname.startsWith("/cosmetics");
 
   return (
@@ -69,11 +70,11 @@ function RootComponent() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <I18nProvider>
           <div className="relative flex min-h-screen flex-col">
-            <Navbar />
+            {!isAdminOrClient && <Navbar />}
             <main className="flex-1 flex flex-col">
               <Outlet />
             </main>
-            {!isBuilder && <Footer />}
+            {!isAdminOrClient && <Footer />}
           </div>
         </I18nProvider>
       </ThemeProvider>

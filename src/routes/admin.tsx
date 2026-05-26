@@ -166,7 +166,10 @@ function AdminLayout() {
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />
             </button>
             <button 
-              onClick={logout}
+              onClick={() => {
+                logout();
+                window.location.href = "/";
+              }}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-red-500/10 hover:text-red-400 transition-colors text-muted-foreground text-sm font-medium"
             >
               <LogOut className="h-4 w-4" />
