@@ -811,10 +811,10 @@ function BuilderPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[550px] bg-gradient-to-b from-gold/15 to-transparent blur-[80px] pointer-events-none rounded-full" />
         
         {/* Slide instructions */}
-        <div className="absolute top-8 text-center">
+        {/* <div className="absolute top-8 text-center">
           <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Interactive 3D Stage</span>
           <p className="text-[8px] text-muted-foreground/50 mt-1">Move your cursor to rotate customized private label bottle</p>
-        </div>
+        </div> */}
 
         {/* 50% Screen height floating flask */}
         <motion.div

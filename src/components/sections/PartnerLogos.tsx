@@ -117,7 +117,7 @@ export function PartnerLogos() {
                 <img
                   src={item.logo}
                   alt={item.name}
-                  className="h-8 md:h-10 max-w-[120px] md:max-w-[130px] object-contain transition-all duration-500 filter grayscale contrast-125 brightness-90 hover:grayscale-0 dark:brightness-0 dark:invert dark:opacity-40 dark:hover:opacity-90 opacity-80 hover:opacity-100 hover:scale-105"
+                  className="h-8 md:h-10 max-w-[120px] md:max-w-[130px] object-contain transition-all duration-500 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 hover:scale-105 dark:invert dark:brightness-200 dark:opacity-80 dark:hover:opacity-100"
                 />
               </div>
             ))}
@@ -141,7 +141,7 @@ export function PartnerLogos() {
                 <img
                   src={item.logo}
                   alt={item.name}
-                  className="h-8 md:h-10 max-w-[120px] md:max-w-[130px] object-contain transition-all duration-500 filter grayscale contrast-125 brightness-90 hover:grayscale-0 dark:brightness-0 dark:invert dark:opacity-40 dark:hover:opacity-90 opacity-80 hover:opacity-100 hover:scale-105"
+                  className="h-8 md:h-10 max-w-[120px] md:max-w-[130px] object-contain transition-all duration-500 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 hover:scale-105 dark:invert dark:brightness-200 dark:opacity-80 dark:hover:opacity-100"
                 />
               </div>
             ))}

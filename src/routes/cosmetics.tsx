@@ -950,10 +950,10 @@ function CosmeticsBuilderPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[320px] h-[500px] bg-gradient-to-b from-gold/15 to-transparent blur-[80px] pointer-events-none rounded-full" />
 
         {/* Stage label */}
-        <div className="absolute top-8 text-center">
+        {/* <div className="absolute top-8 text-center">
           <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Live Preview Studio</span>
           <p className="text-[8px] text-muted-foreground/50 mt-1">{selectedProduct.emoji} {selectedProduct.name} — {selectedContainer.name}</p>
-        </div>
+        </div> */}
 
         {/* Container Preview */}
         <motion.div
@@ -975,14 +975,15 @@ function CosmeticsBuilderPage() {
         {/* Selected state badges */}
         <div className="absolute bottom-14 flex flex-wrap justify-center gap-3 px-4 z-10">
           {[
-            { label: selectedProduct.name,    icon: selectedProduct.emoji },
-            { label: selectedContainer.name,  icon: "📦" },
-            { label: selectedCapacity.size,   icon: "💧" },
-            { label: selectedColor.name,      icon: "🎨" },
+            { label: selectedProduct.name,    icon: "" },
+            { label: selectedContainer.name,  icon: "" },
+            { label: selectedCapacity.size,   icon: "" },
+            { label: selectedColor.name,      icon: "" },
           ].map(badge => (
             <div key={badge.label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow text-[10px] text-muted-foreground transition-colors">
               <span>{badge.icon}</span>
               <span>{badge.label}</span>
+              
             </div>
           ))}
         </div>
