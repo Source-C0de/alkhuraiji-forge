@@ -162,24 +162,56 @@ interface ClientState {
   requestStep: number;
   setRequestStep: (step: number) => void;
   requestDraft: Partial<{
+    // Core
     category: string;
     name: string;
+    brand: string;
     market: string;
-    type: string;
     audience: string;
-    volume: string;
     quantity: string;
+    price: string;
+    notes: string;
+    // Perfume
+    fragFamily: string;
+    concentration: string;
+    volumes: string[];
+    topNotes: string[];
+    heartNotes: string[];
+    baseNotes: string[];
     bottleShape: string;
     bottleMaterial: string;
     bottleColor: string;
     capStyle: string;
+    atomizer: string;
     labelStyle: string;
     boxPackaging: string;
-    fragrance: string;
+    // Cosmetics
+    cosmeticType: string;
+    cosmeticSubType: string;
+    selectedShades: string[];
+    formulaType: string;
     finish: string;
+    coverage: string;
+    skinType: string;
+    cosmeticVolume: string;
+    certifications: string[];
+    // Assets
+    logo: string;
+    designRef: string;
+    packagingRef: string;
+    formula: string;
+    brandGuide: string;
+    competitor: string;
+    pantone: string;
+    specs: string;
+    // Legacy
+    type: string;
+    volume: string;
+    fragrance: string;
   }>;
   updateRequestDraft: (data: Partial<ClientState['requestDraft']>) => void;
   resetRequest: () => void;
+  submitProductRequest: (draft: ClientState['requestDraft']) => void;
 }
 
 const MOCK_PROFILE: ClientProfile = {
@@ -421,6 +453,42 @@ export const useClientStore = create<ClientState>()(
       updateRequestDraft: (data) =>
         set((state) => ({ requestDraft: { ...state.requestDraft, ...data } })),
       resetRequest: () => set({ requestStep: 1, requestDraft: {} }),
+      submitProductRequest: (draft) =>
+        set((state) => {
+          const categoryMap: Record<string, string> = {
+            perfume: 'Perfume',
+            cosmetics: 'Cosmetics',
+            hair_oil: 'Hair Care',
+            packaging: 'Packaging',
+            private_label: 'Private Label',
+            other: 'Other',
+          };
+          const newProject: Project = {
+            id: `p${Date.now()}`,
+            name: draft.name ?? 'New Product',
+            category: categoryMap[draft.category ?? ''] ?? draft.category ?? 'Unknown',
+            status: 'request_submitted',
+            progress: 5,
+            createdAt: new Date().toISOString().split('T')[0],
+            updatedAt: new Date().toISOString().split('T')[0],
+            manager: 'Pending Assignment',
+            quantity: parseInt(draft.quantity?.replace(/[^0-9]/g, '') ?? '0') || 0,
+            estimatedDelivery: 'TBD',
+          };
+          const newNotif: Notification = {
+            id: `n${Date.now()}`,
+            title: 'Request Submitted',
+            message: `Your request for "${draft.name ?? 'New Product'}" has been received and is pending review.`,
+            type: 'success',
+            read: false,
+            timestamp: new Date().toISOString(),
+            link: 'my-projects',
+          };
+          return {
+            projects: [...state.projects, newProject],
+            notifications: [newNotif, ...state.notifications],
+          };
+        }),
     }),
     {
       name: 'client-dashboard-store',

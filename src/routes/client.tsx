@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, useRouterState } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -30,18 +30,18 @@ export const Route = createFileRoute("/client")({
   component: ClientLayout,
 });
 
-const NAV_ITEMS: { icon: React.ElementType; label: string; section: DashboardSection; badge?: number }[] = [
-  { icon: LayoutDashboard, label: "Overview", section: "overview" },
-  { icon: Plus, label: "New Product Request", section: "new-request" },
-  { icon: FolderKanban, label: "My Projects", section: "my-projects" },
-  { icon: Layers, label: "Design Approvals", section: "design-approvals", badge: 1 },
-  { icon: FlaskConical, label: "Samples & Prototypes", section: "samples" },
-  { icon: Factory, label: "Production Tracking", section: "production" },
-  { icon: ShoppingBag, label: "Orders & Invoices", section: "orders" },
-  { icon: FileText, label: "Documents", section: "documents" },
-  { icon: MessageSquare, label: "Messaging Center", section: "messaging", badge: 2 },
-  { icon: LifeBuoy, label: "Support Tickets", section: "support" },
-  { icon: Settings, label: "Account Settings", section: "settings" },
+const NAV_ITEMS: { icon: React.ElementType; label: string; section: DashboardSection; path: string; badge?: number }[] = [
+  { icon: LayoutDashboard, label: "Overview", section: "overview", path: "/client/" },
+  { icon: Plus, label: "New Product Request", section: "new-request", path: "/client/new-request" },
+  { icon: FolderKanban, label: "My Projects", section: "my-projects", path: "/client/projects" },
+  { icon: Layers, label: "Design Approvals", section: "design-approvals", path: "/client/design-approvals", badge: 1 },
+  { icon: FlaskConical, label: "Samples & Prototypes", section: "samples", path: "/client/samples" },
+  { icon: Factory, label: "Production Tracking", section: "production", path: "/client/production" },
+  { icon: ShoppingBag, label: "Orders & Invoices", section: "orders", path: "/client/orders" },
+  { icon: FileText, label: "Documents", section: "documents", path: "/client/documents" },
+  { icon: MessageSquare, label: "Messaging Center", section: "messaging", path: "/client/messaging", badge: 2 },
+  { icon: LifeBuoy, label: "Support Tickets", section: "support", path: "/client/support" },
+  { icon: Settings, label: "Account Settings", section: "settings", path: "/client/settings" },
 ];
 
 function LoginGate() {
@@ -146,11 +146,26 @@ function LoginGate() {
 }
 
 function ClientLayout() {
-  const { isAuthenticated, profile, logout, activeSection, setActiveSection, sidebarOpen, setSidebarOpen, notifications, messages } = useClientStore();
+  const { isAuthenticated, profile, logout, setActiveSection, sidebarOpen, setSidebarOpen, notifications, messages } = useClientStore();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
+
+  // Derive active section from current URL
+  const activeSection = NAV_ITEMS.find((item) =>
+    item.path === "/client/"
+      ? currentPath === "/client" || currentPath === "/client/"
+      : currentPath.startsWith(item.path)
+  )?.section ?? "overview";
+
+  const navigateTo = (item: typeof NAV_ITEMS[0]) => {
+    setActiveSection(item.section);
+    navigate({ to: item.path as any });
+  };
 
   const unreadNotifications = notifications.filter((n) => !n.read).length;
   const unreadMessages = messages.filter((m) => m.sender === 'manager' && !m.read).length;
@@ -217,7 +232,7 @@ function ClientLayout() {
             return (
               <button
                 key={item.section}
-                onClick={() => setActiveSection(item.section)}
+                onClick={() => navigateTo(item)}
                 title={!sidebarOpen ? item.label : undefined}
                 className={`relative flex items-center gap-3.5 px-3 py-2.5 rounded-xl transition-all duration-200 w-full group text-left ${
                   isActive
@@ -309,7 +324,7 @@ function ClientLayout() {
 
             {/* New Request CTA */}
             <button
-              onClick={() => setActiveSection('new-request')}
+              onClick={() => navigate({ to: '/client/new-request' as any })}
               className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-[#C9A84C] hover:bg-[#D4B86A] text-black font-semibold text-sm transition-all shadow-[0_2px_12px_rgba(201,168,76,0.25)]"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -346,7 +361,14 @@ function ClientLayout() {
                       {notifications.map((n) => (
                         <button
                           key={n.id}
-                          onClick={() => { useClientStore.getState().markNotificationRead(n.id); if (n.link) setActiveSection(n.link as DashboardSection); setNotifOpen(false); }}
+                          onClick={() => {
+                          useClientStore.getState().markNotificationRead(n.id);
+                          if (n.link) {
+                            const target = NAV_ITEMS.find(i => i.section === n.link);
+                            if (target) navigate({ to: target.path as any });
+                          }
+                          setNotifOpen(false);
+                        }}
                           className={`w-full text-left px-4 py-3 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors flex gap-3 items-start ${!n.read ? "bg-white/[0.02]" : ""}`}
                         >
                           <div className={`mt-0.5 h-2 w-2 rounded-full flex-shrink-0 ${n.type === 'success' ? 'bg-emerald-400' : n.type === 'warning' ? 'bg-amber-400' : 'bg-[#C9A84C]'}`} />
@@ -393,7 +415,7 @@ function ClientLayout() {
                     </div>
                     <div className="p-2">
                       <button
-                        onClick={() => { setActiveSection('settings'); setProfileOpen(false); }}
+                        onClick={() => { navigate({ to: '/client/settings' as any }); setProfileOpen(false); }}
                         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/[0.05] transition-colors text-sm text-white/70 hover:text-white"
                       >
                         <Settings className="h-4 w-4" />
