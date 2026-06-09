@@ -56,9 +56,9 @@ export const useBuilderStore = create<BuilderState>((set) => ({
   bottleMaterial: "Glass",
   bottleSilhouette: "Round",
   bottleCapacity: "100ml",
-  capStyle: "Metallic Gold",
+  capStyle: "cap-paris-round",
   capColor: "Transparent",
-  pumpType: "Standard Spray",
+  pumpType: "pwc-gold",
   bottleColor: "Transparent",
   label: {
     name: "L'ELEGANCE",
