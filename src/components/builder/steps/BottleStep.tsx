@@ -1,5 +1,16 @@
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { useAdminStore } from "@/store/adminStore";
+import circleGlass from "@/assets/shape/circle_glass.png";
+import cylindricalGlass from "@/assets/shape/cyclindaric_glass.png";
+import ovalGlass from "@/assets/shape/oval_glass.png";
+import squareGlass from "@/assets/shape/square_glass.png";
+
+const SHAPE_IMAGES: Record<string, string> = {
+  Round: circleGlass,
+  Cylindrical: cylindricalGlass,
+  Oval: ovalGlass,
+  Square: squareGlass,
+};
 
 const MATERIALS = ["Glass", "Plastic", "Frosted Glass", "Crystal", "Matte Glass", "Recycled"];
 const CAPACITIES = ["10ml", "30ml", "50ml", "75ml", "100ml", "150ml", "250ml"];
@@ -55,11 +66,16 @@ export function BottleStep() {
                   : "border-border bg-card hover:border-primary/50"
               }`}
             >
-              <div className="h-12 w-12 rounded bg-muted/50 border border-border flex items-center justify-center text-[10px] text-muted-foreground"
-                   style={{
-                     borderRadius: sil === "Round" ? "50%" : sil === "Square" ? "4px" : sil === "Oval" ? "40% 40% 50% 50%" : sil === "Cylindrical" ? "12px" : "8px"
-                   }}>
-                {sil}
+              <div className="h-12 w-12 rounded bg-muted/50 border border-border flex items-center justify-center overflow-hidden">
+                {SHAPE_IMAGES[sil] ? (
+                  <img
+                    src={SHAPE_IMAGES[sil]}
+                    alt={sil}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">{sil}</span>
+                )}
               </div>
               <span className="font-medium text-sm">{sil}</span>
             </button>

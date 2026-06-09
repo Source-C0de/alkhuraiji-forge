@@ -18,6 +18,70 @@ import {
 import { useAdminStore } from "@/store/adminStore";
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { useTheme } from "@/components/ThemeProvider";
+import circleGlass from "@/assets/shape/circle_glass.png";
+import cylindricalGlass from "@/assets/shape/cyclindaric_glass.png";
+import ovalGlass from "@/assets/shape/oval_glass.png";
+import squareGlass from "@/assets/shape/square_glass.png";
+
+const SHAPE_IMAGES: Record<string, string> = {
+  Round: circleGlass,
+  Cylindrical: cylindricalGlass,
+  Oval: ovalGlass,
+  Square: squareGlass,
+};
+
+const getShapeImage = (name: string) => {
+  if (name.includes("Round") || name.includes("Circle")) return circleGlass;
+  if (name.includes("Cylinder") || name.includes("Cylindrical")) return cylindricalGlass;
+  if (name.includes("Oval")) return ovalGlass;
+  if (name.includes("Square") || name.includes("Cube")) return squareGlass;
+  return null;
+};
+
+// Convert a hex color to an HSL hue value (0-360)
+const hexToHue = (hex: string): number => {
+  const cleaned = hex.replace("#", "");
+  if (cleaned.length !== 6) return 0;
+  const r = parseInt(cleaned.substring(0, 2), 16) / 255;
+  const g = parseInt(cleaned.substring(2, 4), 16) / 255;
+  const b = parseInt(cleaned.substring(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return 0;
+  const d = max - min;
+  let h = 0;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  h = Math.round(h * 60);
+  if (h < 0) h += 360;
+  return h;
+};
+
+// Build a CSS filter that tints the bottle image based on the selected color
+const getColorFilter = (colorName: string): string => {
+  switch (colorName) {
+    case "Transparent":
+      return "none";
+    case "Black Frosted":
+      return "grayscale(100%) brightness(0.45) contrast(1.1)";
+    case "Amber":
+      return "sepia(100%) saturate(250%) hue-rotate(-15deg) brightness(0.95)";
+    case "Emerald":
+      return "sepia(100%) saturate(300%) hue-rotate(75deg) brightness(0.9)";
+    case "Royal Blue":
+      return "sepia(100%) saturate(350%) hue-rotate(175deg) brightness(0.85)";
+    case "Rose Gold":
+      return "sepia(60%) saturate(220%) hue-rotate(310deg) brightness(1.05)";
+    case "White Matte":
+      return "grayscale(100%) brightness(1.25) contrast(0.9)";
+    case "Gradient Luxe":
+      return "sepia(80%) saturate(300%) hue-rotate(-10deg) brightness(1.1)";
+    default:
+      return "none";
+  }
+};
 
 export const Route = createFileRoute("/builder")({
   component: BuilderPage,
@@ -166,37 +230,38 @@ function BuilderPage() {
     const sil = silhouette.toLowerCase();
     if (sil.includes("round")) {
       return {
-        width: "200px",
-        height: "200px",
+        width: "360px",
+        height: "360px",
         borderRadius: "9999px",
       };
     } else if (sil.includes("square") || sil.includes("cube")) {
       return {
-        width: "170px",
-        height: "230px",
-        borderRadius: "16px",
+        width: "320px",
+        height: "420px",
+        borderRadius: "24px",
       };
     } else if (sil.includes("oval")) {
       return {
-        width: "175px",
-        height: "240px",
+        width: "320px",
+        height: "440px",
         borderRadius: "100px 100px 120px 120px",
       };
     } else if (sil.includes("cylinder") || sil.includes("cylindrical")) {
       return {
-        width: "140px",
-        height: "260px",
+        width: "260px",
+        height: "480px",
         borderRadius: "9999px",
       };
     } else {
       return {
-        width: "160px",
-        height: "250px",
-        borderRadius: "24px",
+        width: "300px",
+        height: "460px",
+        borderRadius: "32px",
       };
     }
   };
   const dims = getBottleDimensions(store.bottleSilhouette);
+  const shapeImage = getShapeImage(store.bottleSilhouette);
 
   // Parallax rotation tracking for immersive Stage
   const rotateY = useMotionValue(0);
@@ -427,25 +492,39 @@ function BuilderPage() {
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">1. Silhouette Shape</h3>
                   <div className="grid grid-cols-2 gap-3">
-                    {activeBottles.map((bottle) => (
-                      <button
-                        key={bottle.id}
-                        onClick={() => store.setBottleSilhouette(bottle.name)}
-                        className={`p-4 rounded-xl border text-left transition-all duration-300 relative group overflow-hidden ${
-                          store.bottleSilhouette === bottle.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
-                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
-                        }`}
-                      >
-                        <div className="text-xs font-semibold text-foreground mb-1">{bottle.name}</div>
-                        <div className="text-[9px] text-muted-foreground uppercase">{bottle.category}</div>
-                        {store.bottleSilhouette === bottle.name && (
-                          <div className="absolute right-3 top-3 h-4 w-4 bg-gold rounded-full flex items-center justify-center text-black">
-                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                    {activeBottles.map((bottle) => {
+                      const shapeImg = getShapeImage(bottle.name);
+                      return (
+                        <button
+                          key={bottle.id}
+                          onClick={() => store.setBottleSilhouette(bottle.name)}
+                          className={`p-4 rounded-xl border text-left transition-all duration-300 relative group overflow-hidden flex items-center gap-3 ${
+                            store.bottleSilhouette === bottle.name
+                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold"
+                              : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                          }`}
+                        >
+                          {shapeImg ? (
+                            <img
+                              src={shapeImg}
+                              alt={bottle.name}
+                              className="h-12 w-12 object-contain flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded bg-muted/50 border border-border" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold text-foreground mb-1 truncate">{bottle.name}</div>
+                            <div className="text-[9px] text-muted-foreground uppercase truncate">{bottle.category}</div>
                           </div>
-                        )}
-                      </button>
-                    ))}
+                          {store.bottleSilhouette === bottle.name && (
+                            <div className="absolute right-3 top-3 h-4 w-4 bg-gold rounded-full flex items-center justify-center text-black">
+                              <Check className="h-2.5 w-2.5 stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -816,91 +895,45 @@ function BuilderPage() {
           <p className="text-[8px] text-muted-foreground/50 mt-1">Move your cursor to rotate customized private label bottle</p>
         </div> */}
 
-        {/* 50% Screen height floating flask */}
+        {/* Large floating flask preview */}
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
           style={{ rotateY, transformStyle: "preserve-3d" }}
-          className="relative w-full max-w-sm h-[50vh] flex items-center justify-center perspective-1000"
+          className="relative w-full max-w-2xl h-[70vh] flex items-center justify-center perspective-1000"
         >
           {/* Glass reflections */}
           <div className="absolute inset-0 bg-radial-gradient(circle, rgba(255,255,255,0.02), transparent) pointer-events-none" />
 
-          {/* Core Dynamic Custom Perfume Bottle */}
-          <motion.div
-            className="border border-white/15 dark:border-white/15 border-black/10 shadow-[0_30px_100px_rgba(0,0,0,0.85),_inset_0_0_20px_rgba(255,255,255,0.1)] flex flex-col items-center relative"
-            animate={{ 
-              scale,
-              width: dims.width,
-              height: dims.height,
-              borderRadius: dims.borderRadius
-            }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
-            style={{
-              backdropFilter: store.bottleMaterial === "Frosted Glass" ? "blur(20px)" : store.bottleMaterial === "Crystal" ? "blur(4px)" : "blur(10px)",
-              background: store.bottleColor === "Transparent" ? (resolvedTheme === "dark" ? "rgba(255,255,255,0.03)" : "rgba(255, 255, 255, 0.45)") : BOTTLE_COLORS.find(c => c.name === store.bottleColor)?.hex,
-            }}
-          >
-            
-            {/* Spray Pump */}
-            <div 
-              className="absolute -top-6 left-1/2 w-8 h-6 shadow-md transition-all"
-              style={{
-                background: store.pumpType === "Standard Spray" ? "#aaa" : 
-                            store.pumpType === "Luxury Atomizer" ? "linear-gradient(135deg, #bf953f, #fcf6ba, #bf953f)" : 
-                            store.pumpType === "Fine Mist" ? "#ddd" : "#666",
-                borderRadius: store.pumpType === "Oil Roller" ? "50%" : "6px 6px 0 0",
-                transform: "translateX(-50%)"
-              }}
+          {/* Shape Bottle Image (no branding overlay - handled in branding step) */}
+          {shapeImage ? (
+            <motion.div
+              key={store.bottleSilhouette}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale }}
+              transition={{ type: "spring", stiffness: 120, damping: 20 }}
+              style={{ transformStyle: "preserve-3d" }}
             >
-              {store.pumpType === "Luxury Atomizer" && (
-                <div className="absolute top-1/2 -right-8 w-10 h-10 rounded-full border border-gold bg-gold/15 backdrop-blur-md transform -translate-y-1/2 flex items-center justify-center">
-                  <span className="text-[6px] font-bold text-gold uppercase tracking-wider">Atomizer</span>
-                </div>
-              )}
-            </div>
-
-            {/* Cap Crown */}
-            <div 
-              className="absolute -top-16 left-1/2 w-16 h-12 shadow-2xl transition-all"
-              style={{
-                background: store.capStyle === "Metallic Gold" ? "linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7)" :
-                            store.capStyle === "Matte Black" ? "#111" :
-                            store.capStyle === "Gloss Silver" ? "linear-gradient(to right, #d1d5db, #ffffff, #d1d5db)" :
-                            store.capStyle === "Wooden Luxury" ? "#8B5A2B" : 
-                            store.capStyle === "Colored Cap" ? CAP_COLORS.find(c => c.name === store.capColor)?.hex || "#333" : "rgba(255,255,255,0.15)",
-                border: store.capStyle === "Crystal Crown" ? "1px solid rgba(255,255,255,0.4)" : "none",
-                borderRadius: store.capStyle === "Crystal Crown" ? "18px" : store.capStyle === "Wooden Luxury" ? "2px" : "6px 6px 0 0",
-                transform: "translateX(-50%)"
-              }}
-            />
-
-            {/* Brand Imprint Label */}
-            <div 
-              className={`absolute top-1/2 left-1/2 w-32 min-h-24 p-4 flex flex-col items-center justify-center text-center shadow-2xl border transition-all duration-300 ${
-                resolvedTheme === "dark" 
-                  ? "bg-black/90 text-white border-white/10" 
-                  : "bg-white/95 text-black border-black/10"
-              }`}
-              style={{
-                borderRadius: store.label.shape === "Rounded" ? "12px" : "0px",
-                height: store.label.shape === "Vertical Strip" ? "75%" : "auto",
-                fontFamily: store.label.font === "Elegant Serif" ? "serif" : "sans-serif",
-                transform: "translate(-50%, -50%) translateZ(40px)"
-              }}
+              <motion.img
+                src={shapeImage}
+                alt={store.bottleSilhouette}
+                style={{
+                  width: dims.width,
+                  height: dims.height,
+                  filter: getColorFilter(store.bottleColor),
+                  transition: "filter 0.6s ease",
+                }}
+                className="object-contain drop-shadow-[0_30px_100px_rgba(0,0,0,0.85)]"
+              />
+            </motion.div>
+          ) : (
+            <div
+              className="flex items-center justify-center text-sm text-muted-foreground"
+              style={{ width: dims.width, height: dims.height }}
             >
-              <span className="text-[8px] uppercase tracking-[0.25em] text-gold-soft mb-1 font-bold">EAU DE PARFUM</span>
-              <span className="font-display font-medium text-lg leading-tight tracking-widest break-words w-full">
-                {store.label.name || "YOUR BRAND"}
-              </span>
-              <span className="text-[7px] uppercase tracking-widest text-muted-foreground mt-3 font-semibold">
-                {store.bottleCapacity} / 3.4 FL.OZ
-              </span>
+              {store.bottleSilhouette}
             </div>
-
-            {/* Reflection Overlay Reflection */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none rounded-[inherit]" />
-          </motion.div>
+          )}
         </motion.div>
 
         {/* Quality Badging */}
