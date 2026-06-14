@@ -54,11 +54,11 @@ export interface BuilderState {
 export const useBuilderStore = create<BuilderState>((set) => ({
   step: 0,
   bottleMaterial: "Glass",
-  bottleSilhouette: "Round",
+  bottleSilhouette: "",
   bottleCapacity: "100ml",
   capStyle: "cap-paris-round",
   capColor: "Transparent",
-  pumpType: "pwc-gold",
+  pumpType: "",
   bottleColor: "Transparent",
   label: {
     name: "L'ELEGANCE",
@@ -86,9 +86,12 @@ export const useBuilderStore = create<BuilderState>((set) => ({
   setBottleMaterial: (bottleMaterial) => set({ bottleMaterial }),
   setBottleSilhouette: (bottleSilhouette) => set({ bottleSilhouette }),
   setBottleCapacity: (bottleCapacity) => set({ bottleCapacity }),
-  setCapStyle: (capStyle) => set({ capStyle }),
+  // Mutual exclusion rule: a cap and a pump cannot be active at the same time.
+  // - setCapStyle: when a cap is selected, clear the pump
+  // - setPumpType: when a pump is selected, clear the cap
+  setCapStyle: (capStyle) => set({ capStyle, pumpType: "" }),
   setCapColor: (capColor) => set({ capColor }),
-  setPumpType: (pumpType) => set({ pumpType }),
+  setPumpType: (pumpType) => set({ pumpType, capStyle: "" }),
   setBottleColor: (bottleColor) => set({ bottleColor }),
   updateLabel: (label) =>
     set((state) => ({ label: { ...state.label, ...label } })),

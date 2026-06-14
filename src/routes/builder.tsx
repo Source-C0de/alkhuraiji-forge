@@ -20,6 +20,7 @@ import {
 import { useAdminStore } from "@/store/adminStore";
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { useTheme } from "@/components/ThemeProvider";
+import baseImg from "@/assets/shape/base.png";
 import circleGlass from "@/assets/shape/circle_glass.png";
 import cylindricalGlass from "@/assets/shape/cyclindaric_glass.png";
 import ovalGlass from "@/assets/shape/oval_glass.png";
@@ -448,41 +449,34 @@ function BuilderPage() {
   };
   const scale = getCapacityScale(store.bottleCapacity);
 
-  const getBottleDimensions = (silhouette: string) => {
-    const sil = silhouette.toLowerCase();
-    if (sil.includes("round")) {
-      return {
-        width: "360px",
-        height: "360px",
-        borderRadius: "9999px",
-      };
-    } else if (sil.includes("square") || sil.includes("cube")) {
-      return {
-        width: "320px",
-        height: "420px",
-        borderRadius: "24px",
-      };
-    } else if (sil.includes("oval")) {
-      return {
-        width: "320px",
-        height: "440px",
-        borderRadius: "100px 100px 120px 120px",
-      };
-    } else if (sil.includes("cylinder") || sil.includes("cylindrical")) {
-      return {
-        width: "260px",
-        height: "480px",
-        borderRadius: "9999px",
-      };
-    } else {
-      return {
-        width: "300px",
-        height: "460px",
-        borderRadius: "32px",
-      };
-    }
+  // FIXED CANVAS SLOT — every silhouette renders inside the SAME
+  // bounding box so they all line up identically in the preview.
+  //
+  //   • bottle slot: 280 × 416 (bottom 65% of the canvas)
+  //   • pump slot : 280 × 96  (middle 15%)
+  //   • cap slot  : 280 × 128 (top 20%)
+  //   • canvas   : 280 × 640
+  //
+  // Each uploaded silhouette PNG is rendered with object-contain inside
+  // the 280 × 416 bottle slot, anchored to the bottom-center. Because
+  // the slot never changes size, Round / Square / Oval / Cylindrical
+  // (and any future admin-uploaded shape) all land in exactly the same
+  // horizontal/vertical position.
+  const CANVAS_WIDTH = "280px";
+  const CANVAS_HEIGHT = "640px";
+  const BOTTLE_SLOT_W = "280px";
+  const BOTTLE_SLOT_H = "416px";
+  const BOTTLE_SLICE = "416px";   // 65% of 640
+  const PUMP_SLICE = "96px";      // 15% of 640
+  const CAP_SLICE = "128px";      // 20% of 640
+  // The per-silhouette "borderRadius" hint is still exposed via dims
+  // because some downstream effects (e.g. shadow tint) use it, but the
+  // slot dimensions are NO LONGER driven by the silhouette.
+  const dims = {
+    width: CANVAS_WIDTH,
+    height: BOTTLE_SLOT_H,
+    borderRadius: "24px",
   };
-  const dims = getBottleDimensions(store.bottleSilhouette);
   const shapeImage = getShapeImage(store.bottleSilhouette);
 
   // Parallax rotation tracking for immersive Stage
@@ -1198,99 +1192,376 @@ function BuilderPage() {
           <p className="text-[8px] text-muted-foreground/50 mt-1">Move your cursor to rotate customized private label bottle</p>
         </div> */}
 
-        {/* Large floating flask preview */}
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-          style={{ rotateY, transformStyle: "preserve-3d" }}
-          className="relative w-full max-w-2xl h-[70vh] flex items-center justify-center perspective-1000"
-        >
-          {/* Glass reflections */}
-          <div className="absolute inset-0 bg-radial-gradient(circle, rgba(255,255,255,0.02), transparent) pointer-events-none" />
+        {/* ================= IMMERSIVE 3D PRODUCT-DESIGNER STAGE =================
+            The preview is presented as a large, framed product-designer canvas.
+            - Animated gradient backdrop with a soft overhead spotlight
+            - Subtle floor grid (perspective lines) for depth
+            - Floor reflection of the bottle (mirrored, low opacity)
+            - Dynamic shape label chip floating above the bottle
+            - Tilt-on-cursor parallax preserved from previous build
+            - The actual bottle/cap/pump stack is unchanged internally —
+              only the surrounding stage chrome is upgraded.
+        ======================================================================= */}
+        <div className="relative w-full max-w-3xl h-[78vh] flex items-center justify-center perspective-1200">
+          {/* ===== Stage frame: outer card with thin gold border + vignette ===== */}
+          <div className="absolute inset-0 rounded-[28px] overflow-hidden border border-gold/15 bg-gradient-to-b from-secondary/30 via-background/40 to-secondary/20 shadow-[0_30px_120px_-20px_rgba(0,0,0,0.9)]">
+            {/* Animated radial spotlight from above */}
+            <motion.div
+              className="absolute -top-32 left-1/2 -translate-x-1/2 w-[120%] h-[70%] bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.18)_0%,rgba(212,175,55,0.05)_35%,transparent_70%)] pointer-events-none"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            {/* Soft side glows for depth */}
+            <div className="absolute top-1/3 -left-20 w-72 h-72 bg-gold/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-1/4 -right-20 w-72 h-72 bg-gold-soft/10 rounded-full blur-[100px] pointer-events-none" />
+            {/* Perspective floor grid lines */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none opacity-[0.18]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(212,175,55,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(212,175,55,0.5) 1px, transparent 1px)",
+                backgroundSize: "60px 60px",
+                transform: "perspective(600px) rotateX(60deg)",
+                transformOrigin: "bottom center",
+                maskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+              }}
+            />
+            {/* Horizontal "horizon" line where the floor meets the wall */}
+            <div className="absolute left-0 right-0 bottom-1/2 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent pointer-events-none" />
+            {/* Vignette to focus the eye on the product */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
+            {/* Corner crosshairs (designer / blueprint feel) */}
+            {[
+              "top-4 left-4 border-t border-l",
+              "top-4 right-4 border-t border-r",
+              "bottom-4 left-4 border-b border-l",
+              "bottom-4 right-4 border-b border-r",
+            ].map((pos) => (
+              <div
+                key={pos}
+                className={`absolute ${pos} w-5 h-5 border-gold/40 pointer-events-none`}
+              />
+            ))}
+          </div>
 
-          {/* Sequential Layered Preview: Cap → Pump → Bottle (top to bottom).
-              Each layer only appears once the corresponding step is unlocked & completed. */}
-          <div
-            className="relative flex flex-col items-center justify-center"
-            style={{ minHeight: `calc(${dims.height} * 1.6)` }}
+          {/* ===== Floating product (bottle + cap/pump + reflection) ===== */}
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+            style={{ rotateY, transformStyle: "preserve-3d" }}
+            className="relative w-full h-full flex items-center justify-center"
           >
-            {/* Cap image (top) - only shown once the cap step is unlocked AND a cap is selected */}
-            <AnimatePresence>
-              {isTabUnlocked("cap") && CAP_IMAGES[store.capStyle] && (
-                <motion.img
-                  key={`cap-${store.capStyle}`}
-                  src={CAP_IMAGES[store.capStyle]}
-                  alt="Cap"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0, scale }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                  style={{
-                    // Cap sits above the bottle, width = 55% of bottle width
-                    width: `calc(${dims.width} * 0.55)`,
-                    height: "auto",
-                    marginBottom: `-${parseInt(dims.height) * 0.04}px`,
-                    zIndex: 3,
-                  }}
-                  className="object-contain drop-shadow-[0_15px_40px_rgba(0,0,0,0.7)]"
-                />
-              )}
-            </AnimatePresence>
+            {/* Floor reflection of the full assembly.
+                Mirrored vertically, faded out, blurred — gives the illusion
+                the bottle is sitting on a glossy surface inside the stage. */}
+            <div
+              className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+              style={{
+                bottom: "8%",
+                width: "60%",
+                height: "55%",
+                transform: "translateX(-50%) scaleY(-1)",
+                opacity: 0.18,
+                filter: "blur(6px)",
+                WebkitMaskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
+                maskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
+              }}
+            >
+              <div
+                className="w-full h-full"
+                style={{
+                  filter: getColorFilter(store.bottleColor),
+                }}
+              >
+                {shapeImage && (
+                  <img
+                    src={shapeImage}
+                    alt=""
+                    aria-hidden
+                    className="w-full h-full object-contain"
+                  />
+                )}
+                {isTabUnlocked("cap") && PUMP_IMAGES[store.pumpType] && !store.capStyle && (
+                  <img
+                    src={PUMP_IMAGES[store.pumpType]}
+                    alt=""
+                    aria-hidden
+                    className="absolute left-1/2 -translate-x-1/2"
+                    style={{
+                      top: 0,
+                      width: "35%",
+                      height: "49%",
+                      objectFit: "contain",
+                      objectPosition: "center bottom",
+                    }}
+                  />
+                )}
+                {isTabUnlocked("cap") && CAP_IMAGES[store.capStyle] && !store.pumpType && (
+                  <img
+                    src={CAP_IMAGES[store.capStyle]}
+                    alt=""
+                    aria-hidden
+                    className="absolute left-1/2 -translate-x-1/2"
+                    style={{
+                      top: 0,
+                      width: "55%",
+                      height: "77%",
+                      objectFit: "contain",
+                      objectPosition: "center bottom",
+                    }}
+                  />
+                )}
+              </div>
+            </div>
 
-            {/* Pump image (middle) - only shown once the cap step is unlocked AND a pump is selected.
-                Pump is part of the "cap" step in this builder, so it gates on the same unlock. */}
-            <AnimatePresence>
-              {isTabUnlocked("cap") && PUMP_IMAGES[store.pumpType] && (
-                <motion.img
-                  key={`pump-${store.pumpType}`}
-                  src={PUMP_IMAGES[store.pumpType]}
-                  alt="Pump"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0, scale }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                  style={{
-                    width: `calc(${dims.width} * 0.35)`,
-                    height: "auto",
-                    marginBottom: `-${parseInt(dims.height) * 0.10}px`,
-                    zIndex: 2,
-                  }}
-                  className="object-contain drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]"
-                />
-              )}
-            </AnimatePresence>
+            {/* Ground contact shadow (elliptical, soft) */}
+            <div
+              className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+              style={{
+                bottom: "8%",
+                width: `calc(${dims.width} * 1.05)`,
+                height: `calc(${dims.width} * 0.12)`,
+                background:
+                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, transparent 75%)",
+                filter: "blur(8px)",
+                zIndex: 5,
+              }}
+            />
 
-            {/* Bottle image (bottom) - always visible, this is the foundation */}
-            {shapeImage ? (
+            {/* ===== Dynamic shape label chip (top of stage) ===== */}
+            <AnimatePresence mode="wait">
               <motion.div
                 key={store.bottleSilhouette}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale }}
-                transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                style={{ transformStyle: "preserve-3d" }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35 }}
+                className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-background/70 backdrop-blur-md shadow-lg"
               >
-                <motion.img
-                  src={shapeImage}
-                  alt={store.bottleSilhouette}
-                  style={{
-                    width: dims.width,
-                    height: dims.height,
-                    filter: getColorFilter(store.bottleColor),
-                    transition: "filter 0.6s ease",
-                  }}
-                  className="object-contain drop-shadow-[0_30px_100px_rgba(0,0,0,0.85)]"
-                />
+                <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold">
+                  {store.bottleSilhouette}
+                </span>
               </motion.div>
-            ) : (
-              <div
-                className="flex items-center justify-center text-sm text-muted-foreground"
-                style={{ width: dims.width, height: dims.height }}
-              >
-                {store.bottleSilhouette}
-              </div>
-            )}
-          </div>
-        </motion.div>
+            </AnimatePresence>
+
+            {/* ===== Spec readout chip (bottom of stage) ===== */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2 rounded-full border border-border/60 bg-background/60 backdrop-blur-md text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="text-gold-soft">{store.bottleMaterial}</span>
+              <span className="h-3 w-px bg-border" />
+              <span className="text-foreground">{store.bottleColor}</span>
+              <span className="h-3 w-px bg-border" />
+              <span>{store.bottleCapacity}ml</span>
+            </div>
+
+            {/* ===== Layered bottle/cap/pump canvas (3-slice stack) =====
+                ============================================================
+                The preview canvas is a 400×640 unit grid (scaled by `s`)
+                split into three vertical slices that stack exactly on
+                top of one another, all centered on the same axis:
+
+                  ┌──────────────────────────────┐  ← top (z-30: CAP)
+                  │   CAP SLICE   (400 × 128)   │  20% of total height
+                  ├──────────────────────────────┤
+                  │   PUMP SLICE  (400 × 96)    │  15% of total height
+                  ├──────────────────────────────┤
+                  │   BOTTLE SLICE (400 × 416)  │  65% of total height
+                  └──────────────────────────────┘  ← bottom (z-10: BOTTLE)
+
+                Layer rules:
+                - BASE LAYER (z-10): Bottle. Anchored to the BOTTLE
+                  slice. The bottle's top-of-shoulders touches the top
+                  pixel row of this slice. Always rendered.
+                - MID LAYER (z-20): Pump. Anchored to the PUMP slice.
+                  The pump's collar bottom touches the bottom pixel row
+                  of this slice (so the visible pump base sits flush
+                  against the top of the bottle slice). Renders ONLY
+                  when a pump is selected AND no cap is active.
+                - TOP LAYER (z-30): Cap. Anchored to the CAP slice.
+                  The cap graphic is centered horizontally and
+                  vertically inside this slice. Renders ONLY when a cap
+                  is selected AND no pump is active.
+
+                Because the slices are pixel-aligned to the same canvas,
+                the cap/pump bottom edge and the bottle's top edge share
+                the same Y-coordinate, producing a flush stack with no
+                visible gap.
+                ============================================================ */}
+            {(() => {
+              const showPump =
+                isTabUnlocked("cap") &&
+                !!PUMP_IMAGES[store.pumpType] &&
+                !store.capStyle;
+              const showCap =
+                isTabUnlocked("cap") &&
+                !!CAP_IMAGES[store.capStyle] &&
+                !store.pumpType;
+              // Scale factor: dims.width is the bottle's intrinsic width.
+              // We want the canvas WIDTH to be ~dims.width * 1.0 (so the
+              // bottle slice matches the bottle's natural width) and the
+              // canvas HEIGHT to be dims.width * 1.6 (matching the
+              // 400:640 ≈ 1:1.6 spec). All three slice heights derive
+              // from that:
+              //   cap   = canvas_h * 0.20 = dims.width * 0.32
+              //   pump  = canvas_h * 0.15 = dims.width * 0.24
+              //   botl  = canvas_h * 0.65 = dims.width * 1.04
+              // The bottle slice then takes dims.height (= dims.width *
+              // aspect) and the pump/cap fill the rest of the canvas.
+              // To keep the bottle slice exactly dims.height tall while
+              // preserving the 65% ratio, we set canvas_h = dims.height
+              // / 0.65 and let the cap/pump slices scale accordingly.
+              // Fixed 3-slice geometry. The bottle, pump, and cap slots
+              // are sized independently of the active silhouette so every
+              // PNG ends up in the same screen position.
+              const bottleSlice = BOTTLE_SLICE;
+              const canvasH = CANVAS_HEIGHT;
+              const capH = CAP_SLICE;
+              const pumpH = PUMP_SLICE;
+              const canvasW = CANVAS_WIDTH;
+              return (
+                <div
+                  className="relative"
+                  style={{
+                    width: canvasW,
+                    height: canvasH,
+                  }}
+                >
+                  {/* LAYER 0 (z-0): Base wireframe placeholder — always visible.
+                      Shows base.png as the fixed frame/placeholder when no bottle
+                      is selected. Once the user picks a silhouette, this stays as
+                      a subtle reference frame behind the actual bottle image. */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    style={{ zIndex: 0 }}
+                  >
+                    <img
+                      src={baseImg}
+                      alt="Bottle placeholder"
+                      draggable={false}
+                      className="max-w-full max-h-full object-contain select-none"
+                      style={{
+                        opacity: shapeImage ? 0.35 : 0.9,
+                        transition: "opacity 0.4s ease",
+                      }}
+                    />
+                  </div>
+
+                  {/* BASE LAYER (z-10): Bottle — anchored to BOTTOM 65%
+                      slice. The bottle's top-of-shoulders touches the
+                      top pixel row of the bottle slice. Only rendered
+                      when the user has selected a silhouette. */}
+                  <div
+                    className="absolute left-0 right-0 bottom-0"
+                    style={{
+                      height: bottleSlice,
+                      zIndex: 10,
+                    }}
+                  >
+                    {shapeImage ? (
+                      <motion.img
+                        key={`bottle-${store.bottleSilhouette}`}
+                        src={shapeImage}
+                        alt={store.bottleSilhouette}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale }}
+                        transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                        style={{
+                          width: BOTTLE_SLOT_W,
+                          height: BOTTLE_SLOT_H,
+                          filter: getColorFilter(store.bottleColor),
+                          transition: "filter 0.6s ease",
+                        }}
+                        // object-contain + object-bottom-center pins every
+                        // silhouette to the SAME rectangle regardless of the
+                        // PNG's intrinsic aspect ratio, so the bottle never
+                        // shifts up/down or left/right when the shape changes.
+                        className="object-contain object-bottom drop-shadow-[0_40px_120px_rgba(0,0,0,0.9)]"
+                      />
+                    ) : null}
+                  </div>
+
+                  {/* MID LAYER (z-20): Pump — anchored to MIDDLE 15%
+                      slice. Bottom edge of the pump collar touches the
+                      bottom pixel row of this slice, which is the same
+                      Y-coordinate as the top of the bottle slice — so
+                      the pump's base sits flush on the bottle's
+                      shoulder line. */}
+                  <AnimatePresence>
+                    {showPump && (
+                      <div
+                        key={`pump-${store.pumpType}`}
+                        className="absolute left-0 right-0 flex items-end justify-center"
+                        style={{
+                          bottom: bottleSlice, // = top of bottle slice
+                          height: pumpH,
+                          zIndex: 20,
+                        }}
+                      >
+                        <motion.img
+                          src={PUMP_IMAGES[store.pumpType]}
+                          alt="Pump"
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0, scale }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                          style={{
+                            width: BOTTLE_SLOT_W,
+                            height: pumpH,
+                            display: "block",
+                            objectFit: "contain",
+                            objectPosition: "center bottom",
+                          }}
+                          className="drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]"
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* TOP LAYER (z-30): Cap — anchored directly above the bottle.
+                      The cap sits flush on top of the bottle slice (same
+                      Y-coordinate as the top of the bottle), with the
+                      pump slice above it (when a pump is active). */}
+                  <AnimatePresence>
+                    {showCap && (
+                      <div
+                        key={`cap-${store.capStyle}`}
+                        className="absolute left-0 right-0 bottom-0"
+                        style={{
+                          bottom: bottleSlice, // sit flush on top of the bottle
+                          height: capH,
+                          zIndex: 10,
+                        }}
+                      >
+                        <motion.img
+                          src={CAP_IMAGES[store.capStyle]}
+                          alt="Cap"
+                          initial={{ opacity: 0, y: -25 }}
+                          animate={{ opacity: 1, y: 0, scale }}
+                          exit={{ opacity: 0, y: -25 }}
+                          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            display: "block",
+                            objectFit: "contain",
+                            objectPosition: "center bottom",
+                            transform: "translateY(20px)"
+                          }}
+                          className="drop-shadow-[0_18px_48px_rgba(0,0,0,0.8)]"
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })()}
+          </motion.div>
+        </div>
 
         {/* Quality Badging */}
         <div className="absolute bottom-16 flex gap-6 z-10">

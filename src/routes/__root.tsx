@@ -67,7 +67,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <I18nProvider>
           <div className="relative flex min-h-screen flex-col">
             {!isAdminOrClient && <Navbar />}
