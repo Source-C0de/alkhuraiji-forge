@@ -1,97 +1,98 @@
 import { useBuilderStore } from "@/store/useBuilderStore";
-
-const CAP_STYLES = [
-  "Metallic Gold",
-  "Matte Black",
-  "Gloss Silver",
-  "Wooden Luxury",
-  "Crystal Crown",
-  "Colored Cap",
-];
-
-const PUMP_TYPES = [
-  "Standard Spray",
-  "Fine Mist",
-  "Luxury Atomizer",
-  "Oil Roller"
-];
-
-const CAP_COLORS = [
-  { name: "Transparent", hex: "transparent" },
-  { name: "Black Frosted", hex: "#222" },
-  { name: "Amber", hex: "#b45f06" },
-  { name: "Emerald", hex: "#274e13" },
-  { name: "Royal Blue", hex: "#0b5394" },
-  { name: "Rose Gold", hex: "#b4a7d6" },
-  { name: "White Matte", hex: "#f3f4f6" },
-  { name: "Gradient Luxe", hex: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)" },
-];
+import { useAdminStore } from "@/store/adminStore";
 
 export function CapStep() {
   const store = useBuilderStore();
+  const { capStyles, pumpTypes, capColors, showCapStyles, showPumpTypes, showCapColor } =
+    useAdminStore();
+
+  // All three option lists are now admin-controlled. Filter to active items.
+  const activeCapStyles = capStyles.filter((s) => s.active).map((s) => s.name);
+  const activePumpTypes = pumpTypes.filter((p) => p.active).map((p) => p.name);
+  const activeCapColors = capColors.filter((c) => c.active);
 
   return (
     <div className="space-y-10">
-      <div>
-        <h2 className="text-2xl font-display font-semibold mb-4">Select Cap Style</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {CAP_STYLES.map((style) => (
-            <button
-              key={style}
-              onClick={() => store.setCapStyle(style)}
-              className={`p-4 rounded-xl border text-center transition-all duration-300 ${
-                store.capStyle === style
-                  ? "border-primary bg-primary/10 shadow-gold-glow font-medium"
-                  : "border-border bg-card hover:border-primary/50"
-              }`}
-            >
-              <p className="font-medium text-sm">{style}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {store.capStyle === "Colored Cap" && (
-        <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-          <h2 className="text-xl font-display font-semibold mb-4">Cap Color</h2>
-          <div className="grid grid-cols-4 gap-4">
-            {CAP_COLORS.map((color) => (
-              <button
-                key={color.name}
-                onClick={() => store.setCapColor(color.name)}
-                className={`flex flex-col items-center gap-2 p-2 rounded-lg border transition-all ${
-                  store.capColor === color.name ? "border-primary shadow-gold-glow" : "border-transparent hover:bg-muted"
-                }`}
-              >
-                <div
-                  className="w-10 h-10 rounded-full border border-border shadow-sm"
-                  style={{ background: color.hex }}
-                />
-                <span className="text-[10px] text-center font-medium leading-tight">{color.name}</span>
-              </button>
-            ))}
-          </div>
+      {showCapStyles && (
+        <div>
+          <h2 className="text-2xl font-display font-semibold mb-4">Select Cap Style</h2>
+          {activeCapStyles.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {activeCapStyles.map((style) => (
+                <button
+                  key={style}
+                  onClick={() => store.setCapStyle(style)}
+                  className={`p-4 rounded-xl border text-center transition-all duration-300 ${
+                    store.capStyle === style
+                      ? "border-primary bg-primary/10 shadow-gold-glow font-medium"
+                      : "border-border bg-card hover:border-primary/50"
+                  }`}
+                >
+                  <p className="font-medium text-sm">{style}</p>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">No cap style options available.</p>
+          )}
         </div>
       )}
 
-      <div>
-        <h2 className="text-2xl font-display font-semibold mb-4">Pump Type</h2>
-        <div className="grid grid-cols-2 gap-3">
-          {PUMP_TYPES.map((pump) => (
-            <button
-              key={pump}
-              onClick={() => store.setPumpType(pump)}
-              className={`p-4 rounded-xl border text-center transition-all duration-300 ${
-                store.pumpType === pump
-                  ? "border-primary bg-primary/10 shadow-gold-glow font-medium"
-                  : "border-border bg-card hover:border-primary/50"
-              }`}
-            >
-              <span className="font-medium text-sm">{pump}</span>
-            </button>
-          ))}
+      {showCapColor && store.capStyle === "Colored Cap" && (
+        <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+          <h2 className="text-xl font-display font-semibold mb-4">Cap Color</h2>
+          {activeCapColors.length > 0 ? (
+            <div className="grid grid-cols-4 gap-4">
+              {activeCapColors.map((color) => (
+                <button
+                  key={color.id}
+                  onClick={() => store.setCapColor(color.name)}
+                  className={`flex flex-col items-center gap-2 p-2 rounded-lg border transition-all ${
+                    store.capColor === color.name
+                      ? "border-primary shadow-gold-glow"
+                      : "border-transparent hover:bg-muted"
+                  }`}
+                >
+                  <div
+                    className="w-10 h-10 rounded-full border border-border shadow-sm"
+                    style={{ background: color.hex }}
+                  />
+                  <span className="text-[10px] text-center font-medium leading-tight">
+                    {color.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">No cap color options available.</p>
+          )}
         </div>
-      </div>
+      )}
+
+      {showPumpTypes && (
+        <div>
+          <h2 className="text-2xl font-display font-semibold mb-4">Pump Type</h2>
+          {activePumpTypes.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3">
+              {activePumpTypes.map((pump) => (
+                <button
+                  key={pump}
+                  onClick={() => store.setPumpType(pump)}
+                  className={`p-4 rounded-xl border text-center transition-all duration-300 ${
+                    store.pumpType === pump
+                      ? "border-primary bg-primary/10 shadow-gold-glow font-medium"
+                      : "border-border bg-card hover:border-primary/50"
+                  }`}
+                >
+                  <span className="font-medium text-sm">{pump}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">No pump type options available.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

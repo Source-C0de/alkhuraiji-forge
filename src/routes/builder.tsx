@@ -15,7 +15,7 @@ import {
   Calendar,
   DollarSign,
   Lock,
-  Unlock
+  Unlock,
 } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
 import { useBuilderStore } from "@/store/useBuilderStore";
@@ -120,35 +120,41 @@ export const Route = createFileRoute("/builder")({
 });
 
 const CATEGORIES = [
-  { id: "perfume", name: "Perfume", description: "Design your custom signature fragrance", icon: Droplet },
-  { id: "cosmetics", name: "Cosmetics", description: "Premium skincare and makeup products", icon: Sparkles },
+  {
+    id: "perfume",
+    name: "Perfume",
+    description: "Design your custom signature fragrance",
+    icon: Droplet,
+  },
+  {
+    id: "cosmetics",
+    name: "Cosmetics",
+    description: "Premium skincare and makeup products",
+    icon: Sparkles,
+  },
   { id: "home", name: "Home Fragrance", description: "Luxury candles and diffusers", icon: Home },
-  { id: "personal", name: "Personal Care", description: "Bath, body, and grooming essentials", icon: Box },
+  {
+    id: "personal",
+    name: "Personal Care",
+    description: "Bath, body, and grooming essentials",
+    icon: Box,
+  },
 ];
 
-const MATERIALS = ["Glass", "Plastic", "Frosted Glass", "Crystal", "Matte Glass", "Recycled"];
-const CAPACITIES = ["10ml", "30ml", "50ml", "75ml", "100ml", "150ml", "250ml"];
-const BOTTLE_COLORS = [
-  { name: "Transparent", hex: "transparent", price: 0 },
-  { name: "Black Frosted", hex: "#222", price: 15 },
-  { name: "Amber", hex: "#b45f06", price: 10 },
-  { name: "Emerald", hex: "#274e13", price: 12 },
-  { name: "Royal Blue", hex: "#0b5394", price: 12 },
-  { name: "Rose Gold", hex: "#b4a7d6", price: 25 },
-  { name: "White Matte", hex: "#f3f4f6", price: 15 },
-  { name: "Gradient Luxe", hex: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)", price: 30 },
-];
+// Note: MATERIALS, CAPACITIES, BOTTLE_COLORS, and CAP_COLORS are no longer
+// defined here. They are now read from `useAdminStore()` inside `BuilderPage`
+// so that admin toggles flow through to the live configurator.
 
 // Cap structure: organized by bottle shape compatibility
 // Each cap belongs to one or more shape categories (round, square, oval, cylinder, universal)
 type CapShape = "round" | "square" | "oval" | "cylinder" | "universal";
 
 interface CapVariant {
-  id: string;          // unique id used in store
-  name: string;        // display name
+  id: string; // unique id used in store
+  name: string; // display name
   price: number;
   image: string;
-  shapes: CapShape[];  // which bottle silhouettes this cap fits
+  shapes: CapShape[]; // which bottle silhouettes this cap fits
 }
 
 interface CapCategory {
@@ -164,8 +170,14 @@ const CAP_CATEGORIES: CapCategory[] = [
     name: "Round Caps",
     description: "Caps designed for round / circular bottles",
     variants: [
-      { id: "cap-paris-round", name: "Paris Round",  price: 25, image: parisRoundCap,    shapes: ["round", "universal"] },
-      { id: "cap-king",        name: "King",         price: 28, image: kingCap,          shapes: ["round", "universal"] },
+      {
+        id: "cap-paris-round",
+        name: "Paris Round",
+        price: 25,
+        image: parisRoundCap,
+        shapes: ["round", "universal"],
+      },
+      { id: "cap-king", name: "King", price: 28, image: kingCap, shapes: ["round", "universal"] },
     ],
   },
   {
@@ -173,8 +185,20 @@ const CAP_CATEGORIES: CapCategory[] = [
     name: "Square Caps",
     description: "Caps designed for square / cube bottles",
     variants: [
-      { id: "cap-prism-square", name: "Prism Square", price: 32, image: prismSquareCap,  shapes: ["square", "universal"] },
-      { id: "cap-weed-square",  name: "Weed Square",  price: 28, image: weedSquareCap,   shapes: ["square", "universal"] },
+      {
+        id: "cap-prism-square",
+        name: "Prism Square",
+        price: 32,
+        image: prismSquareCap,
+        shapes: ["square", "universal"],
+      },
+      {
+        id: "cap-weed-square",
+        name: "Weed Square",
+        price: 28,
+        image: weedSquareCap,
+        shapes: ["square", "universal"],
+      },
     ],
   },
   {
@@ -182,7 +206,13 @@ const CAP_CATEGORIES: CapCategory[] = [
     name: "Oval Caps",
     description: "Caps designed for oval bottles",
     variants: [
-      { id: "cap-glob-oval", name: "Glob Oval", price: 26, image: globOvalCap, shapes: ["oval", "round", "universal"] },
+      {
+        id: "cap-glob-oval",
+        name: "Glob Oval",
+        price: 26,
+        image: globOvalCap,
+        shapes: ["oval", "round", "universal"],
+      },
     ],
   },
   {
@@ -190,17 +220,27 @@ const CAP_CATEGORIES: CapCategory[] = [
     name: "Cylinder Caps",
     description: "Caps designed for cylindrical bottles",
     variants: [
-      { id: "cap-liga-cylinder",  name: "Liga Cylinder",  price: 24, image: ligaCylinderCap,  shapes: ["cylinder", "universal"] },
-      { id: "cap-nobel-cylinder", name: "Nobel Cylinder", price: 35, image: nobelCylinderCap, shapes: ["cylinder", "universal"] },
+      {
+        id: "cap-liga-cylinder",
+        name: "Liga Cylinder",
+        price: 24,
+        image: ligaCylinderCap,
+        shapes: ["cylinder", "universal"],
+      },
+      {
+        id: "cap-nobel-cylinder",
+        name: "Nobel Cylinder",
+        price: 35,
+        image: nobelCylinderCap,
+        shapes: ["cylinder", "universal"],
+      },
     ],
   },
   {
     id: "universal",
     name: "Universal Caps",
     description: "Premium caps compatible with all bottle shapes",
-    variants: [
-      { id: "cap-kano",         name: "Kano",          price: 22, image: kanoCap,         shapes: ["universal"] },
-    ],
+    variants: [{ id: "cap-kano", name: "Kano", price: 22, image: kanoCap, shapes: ["universal"] }],
   },
 ];
 
@@ -208,7 +248,9 @@ const CAP_CATEGORIES: CapCategory[] = [
 const CAP_IMAGES: Record<string, string> = (() => {
   const map: Record<string, string> = {};
   CAP_CATEGORIES.forEach((cat) => {
-    cat.variants.forEach((v) => { map[v.id] = v.image; });
+    cat.variants.forEach((v) => {
+      map[v.id] = v.image;
+    });
   });
   return map;
 })();
@@ -245,24 +287,15 @@ const getCompatibleCaps = (silhouette: string): CapVariant[] => {
   return compatible;
 };
 
-const CAP_COLORS = [
-  { name: "Transparent", hex: "transparent", price: 0 },
-  { name: "Black Frosted", hex: "#222", price: 8 },
-  { name: "Amber", hex: "#b45f06", price: 8 },
-  { name: "Emerald", hex: "#274e13", price: 8 },
-  { name: "Royal Blue", hex: "#0b5394", price: 8 },
-  { name: "Rose Gold", hex: "#b4a7d6", price: 8 },
-  { name: "White Matte", hex: "#f3f4f6", price: 8 },
-  { name: "Gradient Luxe", hex: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)", price: 8 },
-];
+// See note above: CAP_COLORS is now read from useAdminStore() inside BuilderPage.
 
 // Pump structure: 3 categories, each with color variants.
 // Image suffix: pwc = pump with collar, pwtc = pump without collar, sc = step collar
 type PumpColor = "Black" | "Gold" | "Rose" | "Silver";
 
 interface PumpVariant {
-  id: string;        // unique id used in store
-  name: string;      // display name
+  id: string; // unique id used in store
+  name: string; // display name
   color: PumpColor;
   price: number;
   image: string;
@@ -281,9 +314,9 @@ const PUMP_CATEGORIES: PumpCategory[] = [
     name: "Pump with Collar",
     description: "Premium spray pump with decorative collar neck",
     variants: [
-      { id: "pwc-black",  name: "Black",  color: "Black",  price: 18, image: blackPwc },
-      { id: "pwc-gold",   name: "Gold",   color: "Gold",   price: 28, image: goldPwc },
-      { id: "pwc-rose",   name: "Rose",   color: "Rose",   price: 26, image: rosePwc },
+      { id: "pwc-black", name: "Black", color: "Black", price: 18, image: blackPwc },
+      { id: "pwc-gold", name: "Gold", color: "Gold", price: 28, image: goldPwc },
+      { id: "pwc-rose", name: "Rose", color: "Rose", price: 26, image: rosePwc },
       { id: "pwc-silver", name: "Silver", color: "Silver", price: 22, image: silverPwc },
     ],
   },
@@ -292,9 +325,9 @@ const PUMP_CATEGORIES: PumpCategory[] = [
     name: "Pump without Collar",
     description: "Sleek minimalist spray pump, no collar",
     variants: [
-      { id: "pwtc-black",  name: "Black",  color: "Black",  price: 14, image: blackPwtc },
-      { id: "pwtc-gold",   name: "Gold",   color: "Gold",   price: 22, image: goldPwtc },
-      { id: "pwtc-rose",   name: "Rose",   color: "Rose",   price: 20, image: rosePwtc },
+      { id: "pwtc-black", name: "Black", color: "Black", price: 14, image: blackPwtc },
+      { id: "pwtc-gold", name: "Gold", color: "Gold", price: 22, image: goldPwtc },
+      { id: "pwtc-rose", name: "Rose", color: "Rose", price: 20, image: rosePwtc },
       { id: "pwtc-silver", name: "Silver", color: "Silver", price: 18, image: silverPwtc },
     ],
   },
@@ -303,8 +336,8 @@ const PUMP_CATEGORIES: PumpCategory[] = [
     name: "Step Collar",
     description: "Stepped collar for premium threaded closures",
     variants: [
-      { id: "sc-black",  name: "Black",  color: "Black",  price: 16, image: blackSc },
-      { id: "sc-gold",   name: "Gold",   color: "Gold",   price: 24, image: goldSc },
+      { id: "sc-black", name: "Black", color: "Black", price: 16, image: blackSc },
+      { id: "sc-gold", name: "Gold", color: "Gold", price: 24, image: goldSc },
       { id: "sc-silver", name: "Silver", color: "Silver", price: 20, image: silverSc },
     ],
   },
@@ -314,7 +347,9 @@ const PUMP_CATEGORIES: PumpCategory[] = [
 const PUMP_IMAGES: Record<string, string> = (() => {
   const map: Record<string, string> = {};
   PUMP_CATEGORIES.forEach((cat) => {
-    cat.variants.forEach((v) => { map[v.id] = v.image; });
+    cat.variants.forEach((v) => {
+      map[v.id] = v.image;
+    });
   });
   return map;
 })();
@@ -390,8 +425,30 @@ function BuilderPage() {
   const [clientPhone, setClientPhone] = useState("");
 
   const store = useBuilderStore();
-  const { builderBottles } = useAdminStore();
+  const {
+    builderBottles,
+    builderMaterials,
+    builderCapacities,
+    builderColors,
+    capColors,
+    showBottleMaterials,
+    showBottleCapacity,
+    showBottleColor,
+    showCapColor,
+  } = useAdminStore();
   const activeBottles = builderBottles.filter((b) => b.active);
+
+  // Materials / capacities / bottle colors / cap colors are admin-controlled.
+  // Filter to active items and skip entire sections when their visibility
+  // flag is off. This is what makes admin toggles visible on this page.
+  const materials = builderMaterials.filter((m) => m.active).map((m) => m.name);
+  const capacities = builderCapacities.filter((c) => c.active).map((c) => c.name);
+  const bottleColors = builderColors
+    .filter((c) => c.active)
+    .map((c) => ({ name: c.name, hex: c.hex, price: c.price ?? 0 }));
+  const capColorsList = capColors
+    .filter((c) => c.active)
+    .map((c) => ({ name: c.name, hex: c.hex, price: c.price ?? 0 }));
 
   const TABS = ["bottle", "cap", "fragrance", "packaging", "branding"];
   const activeIndex = TABS.indexOf(activeTab);
@@ -437,14 +494,22 @@ function BuilderPage() {
 
   const getCapacityScale = (capacity: string) => {
     switch (capacity) {
-      case "10ml": return 0.65;
-      case "30ml": return 0.75;
-      case "50ml": return 0.85;
-      case "75ml": return 0.92;
-      case "100ml": return 1.0;
-      case "150ml": return 1.08;
-      case "250ml": return 1.18;
-      default: return 1.0;
+      case "10ml":
+        return 0.65;
+      case "30ml":
+        return 0.75;
+      case "50ml":
+        return 0.85;
+      case "75ml":
+        return 0.92;
+      case "100ml":
+        return 1.0;
+      case "150ml":
+        return 1.08;
+      case "250ml":
+        return 1.18;
+      default:
+        return 1.0;
     }
   };
   const scale = getCapacityScale(store.bottleCapacity);
@@ -466,9 +531,9 @@ function BuilderPage() {
   const CANVAS_HEIGHT = "640px";
   const BOTTLE_SLOT_W = "280px";
   const BOTTLE_SLOT_H = "416px";
-  const BOTTLE_SLICE = "416px";   // 65% of 640
-  const PUMP_SLICE = "96px";      // 15% of 640
-  const CAP_SLICE = "128px";      // 20% of 640
+  const BOTTLE_SLICE = "416px"; // 65% of 640
+  const PUMP_SLICE = "96px"; // 15% of 640
+  const CAP_SLICE = "128px"; // 20% of 640
   // The per-silhouette "borderRadius" hint is still exposed via dims
   // because some downstream effects (e.g. shadow tint) use it, but the
   // slot dimensions are NO LONGER driven by the silhouette.
@@ -515,40 +580,66 @@ function BuilderPage() {
   // Pricing Engine Calculations in SAR (Saudi Riyals)
   const getSelectionsWithPrices = () => {
     const bottleBase = 35; // Base shape wholesale cost
-    
-    const matPrice = store.bottleMaterial === "Crystal" ? 35 : 
-                     store.bottleMaterial === "Frosted Glass" ? 15 : 
-                     store.bottleMaterial === "Glass" ? 10 : 
-                     store.bottleMaterial === "Matte Glass" ? 20 : 
-                     store.bottleMaterial === "Recycled" ? 12 : 5;
-                     
-    const colPrice = BOTTLE_COLORS.find(c => c.name === store.bottleColor)?.price || 0;
-    
+
+    const matPrice =
+      store.bottleMaterial === "Crystal"
+        ? 35
+        : store.bottleMaterial === "Frosted Glass"
+          ? 15
+          : store.bottleMaterial === "Glass"
+            ? 10
+            : store.bottleMaterial === "Matte Glass"
+              ? 20
+              : store.bottleMaterial === "Recycled"
+                ? 12
+                : 5;
+
+    const colPrice = bottleColors.find((c) => c.name === store.bottleColor)?.price ?? 0;
+
     const capStylePrice = getCapPrice(store.capStyle) || 15;
-    const capColorPrice = store.capStyle === "Colored Cap" ? (CAP_COLORS.find(c => c.name === store.capColor)?.price || 0) : 0;
+    const capColorPrice =
+      store.capStyle === "Colored Cap"
+        ? (capColorsList.find((c) => c.name === store.capColor)?.price ?? 0)
+        : 0;
     const capPrice = capStylePrice + capColorPrice;
 
     const pumpPrice = getPumpPrice(store.pumpType) || 10;
-    
+
     // Scent Blend custom selection calculation
-    const noteCount = (store.fragrance.top?.length || 0) + (store.fragrance.middle?.length || 0) + (store.fragrance.base?.length || 0);
+    const noteCount =
+      (store.fragrance.top?.length || 0) +
+      (store.fragrance.middle?.length || 0) +
+      (store.fragrance.base?.length || 0);
     const notesPrice = noteCount * 4;
-    const intensityPrice = INTENSITIES.find(i => i.name === store.fragrance.intensity)?.price || 35;
+    const intensityPrice =
+      INTENSITIES.find((i) => i.name === store.fragrance.intensity)?.price || 35;
     const fragranceTotalPrice = notesPrice + intensityPrice;
 
     // Presentation box pricing
-    const boxPrice = PACKAGING_TYPES.find(p => p.name === store.packaging.type)?.price || 15;
-    const finishPrice = PACKAGING_FINISHES.find(p => p.name === store.packaging.finish)?.price || 10;
-    const addonsPrice = (store.packaging.addons || []).reduce((sum, ad) => sum + (PACKAGING_ADDONS.find(a => a.name === ad)?.price || 0), 0);
+    const boxPrice = PACKAGING_TYPES.find((p) => p.name === store.packaging.type)?.price || 15;
+    const finishPrice =
+      PACKAGING_FINISHES.find((p) => p.name === store.packaging.finish)?.price || 10;
+    const addonsPrice = (store.packaging.addons || []).reduce(
+      (sum, ad) => sum + (PACKAGING_ADDONS.find((a) => a.name === ad)?.price || 0),
+      0,
+    );
     const packagingTotalPrice = boxPrice + finishPrice + addonsPrice;
 
     const brandPrice = 5; // customized layout imprint charge
 
-    const unitPriceBeforeDiscount = bottleBase + matPrice + colPrice + capPrice + pumpPrice + fragranceTotalPrice + packagingTotalPrice + brandPrice;
-    
+    const unitPriceBeforeDiscount =
+      bottleBase +
+      matPrice +
+      colPrice +
+      capPrice +
+      pumpPrice +
+      fragranceTotalPrice +
+      packagingTotalPrice +
+      brandPrice;
+
     // B2B Wholesale discount multiplier
     let discount = 0;
-    if (store.quantity >= 5000) discount = 0.40;
+    if (store.quantity >= 5000) discount = 0.4;
     else if (store.quantity >= 1000) discount = 0.25;
     else if (store.quantity >= 500) discount = 0.15;
 
@@ -566,7 +657,7 @@ function BuilderPage() {
       brandPrice,
       unitPrice: finalUnitPrice,
       totalPrice,
-      discountPercent: Math.round(discount * 100)
+      discountPercent: Math.round(discount * 100),
     };
   };
 
@@ -592,7 +683,7 @@ function BuilderPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent opacity-40 pointer-events-none" />
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gold/5 blur-[120px] pointer-events-none" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center max-w-3xl mx-auto mb-20 relative z-10"
@@ -604,7 +695,8 @@ function BuilderPage() {
             Craft Your Luxury <span className="text-gradient-gold font-medium">Brand Identity</span>
           </h1>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto font-light leading-relaxed">
-            Select a custom cosmetic or fragrance manufacturing catalog below to enter our high-end 3D customization configurator.
+            Select a custom cosmetic or fragrance manufacturing catalog below to enter our high-end
+            3D customization configurator.
           </p>
         </motion.div>
 
@@ -616,9 +708,13 @@ function BuilderPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               onClick={() => {
-                if (cat.id === "perfume") { setCategory(cat.id); }
-                else if (cat.id === "cosmetics") { navigate({ to: "/cosmetics" }); }
-                else { alert("Home Fragrance and Personal Care coming soon!"); }
+                if (cat.id === "perfume") {
+                  setCategory(cat.id);
+                } else if (cat.id === "cosmetics") {
+                  navigate({ to: "/cosmetics" });
+                } else {
+                  alert("Home Fragrance and Personal Care coming soon!");
+                }
               }}
               className="group relative flex flex-col items-center text-center p-10 rounded-2xl border border-border bg-card/30 backdrop-blur-xl hover:border-gold/30 hover:shadow-gold-glow transition-all duration-500 overflow-hidden"
             >
@@ -627,8 +723,10 @@ function BuilderPage() {
                 <cat.icon className="w-10 h-10 text-muted-foreground group-hover:text-gold transition-colors" />
               </div>
               <h3 className="font-display text-2xl font-medium mb-3 text-foreground">{cat.name}</h3>
-              <p className="text-sm text-muted-foreground/80 font-light leading-relaxed">{cat.description}</p>
-              
+              <p className="text-sm text-muted-foreground/80 font-light leading-relaxed">
+                {cat.description}
+              </p>
+
               <div className="mt-8 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                 Enter Studio <ArrowRight className="h-3 w-3" />
               </div>
@@ -641,12 +739,11 @@ function BuilderPage() {
 
   return (
     <div className="h-screen w-screen bg-background text-foreground flex flex-col lg:flex-row overflow-hidden relative transition-colors duration-300">
-      
       {/* Dynamic luxury dark space highlight backdrop */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#f9f9fb] via-[#f0f0f5] to-[#e4e4eb] dark:from-[#0d0d1e] dark:via-[#05050a] dark:to-[#020205] pointer-events-none z-0 transition-all duration-300" />
 
       {/* Catalog Home */}
-      <button 
+      <button
         onClick={() => setCategory(null)}
         className="absolute top-6 left-6 z-50 px-4 py-2 rounded-full border border-border bg-secondary/30 hover:bg-secondary/50 hover:border-gold/30 transition-all text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
       >
@@ -655,16 +752,19 @@ function BuilderPage() {
 
       {/* ================= COLUMN 1: LEFT SIDEBAR OPTIONS (380px) ================= */}
       <aside className="w-full lg:w-[380px] lg:flex-shrink-0 border-r border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 transition-colors duration-300">
-        
         {/* Brand configuration text entry */}
         <div className="p-6 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-soft">Premium OEM/ODM</span>
-            <span className="text-xs font-semibold text-gold bg-gold/10 px-2 py-0.5 rounded-full">{progress}% Complete</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-soft">
+              Premium OEM/ODM
+            </span>
+            <span className="text-xs font-semibold text-gold bg-gold/10 px-2 py-0.5 rounded-full">
+              {progress}% Complete
+            </span>
           </div>
           <div className="space-y-2">
             <h2 className="font-display text-2xl font-light text-foreground">Your Brand Design</h2>
-            <input 
+            <input
               type="text"
               value={store.label.name}
               onChange={(e) => store.updateLabel({ name: e.target.value.toUpperCase() })}
@@ -681,7 +781,7 @@ function BuilderPage() {
             { id: "cap", label: "Cap" },
             { id: "fragrance", label: "Fragrance" },
             { id: "packaging", label: "Packaging" },
-            { id: "branding", label: "Branding" }
+            { id: "branding", label: "Branding" },
           ].map((tab) => {
             const unlocked = isTabUnlocked(tab.id);
             return (
@@ -700,7 +800,10 @@ function BuilderPage() {
                 {!unlocked && <Lock className="h-3 w-3" />}
                 {tab.label}
                 {activeTab === tab.id && unlocked && (
-                  <motion.div layoutId="activeStepLine" className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-gold-soft" />
+                  <motion.div
+                    layoutId="activeStepLine"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-gold-soft"
+                  />
                 )}
               </button>
             );
@@ -710,12 +813,19 @@ function BuilderPage() {
         {/* Dynamic configuration tabs body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide pb-24">
           <AnimatePresence mode="wait">
-            
             {/* 1. BOTTLE SHAPE & SPECIFICATIONS */}
             {activeTab === "bottle" && (
-              <motion.div key="bottle-wizard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+              <motion.div
+                key="bottle-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">1. Silhouette Shape</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    1. Silhouette Shape
+                  </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {activeBottles.map((bottle) => {
                       const shapeImg = getShapeImage(bottle.name);
@@ -739,8 +849,12 @@ function BuilderPage() {
                             <div className="h-12 w-12 rounded bg-muted/50 border border-border" />
                           )}
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs font-semibold text-foreground mb-1 truncate">{bottle.name}</div>
-                            <div className="text-[9px] text-muted-foreground uppercase truncate">{bottle.category}</div>
+                            <div className="text-xs font-semibold text-foreground mb-1 truncate">
+                              {bottle.name}
+                            </div>
+                            <div className="text-[9px] text-muted-foreground uppercase truncate">
+                              {bottle.category}
+                            </div>
                           </div>
                           {store.bottleSilhouette === bottle.name && (
                             <div className="absolute right-3 top-3 h-4 w-4 bg-gold rounded-full flex items-center justify-center text-black">
@@ -753,70 +867,104 @@ function BuilderPage() {
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">2. Material Selection</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {MATERIALS.map((mat) => (
-                      <button
-                        key={mat}
-                        onClick={() => store.setBottleMaterial(mat)}
-                        className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
-                          store.bottleMaterial === mat 
-                            ? "bg-gold/10 border-gold text-gold font-semibold" 
-                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
-                        }`}
-                      >
-                        {mat}
-                      </button>
-                    ))}
+                {showBottleMaterials && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                      2. Material Selection
+                    </h3>
+                    {materials.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        {materials.map((mat) => (
+                          <button
+                            key={mat}
+                            onClick={() => store.setBottleMaterial(mat)}
+                            className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
+                              store.bottleMaterial === mat
+                                ? "bg-gold/10 border-gold text-gold font-semibold"
+                                : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                            }`}
+                          >
+                            {mat}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground italic">
+                        No material options available.
+                      </p>
+                    )}
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">3. Capacity</h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    {CAPACITIES.map((cap) => (
-                      <button
-                        key={cap}
-                        onClick={() => store.setBottleCapacity(cap)}
-                        className={`py-2.5 rounded-lg border text-center text-xs font-medium transition-all ${
-                          store.bottleCapacity === cap 
-                            ? "bg-gold/10 border-gold text-gold font-bold" 
-                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
-                        }`}
-                      >
-                        {cap}
-                      </button>
-                    ))}
+                {showBottleCapacity && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                      3. Capacity
+                    </h3>
+                    {capacities.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-2">
+                        {capacities.map((cap) => (
+                          <button
+                            key={cap}
+                            onClick={() => store.setBottleCapacity(cap)}
+                            className={`py-2.5 rounded-lg border text-center text-xs font-medium transition-all ${
+                              store.bottleCapacity === cap
+                                ? "bg-gold/10 border-gold text-gold font-bold"
+                                : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                            }`}
+                          >
+                            {cap}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground italic">
+                        No capacity options available.
+                      </p>
+                    )}
                   </div>
-                </div>
+                )}
 
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">4. Glass Color & Finish</h3>
-                  <div className="grid grid-cols-4 gap-3">
-                    {BOTTLE_COLORS.map((color) => (
-                      <button
-                        key={color.name}
-                        onClick={() => store.setBottleColor(color.name)}
-                        className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
-                          store.bottleColor === color.name ? "border-gold bg-secondary/30" : "border-transparent hover:bg-secondary/20"
-                        }`}
-                      >
-                        <div
-                          className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
-                          style={{ background: color.hex }}
-                        >
-                          {store.bottleColor === color.name && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <Check className="h-4 w-4 text-gold" />
+                {showBottleColor && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                      4. Glass Color & Finish
+                    </h3>
+                    {bottleColors.length > 0 ? (
+                      <div className="grid grid-cols-4 gap-3">
+                        {bottleColors.map((color) => (
+                          <button
+                            key={color.name}
+                            onClick={() => store.setBottleColor(color.name)}
+                            className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
+                              store.bottleColor === color.name
+                                ? "border-gold bg-secondary/30"
+                                : "border-transparent hover:bg-secondary/20"
+                            }`}
+                          >
+                            <div
+                              className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
+                              style={{ background: color.hex }}
+                            >
+                              {store.bottleColor === color.name && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <Check className="h-4 w-4 text-gold" />
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        <span className="text-[9px] text-muted-foreground text-center truncate w-full">{color.name}</span>
-                      </button>
-                    ))}
+                            <span className="text-[9px] text-muted-foreground text-center truncate w-full">
+                              {color.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground italic">
+                        No bottle color options available.
+                      </p>
+                    )}
                   </div>
-                </div>
+                )}
 
                 {/* Proceed to next step button */}
                 <button
@@ -833,10 +981,21 @@ function BuilderPage() {
 
             {/* 2. CAPS & PUMPS */}
             {activeTab === "cap" && (
-              <motion.div key="cap-wizard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+              <motion.div
+                key="cap-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">Cap Crown Style</h3>
-                  <p className="text-[10px] text-muted-foreground mb-4">Showing caps compatible with your selected bottle shape: <span className="text-gold font-semibold">{store.bottleSilhouette}</span></p>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">
+                    Cap Crown Style
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mb-4">
+                    Showing caps compatible with your selected bottle shape:{" "}
+                    <span className="text-gold font-semibold">{store.bottleSilhouette}</span>
+                  </p>
 
                   <div className="space-y-5">
                     {CAP_CATEGORIES.map((cat) => {
@@ -851,7 +1010,9 @@ function BuilderPage() {
                           <div className="flex items-baseline justify-between mb-2">
                             <div>
                               <div className="text-xs font-bold text-foreground">{cat.name}</div>
-                              <div className="text-[9px] text-muted-foreground">{cat.description}</div>
+                              <div className="text-[9px] text-muted-foreground">
+                                {cat.description}
+                              </div>
                             </div>
                           </div>
                           <div className="grid grid-cols-3 gap-2">
@@ -874,8 +1035,12 @@ function BuilderPage() {
                                       className="w-full h-full object-contain"
                                     />
                                   </div>
-                                  <div className="text-[10px] font-semibold text-foreground leading-tight">{v.name}</div>
-                                  <div className="text-[8px] text-gold font-bold mt-0.5">+{v.price}</div>
+                                  <div className="text-[10px] font-semibold text-foreground leading-tight">
+                                    {v.name}
+                                  </div>
+                                  <div className="text-[8px] text-gold font-bold mt-0.5">
+                                    +{v.price}
+                                  </div>
                                 </button>
                               );
                             })}
@@ -886,38 +1051,54 @@ function BuilderPage() {
                   </div>
                 </div>
 
-                {store.capStyle === "Colored Cap" && (
+                {store.capStyle === "Colored Cap" && showCapColor && (
                   <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Cap Color Selection</h3>
-                    <div className="grid grid-cols-4 gap-3">
-                      {CAP_COLORS.map((color) => (
-                        <button
-                          key={color.name}
-                          onClick={() => store.setCapColor(color.name)}
-                          className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
-                            store.capColor === color.name ? "border-gold bg-secondary/30" : "border-transparent hover:bg-secondary/20"
-                          }`}
-                        >
-                          <div 
-                            className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
-                            style={{ background: color.hex }}
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                      Cap Color Selection
+                    </h3>
+                    {capColorsList.length > 0 ? (
+                      <div className="grid grid-cols-4 gap-3">
+                        {capColorsList.map((color) => (
+                          <button
+                            key={color.name}
+                            onClick={() => store.setCapColor(color.name)}
+                            className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
+                              store.capColor === color.name
+                                ? "border-gold bg-secondary/30"
+                                : "border-transparent hover:bg-secondary/20"
+                            }`}
                           >
-                            {store.capColor === color.name && (
-                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <Check className="h-4 w-4 text-gold" />
-                              </div>
-                            )}
-                          </div>
-                          <span className="text-[9px] text-muted-foreground text-center truncate w-full">{color.name}</span>
-                        </button>
-                      ))}
-                    </div>
+                            <div
+                              className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
+                              style={{ background: color.hex }}
+                            >
+                              {store.capColor === color.name && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <Check className="h-4 w-4 text-gold" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[9px] text-muted-foreground text-center truncate w-full">
+                              {color.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground italic">
+                        No cap color options available.
+                      </p>
+                    )}
                   </div>
                 )}
 
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">Pump & Atomizer Accents</h3>
-                  <p className="text-[10px] text-muted-foreground mb-4">Choose a category and color — the pump renders live in the preview above.</p>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">
+                    Pump & Atomizer Accents
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mb-4">
+                    Choose a category and color — the pump renders live in the preview above.
+                  </p>
 
                   <div className="space-y-5">
                     {PUMP_CATEGORIES.map((cat) => (
@@ -925,7 +1106,9 @@ function BuilderPage() {
                         <div className="flex items-baseline justify-between mb-2">
                           <div>
                             <div className="text-xs font-bold text-foreground">{cat.name}</div>
-                            <div className="text-[9px] text-muted-foreground">{cat.description}</div>
+                            <div className="text-[9px] text-muted-foreground">
+                              {cat.description}
+                            </div>
                           </div>
                         </div>
                         <div className="grid grid-cols-4 gap-2">
@@ -948,8 +1131,12 @@ function BuilderPage() {
                                     className="w-full h-full object-contain"
                                   />
                                 </div>
-                                <div className="text-[10px] font-semibold text-foreground leading-tight">{v.name}</div>
-                                <div className="text-[8px] text-gold font-bold mt-0.5">+{v.price}</div>
+                                <div className="text-[10px] font-semibold text-foreground leading-tight">
+                                  {v.name}
+                                </div>
+                                <div className="text-[8px] text-gold font-bold mt-0.5">
+                                  +{v.price}
+                                </div>
                               </button>
                             );
                           })}
@@ -974,17 +1161,29 @@ function BuilderPage() {
 
             {/* 3. FRAGRANCE NOTE COMPOSITION */}
             {activeTab === "fragrance" && (
-              <motion.div key="fragrance-wizard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+              <motion.div
+                key="fragrance-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">Olfactive Note Mixer</h3>
-                  <p className="text-[10px] text-muted-foreground mb-4">Select up to 3 luxury notes per composition layer (+4 SAR per note).</p>
-                  
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">
+                    Olfactive Note Mixer
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mb-4">
+                    Select up to 3 luxury notes per composition layer (+4 SAR per note).
+                  </p>
+
                   {/* Top, Middle, Base Notes Layers */}
                   {(Object.keys(NOTES) as Array<"top" | "middle" | "base">).map((layer) => {
                     const selected = store.fragrance[layer] || [];
                     return (
                       <div key={layer} className="space-y-2.5 mb-4">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground capitalize">{layer} Notes</label>
+                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground capitalize">
+                          {layer} Notes
+                        </label>
                         <div className="flex flex-wrap gap-2">
                           {NOTES[layer].map((note) => {
                             const isAct = selected.includes(note);
@@ -993,8 +1192,8 @@ function BuilderPage() {
                                 key={note}
                                 onClick={() => toggleFragranceNote(layer, note)}
                                 className={`px-4 py-2 rounded-full border text-[10px] font-medium transition-all ${
-                                  isAct 
-                                    ? "bg-gold/20 border-gold text-gold shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]" 
+                                  isAct
+                                    ? "bg-gold/20 border-gold text-gold shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]"
                                     : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                                 }`}
                               >
@@ -1009,21 +1208,25 @@ function BuilderPage() {
                 </div>
 
                 <div className="pt-4 border-t border-border">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Scent Intensity & Blend</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Scent Intensity & Blend
+                  </h3>
                   <div className="space-y-2.5">
                     {INTENSITIES.map((int) => (
                       <button
                         key={int.name}
                         onClick={() => store.updateFragrance({ intensity: int.name })}
                         className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                          store.fragrance.intensity === int.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
+                          store.fragrance.intensity === int.name
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold"
                             : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         <div>
                           <div className="text-xs font-semibold text-foreground">{int.name}</div>
-                          <div className="text-[9px] text-muted-foreground mt-0.5">Custom scent density composition</div>
+                          <div className="text-[9px] text-muted-foreground mt-0.5">
+                            Custom scent density composition
+                          </div>
                         </div>
                         <div className="text-xs font-bold text-gold">+{int.price} SAR</div>
                       </button>
@@ -1035,23 +1238,33 @@ function BuilderPage() {
 
             {/* 4. OUTER PACKAGING DESIGN */}
             {activeTab === "packaging" && (
-              <motion.div key="packaging-wizard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+              <motion.div
+                key="packaging-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Outer Box Style</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Outer Box Style
+                  </h3>
                   <div className="space-y-2.5">
                     {PACKAGING_TYPES.map((pack) => (
                       <button
                         key={pack.name}
                         onClick={() => store.updatePackaging({ type: pack.name })}
                         className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                          store.packaging.type === pack.name 
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold" 
+                          store.packaging.type === pack.name
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold"
                             : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
                         <div>
                           <div className="text-xs font-semibold text-foreground">{pack.name}</div>
-                          <div className="text-[9px] text-muted-foreground mt-0.5">Heavy cardboard wholesale box base</div>
+                          <div className="text-[9px] text-muted-foreground mt-0.5">
+                            Heavy cardboard wholesale box base
+                          </div>
                         </div>
                         <div className="text-xs font-bold text-gold">+{pack.price} SAR</div>
                       </button>
@@ -1060,15 +1273,17 @@ function BuilderPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Box Texture & Finish</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Box Texture & Finish
+                  </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {PACKAGING_FINISHES.map((finish) => (
                       <button
                         key={finish.name}
                         onClick={() => store.updatePackaging({ finish: finish.name })}
                         className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
-                          store.packaging.finish === finish.name 
-                            ? "bg-gold/10 border-gold text-gold" 
+                          store.packaging.finish === finish.name
+                            ? "bg-gold/10 border-gold text-gold"
                             : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
@@ -1079,7 +1294,9 @@ function BuilderPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Embellishments & Add-ons</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Embellishments & Add-ons
+                  </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {PACKAGING_ADDONS.map((addon) => {
                       const isAct = (store.packaging.addons || []).includes(addon.name);
@@ -1088,8 +1305,8 @@ function BuilderPage() {
                           key={addon.name}
                           onClick={() => toggleAddon(addon.name)}
                           className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
-                            isAct 
-                              ? "bg-gold/10 border-gold text-gold" 
+                            isAct
+                              ? "bg-gold/10 border-gold text-gold"
                               : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                           }`}
                         >
@@ -1104,17 +1321,25 @@ function BuilderPage() {
 
             {/* 5. BRANDING & FONTS */}
             {activeTab === "branding" && (
-              <motion.div key="branding-wizard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
+              <motion.div
+                key="branding-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Branding Typography</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Branding Typography
+                  </h3>
                   <div className="grid grid-cols-3 gap-2">
                     {FONTS.map((font) => (
                       <button
                         key={font}
                         onClick={() => store.updateLabel({ font })}
                         className={`py-3 rounded-lg border text-center text-[10px] transition-all ${
-                          store.label.font === font 
-                            ? "bg-gold/10 border-gold text-gold font-semibold" 
+                          store.label.font === font
+                            ? "bg-gold/10 border-gold text-gold font-semibold"
                             : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                         style={{ fontFamily: font === "Elegant Serif" ? "serif" : "sans-serif" }}
@@ -1126,15 +1351,17 @@ function BuilderPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Label Silhouette</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Label Silhouette
+                  </h3>
                   <div className="grid grid-cols-3 gap-2">
                     {SHAPES.map((shape) => (
                       <button
                         key={shape}
                         onClick={() => store.updateLabel({ shape })}
                         className={`py-3 rounded-lg border text-center text-xs font-medium transition-all ${
-                          store.label.shape === shape 
-                            ? "bg-gold/10 border-gold text-gold" 
+                          store.label.shape === shape
+                            ? "bg-gold/10 border-gold text-gold"
                             : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                         }`}
                       >
@@ -1145,7 +1372,6 @@ function BuilderPage() {
                 </div>
               </motion.div>
             )}
-
           </AnimatePresence>
         </div>
 
@@ -1177,15 +1403,14 @@ function BuilderPage() {
       </aside>
 
       {/* ================= COLUMN 2: IMMERSIVE 3D INTERACTIVE Viewport (CENTER) ================= */}
-      <main 
+      <main
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className="flex-1 h-screen flex flex-col justify-center items-center relative p-8 select-none z-0"
       >
-        
         {/* Overhead Spotlighting Gold Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[550px] bg-gradient-to-b from-gold/15 to-transparent blur-[80px] pointer-events-none rounded-full" />
-        
+
         {/* Slide instructions */}
         {/* <div className="absolute top-8 text-center">
           <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Interactive 3D Stage</span>
@@ -1266,10 +1491,8 @@ function BuilderPage() {
                 transform: "translateX(-50%) scaleY(-1)",
                 opacity: 0.18,
                 filter: "blur(6px)",
-                WebkitMaskImage:
-                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
-                maskImage:
-                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
+                WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
+                maskImage: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
               }}
             >
               <div
@@ -1394,13 +1617,9 @@ function BuilderPage() {
                 ============================================================ */}
             {(() => {
               const showPump =
-                isTabUnlocked("cap") &&
-                !!PUMP_IMAGES[store.pumpType] &&
-                !store.capStyle;
+                isTabUnlocked("cap") && !!PUMP_IMAGES[store.pumpType] && !store.capStyle;
               const showCap =
-                isTabUnlocked("cap") &&
-                !!CAP_IMAGES[store.capStyle] &&
-                !store.pumpType;
+                isTabUnlocked("cap") && !!CAP_IMAGES[store.capStyle] && !store.pumpType;
               // Scale factor: dims.width is the bottle's intrinsic width.
               // We want the canvas WIDTH to be ~dims.width * 1.0 (so the
               // bottle slice matches the bottle's natural width) and the
@@ -1550,7 +1769,7 @@ function BuilderPage() {
                             display: "block",
                             objectFit: "contain",
                             objectPosition: "center bottom",
-                            transform: "translateY(20px)"
+                            transform: "translateY(20px)",
                           }}
                           className="drop-shadow-[0_18px_48px_rgba(0,0,0,0.8)]"
                         />
@@ -1568,52 +1787,82 @@ function BuilderPage() {
           {[
             { icon: ShieldCheck, text: "GMP Certified" },
             { icon: Award, text: "IFRA Compliant" },
-            { icon: Layers, text: "Sustainably Sourced" }
+            { icon: Layers, text: "Sustainably Sourced" },
           ].map((badge) => (
-            <div key={badge.text} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow-lg text-[10px] text-muted-foreground transition-colors duration-300">
+            <div
+              key={badge.text}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow-lg text-[10px] text-muted-foreground transition-colors duration-300"
+            >
               <badge.icon className="h-3.5 w-3.5 text-gold" />
               <span>{badge.text}</span>
             </div>
           ))}
         </div>
-
       </main>
 
       {/* ================= COLUMN 3: STICKY WHOLESALE PRICING (RIGHT) ================= */}
       <aside className="w-full lg:w-[340px] lg:flex-shrink-0 border-l border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 justify-between transition-colors duration-300">
-        
         {/* Selection items summaries with specific price markup indicators */}
         <div className="p-6 border-b border-border flex-1 overflow-y-auto scrollbar-hide">
-          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-4">Design Specs & Pricing</h3>
-          
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-4">
+            Design Specs & Pricing
+          </h3>
+
           <div className="space-y-3.5">
             {[
-              { label: "Silhouette Shape", value: store.bottleSilhouette, price: pricing.bottleBase },
+              {
+                label: "Silhouette Shape",
+                value: store.bottleSilhouette,
+                price: pricing.bottleBase,
+              },
               { label: "Glass Material", value: store.bottleMaterial, price: pricing.matPrice },
               { label: "Glass Finishing", value: store.bottleColor, price: pricing.colPrice },
-              { label: "Cap Style Accent", value: (() => {
-                for (const cat of CAP_CATEGORIES) {
-                  const v = cat.variants.find((x) => x.id === store.capStyle);
-                  if (v) return v.name;
-                }
-                return store.capStyle;
-              })(), price: pricing.capPrice },
-              { label: "Pump", value: (() => {
-                for (const cat of PUMP_CATEGORIES) {
-                  const v = cat.variants.find((x) => x.id === store.pumpType);
-                  if (v) return `${cat.name} – ${v.name}`;
-                }
-                return store.pumpType;
-              })(), price: pricing.pumpPrice },
-              { label: "Olfactive Fragrance", value: store.fragrance.intensity || "Balanced", price: pricing.fragranceTotalPrice },
-              { label: "Outer Box Pack", value: store.packaging.type, price: pricing.packagingTotalPrice }
+              {
+                label: "Cap Style Accent",
+                value: (() => {
+                  for (const cat of CAP_CATEGORIES) {
+                    const v = cat.variants.find((x) => x.id === store.capStyle);
+                    if (v) return v.name;
+                  }
+                  return store.capStyle;
+                })(),
+                price: pricing.capPrice,
+              },
+              {
+                label: "Pump",
+                value: (() => {
+                  for (const cat of PUMP_CATEGORIES) {
+                    const v = cat.variants.find((x) => x.id === store.pumpType);
+                    if (v) return `${cat.name} – ${v.name}`;
+                  }
+                  return store.pumpType;
+                })(),
+                price: pricing.pumpPrice,
+              },
+              {
+                label: "Olfactive Fragrance",
+                value: store.fragrance.intensity || "Balanced",
+                price: pricing.fragranceTotalPrice,
+              },
+              {
+                label: "Outer Box Pack",
+                value: store.packaging.type,
+                price: pricing.packagingTotalPrice,
+              },
             ].map((spec) => (
-              <div key={spec.label} className="flex justify-between items-start text-xs border-b border-border pb-2">
+              <div
+                key={spec.label}
+                className="flex justify-between items-start text-xs border-b border-border pb-2"
+              >
                 <div className="space-y-0.5">
-                  <div className="text-muted-foreground font-light text-[10px] uppercase tracking-wider">{spec.label}</div>
+                  <div className="text-muted-foreground font-light text-[10px] uppercase tracking-wider">
+                    {spec.label}
+                  </div>
                   <div className="text-foreground font-medium">{spec.value}</div>
                 </div>
-                <div className="text-[10px] font-bold text-gold-soft whitespace-nowrap">+{spec.price} SAR</div>
+                <div className="text-[10px] font-bold text-gold-soft whitespace-nowrap">
+                  +{spec.price} SAR
+                </div>
               </div>
             ))}
           </div>
@@ -1622,25 +1871,28 @@ function BuilderPage() {
           <div className="mt-8 p-4 rounded-xl border border-border bg-secondary/20 space-y-3 flex-shrink-0">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Calendar className="h-4 w-4 text-gold-soft" />
-              <span>Est. Delivery: <strong className="text-foreground">18 - 24 Days</strong></span>
+              <span>
+                Est. Delivery: <strong className="text-foreground">18 - 24 Days</strong>
+              </span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-gold-soft" />
-              <span>Wholesale MOQ: <strong className="text-foreground">100 Units</strong></span>
+              <span>
+                Wholesale MOQ: <strong className="text-foreground">100 Units</strong>
+              </span>
             </div>
           </div>
         </div>
 
         {/* Dynamic bulk calculator */}
         <div className="p-6 border-t border-border bg-secondary/15 flex-shrink-0">
-          
           {/* Slider */}
           <div className="space-y-3 mb-6">
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground">Production Units</span>
               <span className="font-bold text-gold">{store.quantity.toLocaleString()} Bottles</span>
             </div>
-            <input 
+            <input
               type="range"
               min="100"
               max="5000"
@@ -1661,7 +1913,9 @@ function BuilderPage() {
           <div className="space-y-4 mb-6">
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Wholesale Rate / Unit</span>
-              <span className="text-xs font-semibold text-foreground">{pricing.unitPrice.toFixed(2)} SAR</span>
+              <span className="text-xs font-semibold text-foreground">
+                {pricing.unitPrice.toFixed(2)} SAR
+              </span>
             </div>
             <div className="flex justify-between items-end">
               <span className="text-xs text-muted-foreground pb-1">Total Estimated wholesale</span>
@@ -1670,7 +1924,9 @@ function BuilderPage() {
                   <span className="font-display text-2xl font-bold tracking-tight">
                     {pricing.totalPrice.toLocaleString()}
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider ml-1 text-gold-soft">SAR</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider ml-1 text-gold-soft">
+                    SAR
+                  </span>
                 </div>
               </div>
             </div>
@@ -1678,13 +1934,13 @@ function BuilderPage() {
 
           {/* Action CTAs */}
           <div className="space-y-2">
-            <button 
+            <button
               onClick={() => setInquiryModalOpen(true)}
               className="w-full py-3.5 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow flex items-center justify-center gap-2 text-xs"
             >
               <DollarSign className="h-4 w-4" /> Request Samples & Wholesale Quote
             </button>
-            <button 
+            <button
               onClick={() => setSuccessModalOpen(true)}
               className="w-full py-2.5 rounded-xl border border-border hover:border-gold/30 hover:bg-secondary/40 transition-all text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
             >
@@ -1692,27 +1948,38 @@ function BuilderPage() {
             </button>
           </div>
         </div>
-
       </aside>
 
       {/* ================= INQUIRY MODALS ================= */}
       {/* 1. Request Quotation Form */}
       {inquiryModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }} 
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-md p-8 rounded-2xl bg-card border border-white/10 shadow-2xl relative overflow-hidden"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold to-gold-soft" />
             <h2 className="font-display text-2xl font-semibold mb-2">Request OEM Quotation</h2>
-            <p className="text-xs text-muted-foreground mb-6">Enter your contact credentials below. A dedicated corporate AlKhuraiji consultant will get back to you with custom wholesale pricing quotes within 24 hours.</p>
-            
-            <form onSubmit={(e) => { e.preventDefault(); setInquiryModalOpen(false); setSuccessModalOpen(true); }} className="space-y-4">
+            <p className="text-xs text-muted-foreground mb-6">
+              Enter your contact credentials below. A dedicated corporate AlKhuraiji consultant will
+              get back to you with custom wholesale pricing quotes within 24 hours.
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setInquiryModalOpen(false);
+                setSuccessModalOpen(true);
+              }}
+              className="space-y-4"
+            >
               <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Representative Name</label>
-                <input 
-                  type="text" 
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Representative Name
+                </label>
+                <input
+                  type="text"
                   required
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
@@ -1721,9 +1988,11 @@ function BuilderPage() {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Business Email Address</label>
-                <input 
-                  type="email" 
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Business Email Address
+                </label>
+                <input
+                  type="email"
                   required
                   value={clientEmail}
                   onChange={(e) => setClientEmail(e.target.value)}
@@ -1732,9 +2001,11 @@ function BuilderPage() {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Contact Phone Number</label>
-                <input 
-                  type="tel" 
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Contact Phone Number
+                </label>
+                <input
+                  type="tel"
                   required
                   value={clientPhone}
                   onChange={(e) => setClientPhone(e.target.value)}
@@ -1744,15 +2015,15 @@ function BuilderPage() {
               </div>
 
               <div className="pt-4 flex gap-3">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setInquiryModalOpen(false)}
                   className="flex-1 py-3 rounded-xl border border-white/10 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="flex-1 py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-colors shadow-gold-glow text-xs"
                 >
                   Submit Inquiry
@@ -1766,8 +2037,8 @@ function BuilderPage() {
       {/* 2. Success dialog */}
       {successModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }} 
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="w-full max-w-sm p-8 rounded-2xl bg-card border border-white/10 text-center shadow-2xl relative"
           >
@@ -1775,9 +2046,12 @@ function BuilderPage() {
               <Check className="h-8 w-8 text-gold stroke-[2.5]" />
             </div>
             <h2 className="font-display text-2xl font-semibold mb-2">Inquiry Logged</h2>
-            <p className="text-xs text-muted-foreground mb-6">Your bespoke packaging & fragrance specifications have been logged securely. Sample kits will be arranged.</p>
-            
-            <button 
+            <p className="text-xs text-muted-foreground mb-6">
+              Your bespoke packaging & fragrance specifications have been logged securely. Sample
+              kits will be arranged.
+            </p>
+
+            <button
               onClick={() => setSuccessModalOpen(false)}
               className="w-full py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-colors shadow-gold-glow text-xs"
             >
@@ -1786,7 +2060,6 @@ function BuilderPage() {
           </motion.div>
         </div>
       )}
-
     </div>
   );
 }
