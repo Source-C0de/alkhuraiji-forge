@@ -188,13 +188,8 @@ export const useAdminStore = create<AdminState>((set) => ({
     { id: 6, name: "Recycled", active: true },
   ],
   builderCapacities: [
-    { id: 1, name: "10ml", active: true },
-    { id: 2, name: "30ml", active: true },
-    { id: 3, name: "50ml", active: true },
-    { id: 4, name: "75ml", active: true },
-    { id: 5, name: "100ml", active: true },
-    { id: 6, name: "150ml", active: true },
-    { id: 7, name: "250ml", active: true },
+    { id: 1, name: "50ml", active: true },
+    { id: 2, name: "100ml", active: true },
   ],
   builderColors: DEFAULT_BOTTLE_COLORS,
   addBuilderMaterial: (m) =>

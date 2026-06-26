@@ -1,5 +1,6 @@
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { useAdminStore } from "@/store/adminStore";
+import { useRef } from "react";
 import circleGlass from "@/assets/shape/circle_glass.png";
 import cylindricalGlass from "@/assets/shape/cyclindaric_glass.png";
 import ovalGlass from "@/assets/shape/oval_glass.png";
@@ -23,6 +24,7 @@ export function BottleStep() {
     showBottleCapacity,
     showBottleColor,
   } = useAdminStore();
+  const customInputRef = useRef<HTMLInputElement>(null);
 
   // Silhouettes already driven by the admin store (silhouettes list).
   const activeBottles = builderBottles.filter((b) => b.active);
@@ -33,6 +35,10 @@ export function BottleStep() {
   const materials = builderMaterials.filter((m) => m.active).map((m) => m.name);
   const capacities = builderCapacities.filter((c) => c.active).map((c) => c.name);
   const bottleColors = builderColors.filter((c) => c.active);
+
+  // True when the user has entered a custom (non-preset) capacity.
+  const isCustomCapacity =
+    !!store.bottleCapacity && !capacities.includes(store.bottleCapacity);
 
   return (
     <div className="space-y-10">
@@ -113,10 +119,71 @@ export function BottleStep() {
                   {cap}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => {
+                  // Clear the stored capacity so the user must enter a fresh value,
+                  // then focus the custom input for immediate typing.
+                  if (!isCustomCapacity) {
+                    store.setBottleCapacity("");
+                  }
+                  setTimeout(() => customInputRef.current?.focus(), 0);
+                }}
+                className={`px-5 py-3 rounded-full border text-sm transition-all duration-300 ${
+                  isCustomCapacity
+                    ? "border-primary bg-primary text-primary-foreground shadow-gold-glow font-bold"
+                    : "border-border bg-card hover:border-primary/50"
+                }`}
+              >
+                Others
+              </button>
             </div>
           ) : (
             <p className="text-xs text-muted-foreground italic">No capacity options available.</p>
           )}
+
+          <div className="mt-5">
+            <label
+              htmlFor="custom-capacity"
+              className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2"
+            >
+              Enter your preferred size (ml)
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                id="custom-capacity"
+                ref={customInputRef}
+                type="number"
+                min={1}
+                max={1000}
+                inputMode="numeric"
+                placeholder="e.g. 75"
+                value={
+                  store.bottleCapacity && !capacities.includes(store.bottleCapacity)
+                    ? store.bottleCapacity.replace(/ml$/i, "")
+                    : ""
+                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "") {
+                    store.setBottleCapacity("");
+                    return;
+                  }
+                  const n = Number(v);
+                  if (Number.isFinite(n) && n > 0 && n <= 1000) {
+                    store.setBottleCapacity(`${n}ml`);
+                  }
+                }}
+                className="w-32 px-3 py-2 rounded-lg border border-border bg-card text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+              <span className="text-sm text-muted-foreground">ml</span>
+            </div>
+            {isCustomCapacity && (
+              <p className="mt-2 text-xs text-primary font-medium">
+                Selected custom size: {store.bottleCapacity}
+              </p>
+            )}
+          </div>
         </div>
       )}
 
