@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 import {
   Droplet,
@@ -14,7 +14,6 @@ import {
   ArrowRight,
   Calendar,
   DollarSign,
-  Lock,
   Unlock,
 } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
@@ -424,6 +423,9 @@ function BuilderPage() {
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
 
+  // Ref for the custom-capacity input in the Bottle tab (focused when "Others" is clicked)
+  const customCapacityRef = useRef<HTMLInputElement>(null);
+
   const store = useBuilderStore();
   const {
     builderBottles,
@@ -459,38 +461,9 @@ function BuilderPage() {
   };
   const handleNextTab = () => {
     if (activeIndex < TABS.length - 1) {
-      const next = TABS[activeIndex + 1];
-      // Only allow advancing if the next step is unlocked
-      if (isTabUnlocked(next)) {
-        setActiveTab(next);
-      }
+      setActiveTab(TABS[activeIndex + 1]);
     }
   };
-
-  // Sequential step locking: only the first tab is unlocked by default.
-  // The user must complete each step to unlock the next one.
-  const [unlockedSteps, setUnlockedSteps] = useState<Set<string>>(() => new Set(["bottle"]));
-
-  // Step completion checks
-  const isBottleComplete = !!store.bottleSilhouette;
-  const isCapComplete = !!store.capStyle;
-  const isPumpComplete = !!store.pumpType;
-
-  // Unlock the next step in sequence
-  const unlockNext = (currentTab: string) => {
-    const idx = TABS.indexOf(currentTab);
-    if (idx >= 0 && idx < TABS.length - 1) {
-      const next = TABS[idx + 1];
-      setUnlockedSteps((prev) => {
-        if (prev.has(next)) return prev;
-        const nextSet = new Set(prev);
-        nextSet.add(next);
-        return nextSet;
-      });
-    }
-  };
-
-  const isTabUnlocked = (tabId: string) => unlockedSteps.has(tabId);
 
   const getCapacityScale = (capacity: string) => {
     switch (capacity) {
@@ -774,7 +747,7 @@ function BuilderPage() {
           </div>
         </div>
 
-        {/* Tab Buttons (Bottle, Cap, Fragrance, Packaging, Branding) - Sequential unlocking */}
+        {/* Tab Buttons (Bottle, Cap, Fragrance, Packaging, Branding) */}
         <div className="flex border-b border-border bg-secondary/10 overflow-x-auto scrollbar-hide flex-shrink-0">
           {[
             { id: "bottle", label: "Bottle" },
@@ -782,32 +755,25 @@ function BuilderPage() {
             { id: "fragrance", label: "Fragrance" },
             { id: "packaging", label: "Packaging" },
             { id: "branding", label: "Branding" },
-          ].map((tab) => {
-            const unlocked = isTabUnlocked(tab.id);
-            return (
-              <button
-                key={tab.id}
-                onClick={() => unlocked && setActiveTab(tab.id)}
-                disabled={!unlocked}
-                className={`flex-1 py-3 px-4 text-center text-[10px] font-bold uppercase tracking-wider transition-colors relative whitespace-nowrap flex items-center justify-center gap-1.5 ${
-                  activeTab === tab.id
-                    ? "text-gold"
-                    : unlocked
-                      ? "text-muted-foreground hover:text-foreground"
-                      : "text-muted-foreground/30 cursor-not-allowed"
-                }`}
-              >
-                {!unlocked && <Lock className="h-3 w-3" />}
-                {tab.label}
-                {activeTab === tab.id && unlocked && (
-                  <motion.div
-                    layoutId="activeStepLine"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-gold-soft"
-                  />
-                )}
-              </button>
-            );
-          })}
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 py-3 px-4 text-center text-[10px] font-bold uppercase tracking-wider transition-colors relative whitespace-nowrap flex items-center justify-center gap-1.5 ${
+                activeTab === tab.id
+                  ? "text-gold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <motion.div
+                  layoutId="activeStepLine"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-gold-soft"
+                />
+              )}
+            </button>
+          ))}
         </div>
 
         {/* Dynamic configuration tabs body */}
@@ -896,34 +862,97 @@ function BuilderPage() {
                   </div>
                 )}
 
-                {showBottleCapacity && (
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
-                      3. Capacity
-                    </h3>
-                    {capacities.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {capacities.map((cap) => (
+                {showBottleCapacity && (() => {
+                  const isCustomCapacity =
+                    !!store.bottleCapacity && !capacities.includes(store.bottleCapacity);
+                  return (
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                        3. Capacity
+                      </h3>
+                      {capacities.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          {capacities.map((cap) => (
+                            <button
+                              key={cap}
+                              onClick={() => store.setBottleCapacity(cap)}
+                              className={`py-2.5 rounded-lg border text-center text-xs font-medium transition-all ${
+                                store.bottleCapacity === cap
+                                  ? "bg-gold/10 border-gold text-gold font-bold"
+                                  : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                              }`}
+                            >
+                              {cap}
+                            </button>
+                          ))}
                           <button
-                            key={cap}
-                            onClick={() => store.setBottleCapacity(cap)}
+                            type="button"
+                            onClick={() => {
+                              if (!isCustomCapacity) {
+                                store.setBottleCapacity("");
+                              }
+                              setTimeout(() => customCapacityRef.current?.focus(), 0);
+                            }}
                             className={`py-2.5 rounded-lg border text-center text-xs font-medium transition-all ${
-                              store.bottleCapacity === cap
+                              isCustomCapacity
                                 ? "bg-gold/10 border-gold text-gold font-bold"
                                 : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                             }`}
                           >
-                            {cap}
+                            Others
                           </button>
-                        ))}
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-muted-foreground italic">
+                          No capacity options available.
+                        </p>
+                      )}
+
+                      <div className="mt-3">
+                        <label
+                          htmlFor="custom-capacity"
+                          className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+                        >
+                          Enter your preferred size (ml)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            ref={customCapacityRef}
+                            id="custom-capacity"
+                            type="number"
+                            min={1}
+                            max={1000}
+                            inputMode="numeric"
+                            placeholder="e.g. 75"
+                            value={
+                              store.bottleCapacity && !capacities.includes(store.bottleCapacity)
+                                ? store.bottleCapacity.replace(/ml$/i, "")
+                                : ""
+                            }
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (v === "") {
+                                store.setBottleCapacity("");
+                                return;
+                              }
+                              const n = Number(v);
+                              if (Number.isFinite(n) && n > 0 && n <= 1000) {
+                                store.setBottleCapacity(`${n}ml`);
+                              }
+                            }}
+                            className="w-28 px-3 py-2 rounded-lg bg-secondary/15 border border-border focus:border-gold focus:outline-none text-xs text-foreground"
+                          />
+                          <span className="text-xs text-muted-foreground">ml</span>
+                        </div>
+                        {isCustomCapacity && (
+                          <p className="mt-1.5 text-[10px] text-gold font-medium">
+                            Selected custom size: {store.bottleCapacity}
+                          </p>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-[10px] text-muted-foreground italic">
-                        No capacity options available.
-                      </p>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  );
+                })()}
 
                 {showBottleColor && (
                   <div>
@@ -965,17 +994,6 @@ function BuilderPage() {
                     )}
                   </div>
                 )}
-
-                {/* Proceed to next step button */}
-                <button
-                  onClick={() => {
-                    unlockNext("bottle");
-                    setActiveTab("cap");
-                  }}
-                  className="w-full mt-2 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-gold-glow"
-                >
-                  Proceed to Cap Selection <ArrowRight className="h-3.5 w-3.5" />
-                </button>
               </motion.div>
             )}
 
@@ -1145,17 +1163,6 @@ function BuilderPage() {
                     ))}
                   </div>
                 </div>
-
-                {/* Proceed to next step button */}
-                <button
-                  onClick={() => {
-                    unlockNext("cap");
-                    setActiveTab("fragrance");
-                  }}
-                  className="w-full mt-2 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-gold-glow"
-                >
-                  Proceed to Fragrance Notes <ArrowRight className="h-3.5 w-3.5" />
-                </button>
               </motion.div>
             )}
 
@@ -1509,7 +1516,7 @@ function BuilderPage() {
                     className="w-full h-full object-contain"
                   />
                 )}
-                {isTabUnlocked("cap") && PUMP_IMAGES[store.pumpType] && !store.capStyle && (
+                {PUMP_IMAGES[store.pumpType] && !store.capStyle && (
                   <img
                     src={PUMP_IMAGES[store.pumpType]}
                     alt=""
@@ -1524,7 +1531,7 @@ function BuilderPage() {
                     }}
                   />
                 )}
-                {isTabUnlocked("cap") && CAP_IMAGES[store.capStyle] && !store.pumpType && (
+                {CAP_IMAGES[store.capStyle] && !store.pumpType && (
                   <img
                     src={CAP_IMAGES[store.capStyle]}
                     alt=""
@@ -1579,7 +1586,11 @@ function BuilderPage() {
               <span className="h-3 w-px bg-border" />
               <span className="text-foreground">{store.bottleColor}</span>
               <span className="h-3 w-px bg-border" />
-              <span>{store.bottleCapacity}ml</span>
+              <span>
+                {store.bottleCapacity && store.bottleCapacity !== "100ml"
+                  ? store.bottleCapacity
+                  : "100ml"}
+              </span>
             </div>
 
             {/* ===== Layered bottle/cap/pump canvas (3-slice stack) =====
@@ -1616,10 +1627,8 @@ function BuilderPage() {
                 visible gap.
                 ============================================================ */}
             {(() => {
-              const showPump =
-                isTabUnlocked("cap") && !!PUMP_IMAGES[store.pumpType] && !store.capStyle;
-              const showCap =
-                isTabUnlocked("cap") && !!CAP_IMAGES[store.capStyle] && !store.pumpType;
+              const showPump = !!PUMP_IMAGES[store.pumpType] && !store.capStyle;
+              const showCap = !!CAP_IMAGES[store.capStyle] && !store.pumpType;
               // Scale factor: dims.width is the bottle's intrinsic width.
               // We want the canvas WIDTH to be ~dims.width * 1.0 (so the
               // bottle slice matches the bottle's natural width) and the
