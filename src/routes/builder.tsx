@@ -388,10 +388,10 @@ const NOTES = {
 };
 
 const INTENSITIES = [
-  { name: "Light", price: 25 },
-  { name: "Balanced", price: 35 },
-  { name: "Strong", price: 45 },
-  { name: "Signature Intense", price: 60 },
+  { name: "Light"},
+  { name: "Balanced" },
+  { name: "Strong"},
+  { name: "Signature Intense" },
 ];
 
 const FONTS = ["Modern Sans", "Elegant Serif", "Minimal Script"];
@@ -401,6 +401,12 @@ function BuilderPage() {
   const navigate = useNavigate();
   const [category, setCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("bottle"); // bottle, cap, fragrance, packaging, branding
+
+  // Review & submit modal state
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [lastTab, setLastTab] = useState<string>("branding"); // remembered for the "Modify" button
 
   const { theme } = useTheme();
   const [resolvedTheme, setResolvedTheme] = useState("dark");
@@ -1386,17 +1392,24 @@ function BuilderPage() {
           >
             ← Previous
           </button>
-          <button
-            onClick={handleNextTab}
-            disabled={activeIndex === TABS.length - 1}
-            className={`flex-1 py-3 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
-              activeIndex === TABS.length - 1
-                ? "bg-secondary/20 border border-border text-muted-foreground/30 cursor-not-allowed"
-                : "bg-gold hover:bg-gold-soft text-black active:scale-[0.98] shadow-gold-glow"
-            }`}
-          >
-            Next →
-          </button>
+          {activeIndex === TABS.length - 1 ? (
+            <button
+              onClick={() => {
+                setLastTab(activeTab);
+                setReviewOpen(true);
+              }}
+              className="flex-1 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] shadow-gold-glow"
+            >
+              Submit Quotation <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={handleNextTab}
+              className="flex-1 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] shadow-gold-glow"
+            >
+              Next →
+            </button>
+          )}
         </div>
       </aside>
 
@@ -1799,6 +1812,253 @@ function BuilderPage() {
           ))}
         </div>
       </main>
+
+      {/* Review & Submit Modal */}
+      <AnimatePresence>
+        {reviewOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 240, damping: 24 }}
+              className="w-full max-w-2xl my-8 bg-card border border-gold/20 rounded-2xl shadow-2xl relative overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-gold to-gold-soft h-1.5" />
+              <div className="p-8">
+                {submitted ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-6">
+                      <Check className="h-8 w-8 text-gold stroke-[2.5]" />
+                    </div>
+                    <h2 className="font-display text-2xl font-bold mb-2">
+                      Quotation Request Sent
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Your specification document has been emailed to:
+                    </p>
+                    <p className="text-sm font-mono text-gold mb-8">
+                      fshahriar@alkhuraii-afpc.com
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-8">
+                      Our luxury manufacturing consultant will respond within 24
+                      hours.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setReviewOpen(false);
+                        setSubmitted(false);
+                      }}
+                      className="w-full py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow text-xs"
+                    >
+                      Return to Builder
+                    </button>
+                  </div>
+                ) : submitting ? (
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      Sending your specification document...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Document header */}
+                    <div className="text-center mb-6 pb-6 border-b border-border">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-2">
+                        Private Label Specification Document
+                      </div>
+                      <h2 className="font-display text-3xl font-bold mb-1">
+                        {store.label.name || "UNTITLED BRAND"}
+                      </h2>
+                      <p className="text-xs text-muted-foreground">
+                        Prepared on{" "}
+                        {new Date().toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* Spec sections */}
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-5 mb-6 text-xs">
+                      <div className="col-span-2">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Bottle Configuration
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Silhouette"
+                        value={store.bottleSilhouette || "—"}
+                      />
+                      <SpecRow
+                        label="Material"
+                        value={store.bottleMaterial || "—"}
+                      />
+                      <SpecRow
+                        label="Capacity"
+                        value={store.bottleCapacity || "—"}
+                      />
+                      <SpecRow
+                        label="Color & Finish"
+                        value={store.bottleColor || "—"}
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Cap & Pump
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Cap Style"
+                        value={
+                          (() => {
+                            for (const cat of CAP_CATEGORIES) {
+                              const v = cat.variants.find(
+                                (x) => x.id === store.capStyle,
+                              );
+                              if (v) return v.name;
+                            }
+                            return store.capStyle || "—";
+                          })()
+                        }
+                      />
+                      <SpecRow
+                        label="Pump"
+                        value={
+                          (() => {
+                            for (const cat of PUMP_CATEGORIES) {
+                              const v = cat.variants.find(
+                                (x) => x.id === store.pumpType,
+                              );
+                              if (v) return `${cat.name} – ${v.name}`;
+                            }
+                            return store.pumpType || "—";
+                          })()
+                        }
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Fragrance Composition
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Top Notes"
+                        value={(store.fragrance.top || []).join(", ") || "—"}
+                      />
+                      <SpecRow
+                        label="Intensity"
+                        value={store.fragrance.intensity || "Balanced"}
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Packaging
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Box Type"
+                        value={store.packaging.type || "—"}
+                      />
+                      <SpecRow
+                        label="Finish"
+                        value={store.packaging.finish || "—"}
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Branding
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Brand Name"
+                        value={store.label.name || "—"}
+                      />
+                      <SpecRow
+                        label="Label Font"
+                        value={store.label.font || "—"}
+                      />
+                      <SpecRow
+                        label="Label Shape"
+                        value={store.label.shape || "—"}
+                      />
+                    </div>
+
+                    {/* Estimated price summary */}
+                    <div className="bg-secondary/20 border border-border rounded-xl p-4 mb-6 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Estimated Wholesale / Unit
+                        </div>
+                        <div className="font-display text-2xl font-bold text-gold">
+                          {pricing.unitPrice.toFixed(2)} SAR
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Total (MOQ {store.quantity.toLocaleString()})
+                        </div>
+                        <div className="font-display text-2xl font-bold text-foreground">
+                          {pricing.totalPrice.toLocaleString()}{" "}
+                          <span className="text-xs text-gold-soft">SAR</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setReviewOpen(false);
+                          setActiveTab(lastTab);
+                        }}
+                        className="flex-1 py-3 rounded-xl border border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-gold/30 transition-all"
+                      >
+                        ← Modify
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSubmitting(true);
+                          setTimeout(() => {
+                            setSubmitting(false);
+                            setSubmitted(true);
+                            // TODO: replace with real API call to POST /api/send-quotation
+                            //       with body containing all store selections + pricing.
+                            //       The API will email the document to fshahriar@alkhuraii-afpc.com.
+                          }, 1500);
+                        }}
+                        className="flex-1 py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow text-xs"
+                      >
+                        Submit & Email →
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function SpecRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-start gap-4 py-1.5 border-b border-border/40">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className="text-xs font-medium text-foreground text-right max-w-[60%]">
+        {value}
+      </span>
     </div>
   );
 }

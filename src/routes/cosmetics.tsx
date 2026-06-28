@@ -4,21 +4,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Check,
   ShieldCheck,
-  TrendingDown,
   Layers,
   Award,
-  Calendar,
-  DollarSign,
   Droplets,
   FlaskConical,
   Package,
   Palette,
   Wind,
   Tag,
-  Star,
+  Sparkles,
   ChevronLeft,
-  ChevronRight,
-  X,
+  ArrowRight,
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -164,27 +160,8 @@ const SCENT_OPTIONS = [
   { name: "Custom Blend",    price: 25 },
 ];
 
-const QUANTITY_TIERS = [
-  { label: "500 Units",   value: 500,   discount: 0   },
-  { label: "1,000 Units", value: 1000,  discount: 0.10 },
-  { label: "2,500 Units", value: 2500,  discount: 0.20 },
-  { label: "5,000 Units", value: 5000,  discount: 0.30 },
-  { label: "10,000 Units",value: 10000, discount: 0.40 },
-];
-
-const STEPS = [
-  { id: "product",    label: "Product",    icon: Star      },
-  { id: "container",  label: "Container",  icon: Package   },
-  { id: "material",   label: "Material",   icon: Layers    },
-  { id: "capacity",   label: "Capacity",   icon: Droplets  },
-  { id: "color",      label: "Color",      icon: Palette   },
-  { id: "cap",        label: "Cap",        icon: Award     },
-  { id: "label",      label: "Branding",   icon: Tag       },
-  { id: "packaging",  label: "Packaging",  icon: Package   },
-  { id: "formula",    label: "Formula",    icon: FlaskConical },
-  { id: "scent",      label: "Scent",      icon: Wind      },
-  { id: "quantity",   label: "Quantity",   icon: TrendingDown },
-];
+const TABS = ["bottle", "cap", "fragrance", "packaging", "branding"] as const;
+type TabId = typeof TABS[number];
 
 // ─── CONTAINER SVG PREVIEW ───────────────────────────────────────────────────
 function ContainerPreview({
@@ -244,19 +221,14 @@ function ContainerPreview({
         </filter>
       </defs>
 
-      {/* Ground shadow */}
       <ellipse cx="100" cy="305" rx="52" ry="8" fill="rgba(0,0,0,0.25)" />
 
       {isJar && (
         <>
-          {/* Jar body */}
           <rect x="38" y="130" width="124" height="140" rx="18" fill={fillColor} stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
-          {/* Jar shine */}
           <rect x="38" y="130" width="124" height="140" rx="18" fill="url(#bodyShine)" />
-          {/* Jar lid */}
           <rect x="34" y="106" width="132" height="38" rx="10" fill="url(#capGold)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
           <rect x="34" y="106" width="132" height="38" rx="10" fill="url(#bodyShine)" />
-          {/* label area */}
           <rect x="52" y="162" width="96" height="68" rx="6" fill={resolvedTheme==="dark"?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.8)"} stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
           <text x="100" y="184" textAnchor="middle" fontSize="7" fontFamily="serif" fill="#d4af37" letterSpacing="2" fontWeight="bold">{productName.toUpperCase().slice(0,12)}</text>
           <text x="100" y="200" textAnchor="middle" fontSize="10" fontFamily="serif" fill={textColor} fontWeight="600" letterSpacing="1">{brandName || "YOUR BRAND"}</text>
@@ -266,12 +238,9 @@ function ContainerPreview({
 
       {isTube && (
         <>
-          {/* Tube body */}
           <rect x="62" y="80" width="76" height="190" rx="38" fill={fillColor} stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
           <rect x="62" y="80" width="76" height="190" rx="38" fill="url(#bodyShine)" />
-          {/* Tube cap */}
           <rect x="72" y="60" width="56" height="32" rx="8" fill="url(#capGold)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-          {/* Label */}
           <rect x="70" y="148" width="60" height="60" rx="4" fill={resolvedTheme==="dark"?"rgba(0,0,0,0.55)":"rgba(255,255,255,0.75)"} stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
           <text x="100" y="165" textAnchor="middle" fontSize="6" fill="#d4af37" letterSpacing="1.5" fontWeight="bold" fontFamily="serif">{productName.slice(0,10).toUpperCase()}</text>
           <text x="100" y="180" textAnchor="middle" fontSize="9" fill={textColor} fontWeight="600" fontFamily="serif">{brandName || "YOUR BRAND"}</text>
@@ -281,16 +250,11 @@ function ContainerPreview({
 
       {isDropper && (
         <>
-          {/* Bottle body */}
           <rect x="68" y="120" width="64" height="160" rx="20" fill={fillColor} stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
           <rect x="68" y="120" width="64" height="160" rx="20" fill="url(#bodyShine)" />
-          {/* Neck */}
           <rect x="82" y="86" width="36" height="40" rx="6" fill={fillColor} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-          {/* Dropper bulb */}
           <ellipse cx="100" cy="72" rx="20" ry="16" fill="url(#capGold)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-          {/* Dropper needle */}
           <line x1="100" y1="56" x2="100" y2="40" stroke="#d4af37" strokeWidth="3" strokeLinecap="round" />
-          {/* Label */}
           <rect x="74" y="148" width="52" height="62" rx="4" fill={resolvedTheme==="dark"?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.8)"} stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
           <text x="100" y="166" textAnchor="middle" fontSize="6" fill="#d4af37" letterSpacing="1.5" fontWeight="bold" fontFamily="serif">{productName.slice(0,10).toUpperCase()}</text>
           <text x="100" y="182" textAnchor="middle" fontSize="8.5" fill={textColor} fontWeight="600" fontFamily="serif">{brandName || "YOUR BRAND"}</text>
@@ -300,14 +264,10 @@ function ContainerPreview({
 
       {isSpray && (
         <>
-          {/* Bottle body */}
           <rect x="58" y="110" width="84" height="170" rx="16" fill={fillColor} stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
           <rect x="58" y="110" width="84" height="170" rx="16" fill="url(#bodyShine)" />
-          {/* Spray pump top */}
           <rect x="78" y="78" width="44" height="36" rx="8" fill="url(#capGold)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-          {/* Nozzle */}
           <rect x="118" y="82" width="28" height="12" rx="6" fill={capColor} />
-          {/* Label */}
           <rect x="66" y="148" width="68" height="66" rx="5" fill={resolvedTheme==="dark"?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.8)"} stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
           <text x="100" y="166" textAnchor="middle" fontSize="6" fill="#d4af37" letterSpacing="1.5" fontWeight="bold" fontFamily="serif">{productName.slice(0,10).toUpperCase()}</text>
           <text x="100" y="182" textAnchor="middle" fontSize="9" fill={textColor} fontWeight="600" fontFamily="serif">{brandName || "YOUR BRAND"}</text>
@@ -317,16 +277,11 @@ function ContainerPreview({
 
       {(isPump || (!isJar && !isTube && !isDropper && !isSpray && !isGlass)) && (
         <>
-          {/* Pump bottle body */}
           <rect x="55" y="108" width="90" height="172" rx="22" fill={fillColor} stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
           <rect x="55" y="108" width="90" height="172" rx="22" fill="url(#bodyShine)" />
-          {/* Pump neck */}
           <rect x="82" y="72" width="36" height="42" rx="6" fill={fillColor} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-          {/* Pump head */}
           <rect x="74" y="52" width="52" height="26" rx="8" fill="url(#capGold)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-          {/* Nozzle */}
           <rect x="122" y="55" width="22" height="10" rx="5" fill={capColor} />
-          {/* Label */}
           <rect x="63" y="145" width="74" height="72" rx="5" fill={resolvedTheme==="dark"?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.82)"} stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
           <text x="100" y="165" textAnchor="middle" fontSize="6" fill="#d4af37" letterSpacing="1.5" fontWeight="bold" fontFamily="serif">{productName.slice(0,12).toUpperCase()}</text>
           <text x="100" y="182" textAnchor="middle" fontSize="10" fill={textColor} fontWeight="600" fontFamily="serif">{brandName || "YOUR BRAND"}</text>
@@ -336,14 +291,10 @@ function ContainerPreview({
 
       {isGlass && (
         <>
-          {/* Elegant glass bottle */}
           <path d="M76,280 Q56,270 56,200 L60,130 Q62,108 100,108 Q138,108 140,130 L144,200 Q144,270 124,280 Z" fill={fillColor} stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
           <path d="M76,280 Q56,270 56,200 L60,130 Q62,108 100,108 Q138,108 140,130 L144,200 Q144,270 124,280 Z" fill="url(#bodyShine)" />
-          {/* Neck */}
           <rect x="82" y="76" width="36" height="38" rx="5" fill={fillColor} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-          {/* Cap */}
           <rect x="78" y="56" width="44" height="26" rx="6" fill="url(#capGold)" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-          {/* Label */}
           <rect x="64" y="150" width="72" height="70" rx="5" fill={resolvedTheme==="dark"?"rgba(0,0,0,0.6)":"rgba(255,255,255,0.82)"} stroke="rgba(212,175,55,0.3)" strokeWidth="1" />
           <text x="100" y="169" textAnchor="middle" fontSize="6" fill="#d4af37" letterSpacing="1.5" fontWeight="bold" fontFamily="serif">{productName.slice(0,12).toUpperCase()}</text>
           <text x="100" y="186" textAnchor="middle" fontSize="10" fill={textColor} fontWeight="600" fontFamily="serif">{brandName || "YOUR BRAND"}</text>
@@ -371,17 +322,13 @@ function CosmeticsBuilderPage() {
 
   // Resolve initial product from URL search param
   const initialProduct = PRODUCT_CATEGORIES.find(p => p.id === productParam) ?? PRODUCT_CATEGORIES[0];
-  // Start at step 1 (container) if a product was pre-selected from the nav dropdown, else step 0
-  const initialStep = productParam ? 1 : 0;
 
-  const [currentStep, setCurrentStep] = useState(initialStep);
-  const [inquiryOpen, setInquiryOpen] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
-
-  // Form fields
-  const [clientName, setClientName] = useState("");
-  const [clientEmail, setClientEmail] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
+  // Tab + review-modal state (mirrors perfume builder)
+  const [activeTab, setActiveTab] = useState<TabId>("bottle");
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [lastTab, setLastTab] = useState<TabId>("branding");
 
   // Configuration state
   const [selectedProduct, setSelectedProduct] = useState(initialProduct);
@@ -399,8 +346,6 @@ function CosmeticsBuilderPage() {
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [selectedFormula, setSelectedFormula] = useState("");
   const [selectedScent, setSelectedScent] = useState(SCENT_OPTIONS[0]);
-  const [selectedQtyTier, setSelectedQtyTier] = useState(QUANTITY_TIERS[0]);
-  const [customQty, setCustomQty] = useState(500);
 
   // Sync formula when product changes
   useEffect(() => {
@@ -414,35 +359,19 @@ function CosmeticsBuilderPage() {
     );
   }, []);
 
-  // ─── PRICING ENGINE ────────────────────────────────────────────────────────
-  const pricing = (() => {
-    const base     = selectedProduct.basePrice;
-    const container = selectedContainer.price;
-    const material = selectedMaterial.price;
-    const capacity = selectedCapacity.price;
-    const color    = selectedColor.price;
-    const cap      = selectedCap.price;
-    const label    = selectedLabel.price;
-    const packaging = selectedPackaging.price;
-    const finish   = selectedFinish.price;
-    const addons   = selectedAddons.reduce((s, a) => s + (PACKAGING_ADDONS.find(x => x.name === a)?.price || 0), 0);
-    const formula  = selectedFormula ? 20 : 0;
-    const scent    = selectedScent.price;
-    const branding = 5;
+  const activeTabIndex = TABS.indexOf(activeTab);
+  const progress = Math.round((activeTabIndex / (TABS.length - 1)) * 100);
 
-    const subtotal = base + container + material + capacity + color + cap + label + packaging + finish + addons + formula + scent + branding;
-    const discount = selectedQtyTier.discount;
-    const unitPrice = subtotal * (1 - discount);
-    const qty = selectedQtyTier.value;
-    const total = unitPrice * qty;
-
-    return { base, container, material, capacity, color, cap, label, packaging, finish, addons, formula, scent, branding, subtotal, discount, unitPrice, total, qty, discountPct: Math.round(discount * 100) };
-  })();
-
-  const progress = Math.round(((currentStep) / (STEPS.length - 1)) * 100);
+  const handleNextTab = () => {
+    const idx = TABS.indexOf(activeTab);
+    if (idx < TABS.length - 1) setActiveTab(TABS[idx + 1]);
+  };
+  const handlePrevTab = () => {
+    const idx = TABS.indexOf(activeTab);
+    if (idx > 0) setActiveTab(TABS[idx - 1]);
+  };
 
   // ─── BUILDER UI ────────────────────────────────────────────────────────────
-  const step = STEPS[currentStep];
   const formulas = FORMULA_TYPES[selectedProduct.id] || [];
 
   return (
@@ -458,229 +387,198 @@ function CosmeticsBuilderPage() {
         <ChevronLeft className="h-3.5 w-3.5" /> Home
       </Link>
 
-      {/* ═══════ COLUMN 1 — CONFIGURATOR LEFT SIDEBAR (390px) ═══════ */}
-      <aside className="w-full lg:w-[390px] lg:flex-shrink-0 border-r border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen transition-colors duration-300">
-        
-        {/* Header with brand name input */}
+      {/* ═══════ COLUMN 1 — CONFIGURATOR LEFT SIDEBAR (480px) ═══════ */}
+      <aside className="w-full lg:w-[480px] lg:flex-shrink-0 border-r border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen transition-colors duration-300">
+
+        {/* Header: Product category picker + brand name input */}
         <div className="p-6 border-b border-border flex-shrink-0 pt-20">
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold-soft mb-0.5">Cosmetics Configurator</div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{selectedProduct.emoji}</span>
-                <h2 className="font-display text-lg font-semibold text-foreground">{selectedProduct.name}</h2>
-              </div>
-            </div>
-            <span className="text-xs font-bold text-gold bg-gold/10 px-2.5 py-1 rounded-full">{progress}%</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-soft">
+              Cosmetics Configurator
+            </span>
+            <span className="text-xs font-semibold text-gold bg-gold/10 px-2 py-0.5 rounded-full">
+              {progress}% Complete
+            </span>
           </div>
+          <h2 className="font-display text-2xl font-light text-foreground mb-4">Your Brand Design</h2>
+
+          {/* Product category picker (persistent across tabs) */}
+          <div className="mb-4">
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-2">
+              Product Category
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 max-h-[110px] overflow-y-auto scrollbar-hide pr-1">
+              {PRODUCT_CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedProduct(cat)}
+                  className={`px-2 py-2 rounded-lg border text-left text-[10px] font-medium uppercase tracking-wide transition-all ${
+                    selectedProduct.id === cat.id
+                      ? "bg-gold/10 border-gold text-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                      : "bg-secondary/15 border-border text-muted-foreground hover:border-gold/30 hover:text-foreground"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <input
             type="text"
             value={brandName}
             onChange={e => setBrandName(e.target.value.toUpperCase())}
             placeholder="ENTER BRAND NAME..."
-            className="w-full bg-secondary/30 border border-border focus:border-gold rounded-lg px-4 py-2.5 text-xs outline-none text-foreground tracking-widest font-medium uppercase transition-colors mt-2"
+            className="w-full bg-secondary/30 border border-border focus:border-gold rounded-lg px-4 py-2.5 text-xs outline-none text-foreground tracking-widest font-medium uppercase transition-colors"
           />
         </div>
 
-        {/* Step Progress Bar */}
-        <div className="px-6 py-3 border-b border-border flex-shrink-0 bg-secondary/10">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] text-muted-foreground font-medium">
-              Step {currentStep + 1} of {STEPS.length} — <span className="text-foreground font-semibold">{step.label}</span>
-            </span>
-          </div>
-          <div className="w-full bg-secondary/30 rounded-full h-1.5 overflow-hidden">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-gold to-gold-soft"
-              animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
-              transition={{ duration: 0.4 }}
-            />
-          </div>
-          {/* Mini step dots */}
-          <div className="flex gap-1 mt-3 justify-between">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => setCurrentStep(i)}
-                  title={s.label}
-                  className={`flex-1 h-1.5 rounded-full transition-all ${
-                    i < currentStep ? "bg-gold/60" : i === currentStep ? "bg-gold" : "bg-secondary/40"
-                  }`}
+        {/* Tab strip (mirrors perfume) */}
+        <div className="flex border-b border-border bg-secondary/10 overflow-x-auto scrollbar-hide flex-shrink-0">
+          {TABS.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-3 px-4 text-center text-[10px] font-bold uppercase tracking-wider transition-colors relative whitespace-nowrap flex items-center justify-center gap-1.5 ${
+                activeTab === tab
+                  ? "text-gold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab}
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="activeCosmeticsTabLine"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-gold-soft"
                 />
-              );
-            })}
-          </div>
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* Step Content */}
-        <div className="flex-1 overflow-y-auto p-6 scrollbar-hide pb-28">
+        {/* Tab content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide pb-24">
           <AnimatePresence mode="wait">
             <motion.div
-              key={step.id}
-              initial={{ opacity: 0, x: 20 }}
+              key={activeTab}
+              initial={{ opacity: 0, x: 16 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-6"
+              exit={{ opacity: 0, x: -16 }}
+              transition={{ duration: 0.22 }}
+              className="space-y-8"
             >
 
-              {/* STEP 0 — PRODUCT CATEGORY */}
-              {step.id === "product" && (
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Select Product Category</h3>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {PRODUCT_CATEGORIES.map(cat => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedProduct(cat)}
-                        className={`p-3.5 rounded-xl border text-left transition-all relative group overflow-hidden ${
-                          selectedProduct.id === cat.id
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                            : "bg-secondary/15 border-border hover:border-gold/30"
-                        }`}
-                      >
-                        {selectedProduct.id === cat.id && (
-                          <div className="absolute top-2 right-2 h-4 w-4 bg-gold rounded-full flex items-center justify-center">
-                            <Check className="h-2.5 w-2.5 text-black stroke-[3]" />
-                          </div>
-                        )}
-                        <div className="text-xl mb-1.5">{cat.emoji}</div>
-                        <div className="text-xs font-semibold text-foreground">{cat.name}</div>
-                        <div className="text-[9px] text-muted-foreground mt-0.5">from {cat.basePrice} SAR</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 1 — CONTAINER */}
-              {step.id === "container" && (
-                <div className="space-y-5">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Choose Container Type</h3>
-                  {(Object.entries(CONTAINER_TYPES) as [string, typeof CONTAINER_TYPES.Bottles][]).map(([group, items]) => (
-                    <div key={group}>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2.5">{group}</div>
-                      <div className="space-y-2">
-                        {items.map(item => (
-                          <button
-                            key={item.name}
-                            onClick={() => setSelectedContainer(item)}
-                            className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                              selectedContainer.name === item.name
-                                ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold"
-                                : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
-                            }`}
-                          >
-                            <div>
-                              <div className="text-xs font-semibold">{item.name}</div>
-                              <div className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</div>
-                            </div>
-                            <div className="text-xs font-bold text-gold-soft whitespace-nowrap">+{item.price} SAR</div>
-                          </button>
-                        ))}
+              {/* ───────── BOTTLE TAB ───────── */}
+              {activeTab === "bottle" && (
+                <>
+                  <section className="space-y-5">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Package className="h-3.5 w-3.5" /> Container Type
+                    </h3>
+                    {(Object.entries(CONTAINER_TYPES) as [string, typeof CONTAINER_TYPES.Bottles][]).map(([group, items]) => (
+                      <div key={group}>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">{group}</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {items.map(item => (
+                            <button
+                              key={item.name}
+                              onClick={() => setSelectedContainer(item)}
+                              className={`p-3 rounded-xl border text-left transition-all ${
+                                selectedContainer.name === item.name
+                                  ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                                  : "bg-secondary/15 border-border hover:border-gold/30"
+                              }`}
+                            >
+                              <div className="text-[11px] font-semibold text-foreground">{item.name}</div>
+                              <div className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{item.desc}</div>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* STEP 2 — MATERIAL */}
-              {step.id === "material" && (
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Select Material</h3>
-                  <div className="space-y-2.5">
-                    {MATERIALS.map(mat => (
-                      <button
-                        key={mat.name}
-                        onClick={() => setSelectedMaterial(mat)}
-                        className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                          selectedMaterial.name === mat.name
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                            : "bg-secondary/15 border-border hover:border-gold/30"
-                        }`}
-                      >
-                        <div>
-                          <div className="text-xs font-semibold text-foreground">{mat.name}</div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5">{mat.desc}</div>
-                        </div>
-                        <div className="text-xs font-bold text-gold-soft">+{mat.price} SAR</div>
-                      </button>
                     ))}
-                  </div>
-                </div>
-              )}
+                  </section>
 
-              {/* STEP 3 — CAPACITY */}
-              {step.id === "capacity" && (
-                <div className="space-y-5">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Select Capacity</h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {CAPACITIES.map(cap => (
-                      <button
-                        key={cap.size}
-                        onClick={() => setSelectedCapacity(cap)}
-                        className={`p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
-                          selectedCapacity.size === cap.size
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                            : "bg-secondary/15 border-border hover:border-gold/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`w-2 rounded-full bg-gold/60 transition-all`} style={{ height: `${cap.scaleFactor * 32}px` }} />
-                          <div>
-                            <div className="text-sm font-bold text-foreground">{cap.size}</div>
-                            <div className="text-[10px] text-muted-foreground">
-                              {cap.size === "15ml" ? "Travel / Sample size" :
-                               cap.size === "30ml" ? "Personal daily use" :
-                               cap.size === "50ml" ? "Standard retail" :
-                               cap.size === "100ml" ? "Professional / Premium" : "Salon / Bulk size"}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-xs font-bold text-gold-soft">{cap.price > 0 ? `+${cap.price} SAR` : "Base"}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 4 — COLOR / FINISH */}
-              {step.id === "color" && (
-                <div className="space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Color & Finish</h3>
-                  <div className="grid grid-cols-4 gap-3">
-                    {COLOR_FINISHES.map(col => (
-                      <button
-                        key={col.name}
-                        onClick={() => setSelectedColor(col)}
-                        className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${
-                          selectedColor.name === col.name ? "border-gold bg-secondary/30" : "border-transparent hover:bg-secondary/20"
-                        }`}
-                      >
-                        <div
-                          className="w-11 h-11 rounded-full border border-border shadow-lg relative overflow-hidden"
-                          style={{ background: col.hex }}
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Layers className="h-3.5 w-3.5" /> Material
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {MATERIALS.map(mat => (
+                        <button
+                          key={mat.name}
+                          onClick={() => setSelectedMaterial(mat)}
+                          className={`p-3 rounded-xl border text-left transition-all ${
+                            selectedMaterial.name === mat.name
+                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                              : "bg-secondary/15 border-border hover:border-gold/30"
+                          }`}
                         >
-                          {selectedColor.name === col.name && (
-                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                              <Check className="h-4 w-4 text-gold" />
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-[9px] text-muted-foreground text-center leading-tight w-full">{col.name}</span>
-                        <span className="text-[8px] text-gold-soft">+{col.price}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                          <div className="text-[11px] font-semibold text-foreground">{mat.name}</div>
+                          <div className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{mat.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Droplets className="h-3.5 w-3.5" /> Capacity
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {CAPACITIES.map(cap => (
+                        <button
+                          key={cap.size}
+                          onClick={() => setSelectedCapacity(cap)}
+                          className={`p-3 rounded-xl border transition-all flex flex-col items-center justify-center gap-1 ${
+                            selectedCapacity.size === cap.size
+                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                              : "bg-secondary/15 border-border hover:border-gold/30"
+                          }`}
+                        >
+                          <div className="w-1 rounded-full bg-gold/60 transition-all" style={{ height: `${cap.scaleFactor * 24}px` }} />
+                          <div className="text-xs font-bold text-foreground">{cap.size}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Palette className="h-3.5 w-3.5" /> Color & Finish
+                    </h3>
+                    <div className="grid grid-cols-4 gap-2">
+                      {COLOR_FINISHES.map(col => (
+                        <button
+                          key={col.name}
+                          onClick={() => setSelectedColor(col)}
+                          className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${
+                            selectedColor.name === col.name ? "border-gold bg-secondary/30" : "border-transparent hover:bg-secondary/20"
+                          }`}
+                        >
+                          <div
+                            className="w-9 h-9 rounded-full border border-border shadow-lg relative overflow-hidden"
+                            style={{ background: col.hex }}
+                          >
+                            {selectedColor.name === col.name && (
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <Check className="h-4 w-4 text-gold" />
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-[9px] text-muted-foreground text-center leading-tight w-full">{col.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                </>
               )}
 
-              {/* STEP 5 — CAP */}
-              {step.id === "cap" && (
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Cap & Closure</h3>
+              {/* ───────── CAP TAB ───────── */}
+              {activeTab === "cap" && (
+                <section className="space-y-3">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                    <Award className="h-3.5 w-3.5" /> Cap & Closure
+                  </h3>
                   <div className="space-y-2.5">
                     {CAP_TYPES.map(cap => (
                       <button
@@ -696,18 +594,157 @@ function CosmeticsBuilderPage() {
                           <div className="text-xs font-semibold text-foreground">{cap.name}</div>
                           <div className="text-[10px] text-muted-foreground mt-0.5">{cap.desc}</div>
                         </div>
-                        <div className="text-xs font-bold text-gold-soft">+{cap.price} SAR</div>
+                        {selectedCap.name === cap.name && (
+                          <Check className="h-4 w-4 text-gold" />
+                        )}
                       </button>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
 
-              {/* STEP 6 — LABEL / BRANDING */}
-              {step.id === "label" && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Label Style</h3>
+              {/* ───────── FRAGRANCE TAB ───────── */}
+              {activeTab === "fragrance" && (
+                <>
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <FlaskConical className="h-3.5 w-3.5" /> Formula
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Active formula for <span className="text-foreground font-medium">{selectedProduct.name}</span>.
+                    </p>
+                    <div className="space-y-2.5">
+                      {formulas.map(f => (
+                        <button
+                          key={f}
+                          onClick={() => setSelectedFormula(f)}
+                          className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
+                            selectedFormula === f
+                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                              : "bg-secondary/15 border-border hover:border-gold/30"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <FlaskConical className={`h-4 w-4 ${selectedFormula === f ? "text-gold" : "text-muted-foreground"}`} />
+                            <span className="text-xs font-semibold text-foreground">{f}</span>
+                          </div>
+                          {selectedFormula === f && <Check className="h-4 w-4 text-gold" />}
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Wind className="h-3.5 w-3.5" /> Signature Scent
+                    </h3>
+                    <div className="space-y-2.5">
+                      {SCENT_OPTIONS.map(s => (
+                        <button
+                          key={s.name}
+                          onClick={() => setSelectedScent(s)}
+                          className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
+                            selectedScent.name === s.name
+                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                              : "bg-secondary/15 border-border hover:border-gold/30"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Wind className={`h-4 w-4 ${selectedScent.name === s.name ? "text-gold" : "text-muted-foreground"}`} />
+                            <span className="text-xs font-semibold text-foreground">{s.name}</span>
+                          </div>
+                          {selectedScent.name === s.name && <Check className="h-4 w-4 text-gold" />}
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                </>
+              )}
+
+              {/* ───────── PACKAGING TAB ───────── */}
+              {activeTab === "packaging" && (
+                <>
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Package className="h-3.5 w-3.5" /> Outer Box
+                    </h3>
+                    <div className="space-y-2.5">
+                      {OUTER_PACKAGING.map(p => (
+                        <button
+                          key={p.name}
+                          onClick={() => setSelectedPackaging(p)}
+                          className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
+                            selectedPackaging.name === p.name
+                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                              : "bg-secondary/15 border-border hover:border-gold/30"
+                          }`}
+                        >
+                          <div>
+                            <div className="text-xs font-semibold text-foreground">{p.name}</div>
+                            <div className="text-[10px] text-muted-foreground mt-0.5">{p.desc}</div>
+                          </div>
+                          {selectedPackaging.name === p.name && (
+                            <Check className="h-4 w-4 text-gold" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  {selectedPackaging.name !== "No Outer Box" && (
+                    <>
+                      <section className="space-y-3">
+                        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                          <Layers className="h-3.5 w-3.5" /> Box Finish
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {PACKAGING_FINISHES.map(f => (
+                            <button
+                              key={f.name}
+                              onClick={() => setSelectedFinish(f)}
+                              className={`p-3 rounded-lg border text-xs font-medium text-center transition-all ${
+                                selectedFinish.name === f.name ? "bg-gold/10 border-gold text-gold" : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                              }`}
+                            >
+                              {f.name}
+                            </button>
+                          ))}
+                        </div>
+                      </section>
+
+                      <section className="space-y-3">
+                        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                          <Sparkles className="h-3.5 w-3.5" /> Embellishments
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {PACKAGING_ADDONS.map(a => {
+                            const active = selectedAddons.includes(a.name);
+                            return (
+                              <button
+                                key={a.name}
+                                onClick={() => toggleAddon(a.name)}
+                                className={`p-3 rounded-lg border text-xs font-medium text-center transition-all ${
+                                  active ? "bg-gold/10 border-gold text-gold" : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                                }`}
+                              >
+                                {a.name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* ───────── BRANDING TAB ───────── */}
+              {activeTab === "branding" && (
+                <>
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Tag className="h-3.5 w-3.5" /> Label Style
+                    </h3>
                     <div className="space-y-2">
                       {LABEL_OPTIONS.map(l => (
                         <button
@@ -723,222 +760,84 @@ function CosmeticsBuilderPage() {
                             <div className="text-xs font-semibold text-foreground">{l.name}</div>
                             <div className="text-[10px] text-muted-foreground">{l.desc}</div>
                           </div>
-                          <div className="text-xs font-bold text-gold-soft">{l.price > 0 ? `+${l.price} SAR` : "Free"}</div>
+                          {selectedLabel.name === l.name && (
+                            <Check className="h-4 w-4 text-gold" />
+                          )}
                         </button>
                       ))}
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Typography</h3>
+                  </section>
+
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Typography</h3>
                     <div className="grid grid-cols-2 gap-2">
                       {LABEL_FONTS.map(f => (
-                        <button key={f} onClick={() => setLabelFont(f)}
+                        <button
+                          key={f}
+                          onClick={() => setLabelFont(f)}
                           className={`py-3 px-4 rounded-lg border text-xs font-medium transition-all ${
                             labelFont === f ? "bg-gold/10 border-gold text-gold" : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
                           }`}
                           style={{ fontFamily: f === "Elegant Serif" ? "serif" : "sans-serif" }}
-                        >{f}</button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Label Shape</h3>
-                    <div className="grid grid-cols-3 gap-2">
-                      {LABEL_SHAPES.map(s => (
-                        <button key={s} onClick={() => setLabelShape(s)}
-                          className={`py-3 rounded-lg border text-[10px] font-medium text-center transition-all ${
-                            labelShape === s ? "bg-gold/10 border-gold text-gold" : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
-                          }`}
-                        >{s}</button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 7 — PACKAGING */}
-              {step.id === "packaging" && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Outer Box</h3>
-                    <div className="space-y-2.5">
-                      {OUTER_PACKAGING.map(p => (
-                        <button key={p.name} onClick={() => setSelectedPackaging(p)}
-                          className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                            selectedPackaging.name === p.name
-                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                              : "bg-secondary/15 border-border hover:border-gold/30"
-                          }`}
                         >
-                          <div>
-                            <div className="text-xs font-semibold text-foreground">{p.name}</div>
-                            <div className="text-[10px] text-muted-foreground mt-0.5">{p.desc}</div>
-                          </div>
-                          <div className="text-xs font-bold text-gold-soft">{p.price > 0 ? `+${p.price} SAR` : "None"}</div>
+                          {f}
                         </button>
                       ))}
                     </div>
-                  </div>
-                  {selectedPackaging.name !== "No Outer Box" && (
-                    <>
-                      <div>
-                        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Box Finish</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                          {PACKAGING_FINISHES.map(f => (
-                            <button key={f.name} onClick={() => setSelectedFinish(f)}
-                              className={`p-3 rounded-lg border text-xs font-medium text-center transition-all ${
-                                selectedFinish.name === f.name ? "bg-gold/10 border-gold text-gold" : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
-                              }`}
-                            >{f.name} (+{f.price} SAR)</button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">Embellishments</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                          {PACKAGING_ADDONS.map(a => {
-                            const active = selectedAddons.includes(a.name);
-                            return (
-                              <button key={a.name} onClick={() => toggleAddon(a.name)}
-                                className={`p-3 rounded-lg border text-xs font-medium text-center transition-all ${
-                                  active ? "bg-gold/10 border-gold text-gold" : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
-                                }`}
-                              >{a.name} (+{a.price} SAR)</button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+                  </section>
 
-              {/* STEP 8 — FORMULA */}
-              {step.id === "formula" && (
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Formula Selection</h3>
-                  <p className="text-[11px] text-muted-foreground">Choose the active formula profile for your <span className="text-foreground font-medium">{selectedProduct.name}</span>. Each formula adds 20 SAR for custom blending.</p>
-                  <div className="space-y-2.5">
-                    {formulas.map(f => (
-                      <button key={f} onClick={() => setSelectedFormula(f)}
-                        className={`w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
-                          selectedFormula === f
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                            : "bg-secondary/15 border-border hover:border-gold/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <FlaskConical className={`h-4 w-4 ${selectedFormula === f ? "text-gold" : "text-muted-foreground"}`} />
-                          <span className="text-xs font-semibold text-foreground">{f}</span>
-                        </div>
-                        {selectedFormula === f && <Check className="h-4 w-4 text-gold" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 9 — SCENT */}
-              {step.id === "scent" && (
-                <div className="space-y-3">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Fragrance / Scent</h3>
-                  <p className="text-[11px] text-muted-foreground">Add a signature scent profile to your product formula.</p>
-                  <div className="space-y-2.5">
-                    {SCENT_OPTIONS.map(s => (
-                      <button key={s.name} onClick={() => setSelectedScent(s)}
-                        className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                          selectedScent.name === s.name
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                            : "bg-secondary/15 border-border hover:border-gold/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Wind className={`h-4 w-4 ${selectedScent.name === s.name ? "text-gold" : "text-muted-foreground"}`} />
-                          <span className="text-xs font-semibold text-foreground">{s.name}</span>
-                        </div>
-                        <div className="text-xs font-bold text-gold-soft">{s.price > 0 ? `+${s.price} SAR` : "Included"}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 10 — QUANTITY */}
-              {step.id === "quantity" && (
-                <div className="space-y-6">
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Production Quantity</h3>
-                  <div className="space-y-2.5">
-                    {QUANTITY_TIERS.map(tier => (
-                      <button key={tier.value} onClick={() => { setSelectedQtyTier(tier); setCustomQty(tier.value); }}
-                        className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
-                          selectedQtyTier.value === tier.value
-                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                            : "bg-secondary/15 border-border hover:border-gold/30"
-                        }`}
-                      >
-                        <div>
-                          <div className="text-xs font-bold text-foreground">{tier.label}</div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5">
-                            {tier.discount > 0 ? `🎁 ${Math.round(tier.discount * 100)}% Bulk Discount` : "Standard MOQ"}
-                          </div>
-                        </div>
-                        {tier.discount > 0 && (
-                          <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">−{Math.round(tier.discount * 100)}%</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center text-xs mb-2">
-                      <span className="text-muted-foreground">Custom Quantity</span>
-                      <span className="font-bold text-gold">{customQty.toLocaleString()} units</span>
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold">Label Shape</h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {LABEL_SHAPES.map(s => (
+                        <button
+                          key={s}
+                          onClick={() => setLabelShape(s)}
+                          className={`py-3 rounded-lg border text-[10px] font-medium text-center transition-all ${
+                            labelShape === s ? "bg-gold/10 border-gold text-gold" : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
                     </div>
-                    <input
-                      type="range" min={500} max={10000} step={100} value={customQty}
-                      onChange={e => {
-                        const v = Number(e.target.value);
-                        setCustomQty(v);
-                        const closest = QUANTITY_TIERS.reduce((prev, curr) =>
-                          Math.abs(curr.value - v) < Math.abs(prev.value - v) ? curr : prev
-                        );
-                        setSelectedQtyTier(closest);
-                      }}
-                      className="w-full h-1 bg-border rounded-full appearance-none cursor-pointer accent-gold"
-                    />
-                  </div>
-                </div>
+                  </section>
+                </>
               )}
 
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Navigation */}
+        {/* Sticky nav footer */}
         <div className="border-t border-border bg-background/80 p-4 flex items-center gap-3 flex-shrink-0 z-20 transition-colors duration-300">
           <button
-            onClick={() => setCurrentStep(s => Math.max(0, s - 1))}
-            disabled={currentStep === 0}
+            onClick={handlePrevTab}
+            disabled={activeTabIndex === 0}
             className={`flex-1 py-3 px-4 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
-              currentStep === 0
+              activeTabIndex === 0
                 ? "border-border text-muted-foreground/30 cursor-not-allowed"
                 : "border-border hover:border-gold/30 hover:bg-secondary/40 text-foreground active:scale-[0.98]"
             }`}
           >
             <ChevronLeft className="h-3 w-3" /> Previous
           </button>
-          {currentStep === STEPS.length - 1 ? (
+          {activeTab === TABS[TABS.length - 1] ? (
             <button
-              onClick={() => setInquiryOpen(true)}
+              onClick={() => {
+                setLastTab(activeTab);
+                setReviewOpen(true);
+              }}
               className="flex-1 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[10px] font-bold uppercase tracking-wider transition-all active:scale-[0.98] shadow-gold-glow flex items-center justify-center gap-1.5"
             >
-              <DollarSign className="h-3 w-3" /> Get Quote
+              Submit Quotation <ArrowRight className="h-3.5 w-3.5" />
             </button>
           ) : (
             <button
-              onClick={() => setCurrentStep(s => Math.min(STEPS.length - 1, s + 1))}
+              onClick={handleNextTab}
               className="flex-1 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[10px] font-bold uppercase tracking-wider transition-all active:scale-[0.98] shadow-gold-glow flex items-center justify-center gap-1.5"
             >
-              Next <ChevronRight className="h-3 w-3" />
+              Next <ArrowRight className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -949,259 +848,291 @@ function CosmeticsBuilderPage() {
         {/* Gold spotlight */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[320px] h-[500px] bg-gradient-to-b from-gold/15 to-transparent blur-[80px] pointer-events-none rounded-full" />
 
-        {/* Stage label */}
-        {/* <div className="absolute top-8 text-center">
-          <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-muted-foreground">Live Preview Studio</span>
-          <p className="text-[8px] text-muted-foreground/50 mt-1">{selectedProduct.emoji} {selectedProduct.name} — {selectedContainer.name}</p>
-        </div> */}
+        {/* Stage frame (mirrors perfume) */}
+        <div className="relative w-full max-w-3xl h-[78vh] flex items-center justify-center perspective-1200">
+          <div className="absolute inset-0 rounded-[28px] overflow-hidden border border-gold/15 bg-gradient-to-b from-secondary/30 via-background/40 to-secondary/20 shadow-[0_30px_120px_-20px_rgba(0,0,0,0.9)]">
+            <motion.div
+              className="absolute -top-32 left-1/2 -translate-x-1/2 w-[120%] h-[70%] bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.18)_0%,rgba(212,175,55,0.05)_35%,transparent_70%)] pointer-events-none"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <div className="absolute top-1/3 -left-20 w-72 h-72 bg-gold/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-1/4 -right-20 w-72 h-72 bg-gold-soft/10 rounded-full blur-[100px] pointer-events-none" />
+            <div
+              className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none opacity-[0.18]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(212,175,55,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(212,175,55,0.5) 1px, transparent 1px)",
+                backgroundSize: "60px 60px",
+                transform: "perspective(600px) rotateX(60deg)",
+                transformOrigin: "bottom center",
+                maskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+              }}
+            />
+            <div className="absolute left-0 right-0 bottom-1/2 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
+            {[
+              "top-4 left-4 border-t border-l",
+              "top-4 right-4 border-t border-r",
+              "bottom-4 left-4 border-b border-l",
+              "bottom-4 right-4 border-b border-r",
+            ].map(pos => (
+              <div
+                key={pos}
+                className={`absolute ${pos} w-5 h-5 border-gold/40 pointer-events-none`}
+              />
+            ))}
+          </div>
 
-        {/* Container Preview */}
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-          className="w-full max-w-[220px] h-[60vh] flex items-center justify-center"
-          style={{ filter: `drop-shadow(0 0 40px ${selectedColor.hex.startsWith("linear") ? "rgba(246,211,101,0.2)" : selectedColor.hex + "30"})` }}
-        >
-          <ContainerPreview
-            containerName={selectedContainer.name}
-            colorHex={selectedColor.hex}
-            capacity={selectedCapacity.size}
-            brandName={brandName}
-            productName={selectedProduct.name}
-            resolvedTheme={resolvedTheme}
-          />
-        </motion.div>
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+            className="relative w-full max-w-[260px] h-[60vh] flex items-center justify-center"
+            style={{ filter: `drop-shadow(0 0 40px ${selectedColor.hex.startsWith("linear") ? "rgba(246,211,101,0.2)" : selectedColor.hex + "30"})` }}
+          >
+            <ContainerPreview
+              containerName={selectedContainer.name}
+              colorHex={selectedColor.hex}
+              capacity={selectedCapacity.size}
+              brandName={brandName}
+              productName={selectedProduct.name}
+              resolvedTheme={resolvedTheme}
+            />
+          </motion.div>
+        </div>
 
-        {/* Selected state badges */}
-        <div className="absolute bottom-14 flex flex-wrap justify-center gap-3 px-4 z-10">
+        {/* Selected-state badges (mirrors perfume) */}
+        <div className="absolute bottom-16 flex flex-wrap justify-center gap-2 px-4 z-10">
           {[
-            { label: selectedProduct.name,    icon: "" },
-            { label: selectedContainer.name,  icon: "" },
-            { label: selectedCapacity.size,   icon: "" },
-            { label: selectedColor.name,      icon: "" },
+            { label: selectedProduct.name,    icon: <Package className="h-3 w-3 text-gold" /> },
+            { label: selectedContainer.name,  icon: <Layers className="h-3 w-3 text-gold" /> },
+            { label: selectedCapacity.size,   icon: <Droplets className="h-3 w-3 text-gold" /> },
+            { label: selectedColor.name,      icon: <Palette className="h-3 w-3 text-gold" /> },
           ].map(badge => (
-            <div key={badge.label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow text-[10px] text-muted-foreground transition-colors">
-              <span>{badge.icon}</span>
+            <div
+              key={badge.label}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card/40 backdrop-blur-md shadow-lg text-[10px] text-foreground transition-colors"
+            >
+              {badge.icon}
               <span>{badge.label}</span>
-              
             </div>
           ))}
         </div>
 
         {/* Quality badges */}
-        <div className="absolute bottom-4 flex gap-4 z-10">
+        <div className="absolute bottom-4 flex gap-6 z-10">
           {[
             { icon: ShieldCheck, text: "ISO Certified" },
             { icon: Award, text: "HALAL Compliant" },
             { icon: Layers, text: "Eco-Sourced" },
           ].map(badge => (
-            <div key={badge.text} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow text-[10px] text-muted-foreground">
-              <badge.icon className="h-3 w-3 text-gold" />
+            <div
+              key={badge.text}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow-lg text-[10px] text-muted-foreground transition-colors duration-300"
+            >
+              <badge.icon className="h-3.5 w-3.5 text-gold" />
               <span>{badge.text}</span>
             </div>
           ))}
         </div>
       </main>
 
-      {/* ═══════ COLUMN 3 — PRICING PANEL (RIGHT) ═══════ */}
-      <aside className="w-full lg:w-[340px] lg:flex-shrink-0 border-l border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 justify-between transition-colors duration-300">
-        
-        {/* Specs & Pricing list */}
-        <div className="p-6 border-b border-border flex-1 overflow-y-auto scrollbar-hide">
-          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-5">Configuration & Pricing</h3>
-          <div className="space-y-3">
-            {[
-              { label: "Product",    value: selectedProduct.name,    price: selectedProduct.basePrice },
-              { label: "Container",  value: selectedContainer.name,  price: pricing.container },
-              { label: "Material",   value: selectedMaterial.name,   price: pricing.material },
-              { label: "Capacity",   value: selectedCapacity.size,   price: pricing.capacity },
-              { label: "Color",      value: selectedColor.name,      price: pricing.color },
-              { label: "Cap",        value: selectedCap.name,        price: pricing.cap },
-              { label: "Label",      value: selectedLabel.name,      price: pricing.label },
-              { label: "Packaging",  value: selectedPackaging.name,  price: pricing.packaging },
-              { label: "Formula",    value: selectedFormula || "—",  price: pricing.formula },
-              { label: "Scent",      value: selectedScent.name,      price: pricing.scent },
-            ].map(spec => (
-              <div key={spec.label} className="flex justify-between items-start text-xs border-b border-border/50 pb-2">
-                <div className="space-y-0.5">
-                  <div className="text-muted-foreground font-light text-[10px] uppercase tracking-wider">{spec.label}</div>
-                  <div className="text-foreground font-medium">{spec.value}</div>
-                </div>
-                <div className="text-[10px] font-bold text-gold-soft whitespace-nowrap ml-2">+{spec.price} SAR</div>
-              </div>
-            ))}
-            {pricing.addons > 0 && (
-              <div className="flex justify-between items-start text-xs border-b border-border/50 pb-2">
-                <div className="space-y-0.5">
-                  <div className="text-muted-foreground font-light text-[10px] uppercase tracking-wider">Add-Ons</div>
-                  <div className="text-foreground font-medium">{selectedAddons.join(", ")}</div>
-                </div>
-                <div className="text-[10px] font-bold text-gold-soft">+{pricing.addons} SAR</div>
-              </div>
-            )}
-          </div>
-
-          {/* Subtotal */}
-          <div className="mt-5 pt-4 border-t border-border flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">Unit Subtotal</span>
-            <span className="text-xs font-bold text-foreground">{pricing.subtotal} SAR</span>
-          </div>
-
-          {/* Delivery info */}
-          <div className="mt-4 p-4 rounded-xl border border-border bg-secondary/20 space-y-2.5">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5 text-gold-soft" />
-              <span>Est. Delivery: <strong className="text-foreground">21 – 28 Days</strong></span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5 text-gold-soft" />
-              <span>Min. Order: <strong className="text-foreground">500 Units</strong></span>
-            </div>
-          </div>
-        </div>
-
-        {/* Pricing footer */}
-        <div className="p-6 border-t border-border bg-secondary/15 flex-shrink-0 space-y-4">
-          {/* Qty & Discount */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Quantity</span>
-              <span className="font-bold text-gold">{pricing.qty.toLocaleString()} Units</span>
-            </div>
-            {pricing.discountPct > 0 && (
-              <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">
-                <TrendingDown className="h-3.5 w-3.5" />
-                <span>{pricing.discountPct}% Volume Discount Applied</span>
-              </div>
-            )}
-          </div>
-
-          {/* Unit & Total */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground">Wholesale / Unit</span>
-              <span className="font-semibold text-foreground">{pricing.unitPrice.toFixed(2)} SAR</span>
-            </div>
-            <div className="flex justify-between items-end">
-              <span className="text-xs text-muted-foreground pb-1">Total Estimate</span>
-              <div className="flex items-baseline text-gold">
-                <span className="font-display text-2xl font-bold tracking-tight">
-                  {Math.round(pricing.total).toLocaleString()}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider ml-1 text-gold-soft">SAR</span>
-              </div>
-            </div>
-          </div>
-
-          {/* CTAs */}
-          <div className="space-y-2 pt-1">
-            <button
-              onClick={() => setInquiryOpen(true)}
-              className="w-full py-3.5 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow flex items-center justify-center gap-2 text-xs"
-            >
-              <DollarSign className="h-4 w-4" /> Request Samples & Quote
-            </button>
-            <button
-              onClick={() => setSuccessOpen(true)}
-              className="w-full py-2.5 rounded-xl border border-border hover:border-gold/30 hover:bg-secondary/40 transition-all text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
-            >
-              Save Design Draft
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* ═══════ INQUIRY MODAL ═══════ */}
+      {/* ═══════ REVIEW & SUBMIT MODAL ═══════ */}
       <AnimatePresence>
-        {inquiryOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        {reviewOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+          >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-md p-8 rounded-2xl bg-card border border-white/10 shadow-2xl relative overflow-hidden"
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 240, damping: 24 }}
+              className="w-full max-w-2xl my-8 bg-card border border-gold/20 rounded-2xl shadow-2xl relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold to-gold-soft" />
-              <button onClick={() => setInquiryOpen(false)} className="absolute top-4 right-4 p-1.5 rounded-full border border-white/10 hover:bg-white/10 transition-colors">
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
-              <div className="mb-6">
-                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-1">{selectedProduct.emoji} {selectedProduct.name} Configurator</div>
-                <h2 className="font-display text-2xl font-semibold text-foreground mb-2">Request OEM Quotation</h2>
-                <p className="text-xs text-muted-foreground">
-                  A dedicated AlKhuraiji consultant will respond with your custom cosmetics wholesale pricing within 24 hours.
-                </p>
+              <div className="bg-gradient-to-r from-gold to-gold-soft h-1.5" />
+              <div className="p-8">
+                {submitted ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-6">
+                      <Check className="h-8 w-8 text-gold stroke-[2.5]" />
+                    </div>
+                    <h2 className="font-display text-2xl font-bold mb-2">
+                      Quotation Request Sent
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Your specification document has been emailed to:
+                    </p>
+                    <p className="text-sm font-mono text-gold mb-8">
+                      fshahriar@alkhuraii-afpc.com
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-8">
+                      Our luxury manufacturing consultant will respond within 24 hours.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setReviewOpen(false);
+                        setSubmitted(false);
+                      }}
+                      className="w-full py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow text-xs"
+                    >
+                      Return to Builder
+                    </button>
+                  </div>
+                ) : submitting ? (
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      Sending your specification document...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Document header */}
+                    <div className="text-center mb-6 pb-6 border-b border-border">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-2">
+                        Cosmetics Specification Document
+                      </div>
+                      <h2 className="font-display text-3xl font-bold mb-1">
+                        {brandName || selectedProduct.name.toUpperCase()}
+                      </h2>
+                      <p className="text-xs text-muted-foreground">
+                        Prepared on{" "}
+                        {new Date().toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* Spec sections (no price card) */}
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-5 mb-6 text-xs">
+                      <div className="col-span-2">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Product
+                        </h4>
+                      </div>
+                      <SpecRow label="Category" value={selectedProduct.name} />
+                      <SpecRow label="Brand Name" value={brandName || "—"} />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Container & Material
+                        </h4>
+                      </div>
+                      <SpecRow label="Container Type" value={selectedContainer.name} />
+                      <SpecRow label="Material" value={selectedMaterial.name} />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Capacity & Color
+                        </h4>
+                      </div>
+                      <SpecRow label="Capacity" value={selectedCapacity.size} />
+                      <SpecRow label="Color & Finish" value={selectedColor.name} />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Cap
+                        </h4>
+                      </div>
+                      <SpecRow label="Cap Type" value={selectedCap.name} />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Fragrance Composition
+                        </h4>
+                      </div>
+                      <SpecRow label="Formula" value={selectedFormula || "—"} />
+                      <SpecRow label="Scent" value={selectedScent.name} />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Packaging
+                        </h4>
+                      </div>
+                      <SpecRow label="Box Type" value={selectedPackaging.name} />
+                      <SpecRow
+                        label="Finish"
+                        value={
+                          selectedPackaging.name === "No Outer Box"
+                            ? "—"
+                            : selectedFinish.name
+                        }
+                      />
+                      {selectedAddons.length > 0 && (
+                        <div className="col-span-2">
+                          <SpecRow
+                            label="Add-Ons"
+                            value={selectedAddons.join(", ")}
+                          />
+                        </div>
+                      )}
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Branding
+                        </h4>
+                      </div>
+                      <SpecRow label="Label Style" value={selectedLabel.name} />
+                      <SpecRow label="Label Font" value={labelFont} />
+                      <SpecRow label="Label Shape" value={labelShape} />
+                    </div>
+
+                    {/* Action buttons (no price card) */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setReviewOpen(false);
+                          setActiveTab(lastTab);
+                        }}
+                        className="flex-1 py-3 rounded-xl border border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-gold/30 transition-all"
+                      >
+                        ← Modify
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSubmitting(true);
+                          setTimeout(() => {
+                            setSubmitting(false);
+                            setSubmitted(true);
+                            // TODO: replace with real API call to POST /api/send-quotation
+                            //       with body containing all selections. The API will
+                            //       email the document to fshahriar@alkhuraii-afpc.com.
+                          }, 1500);
+                        }}
+                        className="flex-1 py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow text-xs"
+                      >
+                        Submit & Email →
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-              <form onSubmit={e => { e.preventDefault(); setInquiryOpen(false); setSuccessOpen(true); }} className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Representative Name</label>
-                  <input type="text" required value={clientName} onChange={e => setClientName(e.target.value)}
-                    className="w-full mt-1.5 px-4 py-3 rounded-lg bg-black/40 border border-white/10 focus:border-gold outline-none text-white transition-colors text-sm"
-                    placeholder="Full Name" />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Business Email</label>
-                  <input type="email" required value={clientEmail} onChange={e => setClientEmail(e.target.value)}
-                    className="w-full mt-1.5 px-4 py-3 rounded-lg bg-black/40 border border-white/10 focus:border-gold outline-none text-white transition-colors text-sm"
-                    placeholder="name@company.com" />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Phone Number</label>
-                  <input type="tel" required value={clientPhone} onChange={e => setClientPhone(e.target.value)}
-                    className="w-full mt-1.5 px-4 py-3 rounded-lg bg-black/40 border border-white/10 focus:border-gold outline-none text-white transition-colors text-sm"
-                    placeholder="+966 50 000 0000" />
-                </div>
-                {/* Quote Summary */}
-                <div className="p-4 rounded-xl bg-gold/5 border border-gold/20 space-y-1 text-xs">
-                  <div className="flex justify-between text-muted-foreground"><span>Product</span><span className="text-foreground font-medium">{selectedProduct.name}</span></div>
-                  <div className="flex justify-between text-muted-foreground"><span>Container</span><span className="text-foreground font-medium">{selectedContainer.name}</span></div>
-                  <div className="flex justify-between text-muted-foreground"><span>Quantity</span><span className="text-foreground font-medium">{pricing.qty.toLocaleString()} Units</span></div>
-                  <div className="flex justify-between text-gold font-bold border-t border-gold/20 pt-2 mt-2"><span>Estimate</span><span>{Math.round(pricing.total).toLocaleString()} SAR</span></div>
-                </div>
-                <div className="pt-2 flex gap-3">
-                  <button type="button" onClick={() => setInquiryOpen(false)}
-                    className="flex-1 py-3 rounded-xl border border-white/10 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-white transition-colors">
-                    Cancel
-                  </button>
-                  <button type="submit"
-                    className="flex-1 py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-colors shadow-gold-glow text-xs">
-                    Submit Inquiry
-                  </button>
-                </div>
-              </form>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
 
-      {/* ═══════ SUCCESS MODAL ═══════ */}
-      <AnimatePresence>
-        {successOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm p-8 rounded-2xl bg-card border border-white/10 text-center shadow-2xl relative"
-            >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold to-gold-soft rounded-t-2xl" />
-              <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-6">
-                <Check className="h-8 w-8 text-gold stroke-[2.5]" />
-              </div>
-              <div className="text-2xl mb-2">{selectedProduct.emoji}</div>
-              <h2 className="font-display text-2xl font-semibold mb-2 text-foreground">Inquiry Submitted</h2>
-              <p className="text-xs text-muted-foreground mb-2">
-                Your <strong className="text-foreground">{selectedProduct.name}</strong> cosmetic configuration has been logged. Our team will prepare a sample kit and detailed quotation.
-              </p>
-              <p className="text-[10px] text-gold/80 font-medium mb-6">Response within 24 business hours</p>
-              <button onClick={() => setSuccessOpen(false)}
-                className="w-full py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-colors shadow-gold-glow text-xs">
-                Continue Designing
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+function SpecRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-start gap-4 py-1.5 border-b border-border/40">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className="text-xs font-medium text-foreground text-right max-w-[60%]">
+        {value}
+      </span>
     </div>
   );
 }
