@@ -8,12 +8,9 @@ import {
   Box,
   Check,
   ShieldCheck,
-  TrendingDown,
   Layers,
   Award,
   ArrowRight,
-  Calendar,
-  DollarSign,
   Unlock,
 } from "lucide-react";
 import { useAdminStore } from "@/store/adminStore";
@@ -314,32 +311,32 @@ const PUMP_CATEGORIES: PumpCategory[] = [
     description: "Premium spray pump with decorative collar neck",
     variants: [
       { id: "pwc-black", name: "Black", color: "Black", price: 18, image: blackPwc },
-      { id: "pwc-gold", name: "Gold", color: "Gold", price: 28, image: goldPwc },
-      { id: "pwc-rose", name: "Rose", color: "Rose", price: 26, image: rosePwc },
+      // { id: "pwc-gold", name: "Gold", color: "Gold", price: 28, image: goldPwc },
+      // { id: "pwc-rose", name: "Rose", color: "Rose", price: 26, image: rosePwc },
       { id: "pwc-silver", name: "Silver", color: "Silver", price: 22, image: silverPwc },
     ],
   },
-  {
-    id: "pwtc",
-    name: "Pump without Collar",
-    description: "Sleek minimalist spray pump, no collar",
-    variants: [
-      { id: "pwtc-black", name: "Black", color: "Black", price: 14, image: blackPwtc },
-      { id: "pwtc-gold", name: "Gold", color: "Gold", price: 22, image: goldPwtc },
-      { id: "pwtc-rose", name: "Rose", color: "Rose", price: 20, image: rosePwtc },
-      { id: "pwtc-silver", name: "Silver", color: "Silver", price: 18, image: silverPwtc },
-    ],
-  },
-  {
-    id: "sc",
-    name: "Step Collar",
-    description: "Stepped collar for premium threaded closures",
-    variants: [
-      { id: "sc-black", name: "Black", color: "Black", price: 16, image: blackSc },
-      { id: "sc-gold", name: "Gold", color: "Gold", price: 24, image: goldSc },
-      { id: "sc-silver", name: "Silver", color: "Silver", price: 20, image: silverSc },
-    ],
-  },
+  // {
+  //   id: "pwtc",
+  //   name: "Pump without Collar",
+  //   description: "Sleek minimalist spray pump, no collar",
+  //   variants: [
+  //     { id: "pwtc-black", name: "Black", color: "Black", price: 14, image: blackPwtc },
+  //     { id: "pwtc-gold", name: "Gold", color: "Gold", price: 22, image: goldPwtc },
+  //     { id: "pwtc-rose", name: "Rose", color: "Rose", price: 20, image: rosePwtc },
+  //     { id: "pwtc-silver", name: "Silver", color: "Silver", price: 18, image: silverPwtc },
+  //   ],
+  // },
+  // {
+  //   id: "sc",
+  //   name: "Step Collar",
+  //   description: "Stepped collar for premium threaded closures",
+  //   variants: [
+  //     { id: "sc-black", name: "Black", color: "Black", price: 16, image: blackSc },
+  //     { id: "sc-gold", name: "Gold", color: "Gold", price: 24, image: goldSc },
+  //     { id: "sc-silver", name: "Silver", color: "Silver", price: 20, image: silverSc },
+  //   ],
+  // },
 ];
 
 // Lookup map for fast image retrieval by pump id
@@ -362,30 +359,32 @@ const getPumpPrice = (pumpId: string): number => {
 };
 
 const PACKAGING_TYPES = [
-  { name: "Standard Box", price: 15 },
-  { name: "Magnetic Luxury Box", price: 45 },
-  { name: "Drawer Style Box", price: 35 },
-  { name: "Premium Rigid Box", price: 50 },
+  { name: "Standard Soft Box"},
+  { name: "Hard Box"},
+  // { name: "Magnetic Luxury Box", price: 45 },
+  // { name: "Drawer Style Box", price: 35 },
+  // { name: "Premium Rigid Box", price: 50 },
 ];
 
 const PACKAGING_FINISHES = [
-  { name: "Matte", price: 10 },
-  { name: "Gloss", price: 8 },
-  { name: "Soft Touch", price: 20 },
-  { name: "Velvet Finish", price: 30 },
+  { name: "Texture"},
+  { name: "Print"},
+  { name: "Sticker"},
+  { name: "Others"},
 ];
 
 const PACKAGING_ADDONS = [
-  { name: "Foil Stamping", price: 15 },
-  { name: "Embossing", price: 15 },
-  { name: "Spot UV", price: 12 },
-  { name: "Ribbon Wrap", price: 18 },
+  // { name: "Foil Stamping", price: 15 },
+  // { name: "Embossing", price: 15 },
+  // { name: "Spot UV", price: 12 },
+  // { name: "Ribbon Wrap", price: 18 },
 ];
 
 const NOTES = {
-  top: ["Citrus", "Bergamot", "Lemon", "Lavender", "Mint"],
-  middle: ["Rose", "Jasmine", "Oud", "Cinnamon", "Vanilla"],
-  base: ["Musk", "Sandalwood", "Amber", "Patchouli", "Leather"],
+  // top: ["Citrus", "Bergamot", "Lemon", "Lavender", "Mint"],
+  // middle: ["Rose", "Jasmine", "Oud", "Cinnamon", "Vanilla"],
+  // base: ["Musk", "Sandalwood", "Amber", "Patchouli", "Leather"],
+    top: ["French","Niche","Amber","Others"]
 };
 
 const INTENSITIES = [
@@ -403,9 +402,6 @@ function BuilderPage() {
   const [category, setCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("bottle"); // bottle, cap, fragrance, packaging, branding
 
-  const [inquiryModalOpen, setInquiryModalOpen] = useState(false);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
-
   const { theme } = useTheme();
   const [resolvedTheme, setResolvedTheme] = useState("dark");
 
@@ -417,11 +413,6 @@ function BuilderPage() {
       setResolvedTheme(theme || "dark");
     }
   }, [theme]);
-
-  // Client Representative Details
-  const [clientName, setClientName] = useState("");
-  const [clientEmail, setClientEmail] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
 
   // Ref for the custom-capacity input in the Bottle tab (focused when "Others" is clicked)
   const customCapacityRef = useRef<HTMLInputElement>(null);
@@ -724,7 +715,7 @@ function BuilderPage() {
       </button>
 
       {/* ================= COLUMN 1: LEFT SIDEBAR OPTIONS (380px) ================= */}
-      <aside className="w-full lg:w-[380px] lg:flex-shrink-0 border-r border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 transition-colors duration-300">
+      <aside className="w-full lg:w-[480px] lg:flex-shrink-0 border-r border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 transition-colors duration-300">
         {/* Brand configuration text entry */}
         <div className="p-6 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -1300,7 +1291,7 @@ function BuilderPage() {
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
                     Embellishments & Add-ons
                   </h3>
@@ -1322,7 +1313,7 @@ function BuilderPage() {
                       );
                     })}
                   </div>
-                </div>
+                </div> */}
               </motion.div>
             )}
 
@@ -1808,267 +1799,6 @@ function BuilderPage() {
           ))}
         </div>
       </main>
-
-      {/* ================= COLUMN 3: STICKY WHOLESALE PRICING (RIGHT) ================= */}
-      <aside className="w-full lg:w-[340px] lg:flex-shrink-0 border-l border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 justify-between transition-colors duration-300">
-        {/* Selection items summaries with specific price markup indicators */}
-        <div className="p-6 border-b border-border flex-1 overflow-y-auto scrollbar-hide">
-          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-4">
-            Design Specs & Pricing
-          </h3>
-
-          <div className="space-y-3.5">
-            {[
-              {
-                label: "Silhouette Shape",
-                value: store.bottleSilhouette,
-                price: pricing.bottleBase,
-              },
-              { label: "Glass Material", value: store.bottleMaterial, price: pricing.matPrice },
-              { label: "Glass Finishing", value: store.bottleColor, price: pricing.colPrice },
-              {
-                label: "Cap Style Accent",
-                value: (() => {
-                  for (const cat of CAP_CATEGORIES) {
-                    const v = cat.variants.find((x) => x.id === store.capStyle);
-                    if (v) return v.name;
-                  }
-                  return store.capStyle;
-                })(),
-                price: pricing.capPrice,
-              },
-              {
-                label: "Pump",
-                value: (() => {
-                  for (const cat of PUMP_CATEGORIES) {
-                    const v = cat.variants.find((x) => x.id === store.pumpType);
-                    if (v) return `${cat.name} – ${v.name}`;
-                  }
-                  return store.pumpType;
-                })(),
-                price: pricing.pumpPrice,
-              },
-              {
-                label: "Olfactive Fragrance",
-                value: store.fragrance.intensity || "Balanced",
-                price: pricing.fragranceTotalPrice,
-              },
-              {
-                label: "Outer Box Pack",
-                value: store.packaging.type,
-                price: pricing.packagingTotalPrice,
-              },
-            ].map((spec) => (
-              <div
-                key={spec.label}
-                className="flex justify-between items-start text-xs border-b border-border pb-2"
-              >
-                <div className="space-y-0.5">
-                  <div className="text-muted-foreground font-light text-[10px] uppercase tracking-wider">
-                    {spec.label}
-                  </div>
-                  <div className="text-foreground font-medium">{spec.value}</div>
-                </div>
-                <div className="text-[10px] font-bold text-gold-soft whitespace-nowrap">
-                  +{spec.price} SAR
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Wholesale B2B parameters */}
-          <div className="mt-8 p-4 rounded-xl border border-border bg-secondary/20 space-y-3 flex-shrink-0">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-4 w-4 text-gold-soft" />
-              <span>
-                Est. Delivery: <strong className="text-foreground">18 - 24 Days</strong>
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-gold-soft" />
-              <span>
-                Wholesale MOQ: <strong className="text-foreground">100 Units</strong>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Dynamic bulk calculator */}
-        <div className="p-6 border-t border-border bg-secondary/15 flex-shrink-0">
-          {/* Slider */}
-          <div className="space-y-3 mb-6">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground">Production Units</span>
-              <span className="font-bold text-gold">{store.quantity.toLocaleString()} Bottles</span>
-            </div>
-            <input
-              type="range"
-              min="100"
-              max="5000"
-              step="100"
-              value={store.quantity}
-              onChange={(e) => store.setQuantity(Number(e.target.value))}
-              className="w-full h-1 bg-border rounded-lg appearance-none cursor-pointer accent-gold"
-            />
-            {pricing.discountPercent > 0 && (
-              <div className="flex items-center gap-1.5 text-[9px] text-emerald-400 font-semibold uppercase tracking-wider">
-                <TrendingDown className="h-3.5 w-3.5" />
-                <span>{pricing.discountPercent}% High-Volume Discount Applied</span>
-              </div>
-            )}
-          </div>
-
-          {/* Price display in Riyal */}
-          <div className="space-y-4 mb-6">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">Wholesale Rate / Unit</span>
-              <span className="text-xs font-semibold text-foreground">
-                {pricing.unitPrice.toFixed(2)} SAR
-              </span>
-            </div>
-            <div className="flex justify-between items-end">
-              <span className="text-xs text-muted-foreground pb-1">Total Estimated wholesale</span>
-              <div className="text-right">
-                <div className="flex items-baseline justify-end text-gold">
-                  <span className="font-display text-2xl font-bold tracking-tight">
-                    {pricing.totalPrice.toLocaleString()}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider ml-1 text-gold-soft">
-                    SAR
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action CTAs */}
-          <div className="space-y-2">
-            <button
-              onClick={() => setInquiryModalOpen(true)}
-              className="w-full py-3.5 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow flex items-center justify-center gap-2 text-xs"
-            >
-              <DollarSign className="h-4 w-4" /> Request Samples & Wholesale Quote
-            </button>
-            <button
-              onClick={() => setSuccessModalOpen(true)}
-              className="w-full py-2.5 rounded-xl border border-border hover:border-gold/30 hover:bg-secondary/40 transition-all text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
-            >
-              Save Brand Design Draft
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* ================= INQUIRY MODALS ================= */}
-      {/* 1. Request Quotation Form */}
-      {inquiryModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-md p-8 rounded-2xl bg-card border border-white/10 shadow-2xl relative overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold to-gold-soft" />
-            <h2 className="font-display text-2xl font-semibold mb-2">Request OEM Quotation</h2>
-            <p className="text-xs text-muted-foreground mb-6">
-              Enter your contact credentials below. A dedicated corporate AlKhuraiji consultant will
-              get back to you with custom wholesale pricing quotes within 24 hours.
-            </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setInquiryModalOpen(false);
-                setSuccessModalOpen(true);
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Representative Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  className="w-full mt-1.5 px-4 py-3 rounded-lg bg-black/40 border border-white/10 focus:border-gold outline-none text-white transition-colors text-sm"
-                  placeholder="Representative Name"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Business Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={clientEmail}
-                  onChange={(e) => setClientEmail(e.target.value)}
-                  className="w-full mt-1.5 px-4 py-3 rounded-lg bg-black/40 border border-white/10 focus:border-gold outline-none text-white transition-colors text-sm"
-                  placeholder="name@company.com"
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Contact Phone Number
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
-                  className="w-full mt-1.5 px-4 py-3 rounded-lg bg-black/40 border border-white/10 focus:border-gold outline-none text-white transition-colors text-sm"
-                  placeholder="+966 50 000 0000"
-                />
-              </div>
-
-              <div className="pt-4 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setInquiryModalOpen(false)}
-                  className="flex-1 py-3 rounded-xl border border-white/10 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-colors shadow-gold-glow text-xs"
-                >
-                  Submit Inquiry
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* 2. Success dialog */}
-      {successModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="w-full max-w-sm p-8 rounded-2xl bg-card border border-white/10 text-center shadow-2xl relative"
-          >
-            <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-6">
-              <Check className="h-8 w-8 text-gold stroke-[2.5]" />
-            </div>
-            <h2 className="font-display text-2xl font-semibold mb-2">Inquiry Logged</h2>
-            <p className="text-xs text-muted-foreground mb-6">
-              Your bespoke packaging & fragrance specifications have been logged securely. Sample
-              kits will be arranged.
-            </p>
-
-            <button
-              onClick={() => setSuccessModalOpen(false)}
-              className="w-full py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-colors shadow-gold-glow text-xs"
-            >
-              Continue Customization
-            </button>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 }
