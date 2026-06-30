@@ -9,32 +9,12 @@ import {
   useTransform,
 } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import {
-  Apple,
-  ArrowRight,
-  ArrowUpRight,
-  Beaker,
-  FlaskConical,
-  HeartPulse,
-  ShoppingBag,
-  Sparkles,
-  Wrench,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { useI18n } from "@/i18n/context";
 import { SectionHeading } from "@/components/ui-custom/SectionHeading";
 
-const ICONS = {
-  perfume: Sparkles,
-  skincare: Beaker,
-  retail: ShoppingBag,
-  luxury: FlaskConical,
-  wellness: HeartPulse,
-  personal: Apple,
-  industrial: Wrench,
-} as const;
-
 type IndustryItem = {
-  id: keyof typeof ICONS;
+  id: string;
   title: string;
   desc: string;
 };
@@ -85,27 +65,12 @@ function Marquee({
         className="flex w-max gap-3 py-2 will-change-transform"
       >
         {loop.map((ind, i) => {
-          const Icon = ICONS[ind.id] ?? Wrench;
           return (
             <div
-              // Key includes the position so React re-renders during wrap, but stable per slot
               key={`${ind.id}-${i}`}
-              className="group/pill relative flex shrink-0 items-center gap-2.5 rounded-full border border-border bg-card/80 px-4 py-2.5 backdrop-blur transition-colors hover:border-primary/60 hover:bg-card"
+              className="group/pill relative flex shrink-0 items-center rounded-full border border-border bg-card/80 px-5 py-2.5 backdrop-blur transition-colors hover:border-primary/60 hover:bg-card"
             >
-              <motion.span
-                animate={prefersReducedMotion ? undefined : { y: [0, -2, 0] }}
-                transition={{
-                  duration: 3 + (i % 5) * 0.3,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                  delay: (i % 7) * 0.15,
-                }}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary"
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </motion.span>
-              <span className="whitespace-nowrap text-xs font-medium text-foreground/85">
+              <span className="whitespace-nowrap text-xs font-medium uppercase tracking-[0.15em] text-foreground/85">
                 {ind.title}
               </span>
             </div>
@@ -130,7 +95,6 @@ function Spotlight({
   prefersReducedMotion: boolean;
 }) {
   const active = items[activeIndex];
-  const Icon = ICONS[active.id] ?? Wrench;
 
   // Auto-rotate
   useEffect(() => {
@@ -183,18 +147,6 @@ function Spotlight({
                 </span>
                 Featured Sector
               </div>
-
-              <motion.div
-                initial={{
-                  scale: prefersReducedMotion ? 1 : 0.6,
-                  rotate: prefersReducedMotion ? 0 : -15,
-                }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 220, damping: 16, delay: 0.05 }}
-                className="mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20"
-              >
-                <Icon className="h-7 w-7" />
-              </motion.div>
 
               <h3 className="font-display text-3xl font-semibold leading-tight text-foreground md:text-4xl">
                 {active.title}
@@ -256,7 +208,6 @@ function ChipRow({
   return (
     <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
       {items.map((ind, i) => {
-        const Icon = ICONS[ind.id] ?? Wrench;
         const isActive = i === activeIndex;
         return (
           <button
@@ -264,7 +215,7 @@ function ChipRow({
             type="button"
             onClick={() => setActiveIndex(i)}
             aria-pressed={isActive}
-            className={`group relative flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+            className={`group relative flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               isActive
                 ? "border-primary bg-primary/10 text-foreground"
                 : "border-border bg-card/60 text-foreground/70 hover:border-primary/40 hover:text-foreground"
@@ -277,15 +228,6 @@ function ChipRow({
                 className="absolute inset-0 rounded-full bg-primary/15 ring-1 ring-primary/40"
               />
             )}
-            <span className="relative inline-flex h-5 w-5 items-center justify-center text-primary">
-              <motion.span
-                whileHover={prefersReducedMotion ? undefined : { rotate: 18, scale: 1.15 }}
-                transition={{ type: "spring", stiffness: 400, damping: 18 }}
-                className="inline-flex"
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </motion.span>
-            </span>
             <span className="relative whitespace-nowrap">{ind.title}</span>
             <span
               className={`relative inline-flex transition-opacity ${

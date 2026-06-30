@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Check,
@@ -15,6 +15,10 @@ import {
   Sparkles,
   ChevronLeft,
   ArrowRight,
+  Plus,
+  Minus,
+  FileText,
+  Hash,
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -70,13 +74,23 @@ const MATERIALS = [
   { name: "Luxury Matte",       price: 30, desc: "Velvety soft-touch matte ABS",   gradient: "from-stone-200/20 to-neutral-200/20" },
 ];
 
-const CAPACITIES = [
-  { size: "15ml",  price: 0,  scaleFactor: 0.60 },
-  { size: "30ml",  price: 5,  scaleFactor: 0.72 },
-  { size: "50ml",  price: 8,  scaleFactor: 0.82 },
-  { size: "100ml", price: 12, scaleFactor: 1.00 },
-  { size: "200ml", price: 18, scaleFactor: 1.18 },
+// Capacities are now RANGES, not individual sizes. The user picks a range
+// (15-50, 75-200, 200-500) which gives a quick choice, OR picks "Others"
+// and types a custom ml value. Custom capacities use the same shape as
+// the ranges — `size` is a display label, `scaleFactor` is used by the
+// preview, and `price` is the wholesale bump for that range.
+const CAPACITY_RANGES = [
+  { id: "15-50",   size: "15-50ml",   price: 0,  scaleFactor: 0.72, min: 15, max: 50,   isCustom: false },
+  { id: "75-200",  size: "75-200ml",  price: 12, scaleFactor: 1.00, min: 75, max: 200,  isCustom: false },
+  { id: "200-500", size: "200-500ml", price: 22, scaleFactor: 1.20, min: 200, max: 500, isCustom: false },
+  // "Others" is a special entry: when selected, the user enters a custom ml
+  // value via an input box. `customValue` holds the typed number; when set
+  // it overrides `size` for the spec summary and the SVG preview.
+  { id: "others",  size: "Others",    price: 0,  scaleFactor: 1.00, min: 0,  max: 0,    isCustom: true },
 ];
+
+// Keep `CAPACITIES` as an alias so any legacy references still compile.
+const CAPACITIES = CAPACITY_RANGES;
 
 const COLOR_FINISHES = [
   { name: "Pearl White",    hex: "#f8f6f0", price: 8 },
@@ -160,7 +174,7 @@ const SCENT_OPTIONS = [
   { name: "Custom Blend",    price: 25 },
 ];
 
-const TABS = ["bottle", "cap", "fragrance", "packaging", "branding"] as const;
+const TABS = ["bottle", "fragrance", "packaging", "branding", "others"] as const;
 type TabId = typeof TABS[number];
 
 // ─── CONTAINER SVG PREVIEW ───────────────────────────────────────────────────
@@ -334,7 +348,6 @@ function CosmeticsBuilderPage() {
   const [selectedProduct, setSelectedProduct] = useState(initialProduct);
   const [selectedContainer, setSelectedContainer] = useState(CONTAINER_TYPES.Bottles[1]); // Pump Bottle default
   const [selectedMaterial, setSelectedMaterial] = useState(MATERIALS[0]);
-  const [selectedCapacity, setSelectedCapacity] = useState(CAPACITIES[2]); // 50ml default
   const [selectedColor, setSelectedColor] = useState(COLOR_FINISHES[0]);
   const [selectedCap, setSelectedCap] = useState(CAP_TYPES[0]);
   const [selectedLabel, setSelectedLabel] = useState(LABEL_OPTIONS[0]);
@@ -346,6 +359,20 @@ function CosmeticsBuilderPage() {
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [selectedFormula, setSelectedFormula] = useState("");
   const [selectedScent, setSelectedScent] = useState(SCENT_OPTIONS[0]);
+  // Capacity state now stores the range object AND an optional custom ml value
+  // (only used when the user picks "Others"). `customCapacity` is kept as a
+  // string in state so the input can be cleared without forcing a number.
+  const [selectedCapacity, setSelectedCapacity] = useState(CAPACITY_RANGES[1]); // 75-200ml default
+  const [customCapacity, setCustomCapacity] = useState("");
+  // Ref used to focus the custom-capacity input the moment the user picks
+  // the "Others" range so they can type immediately without clicking.
+  const customCapacityRef = useRef<HTMLInputElement>(null);
+  // Order quantity (MOQ) and free-form user description — collected in the
+  // "Others" tab after Branding and included in the final quotation form.
+  // Min 50 units (sample/pilot batch), max 100,000 units (mass production).
+  const [quantity, setQuantity] = useState(500);
+  const [userDescription, setUserDescription] = useState("");
+  const USER_DESCRIPTION_MAX = 500;
 
   // Sync formula when product changes
   useEffect(() => {
@@ -498,7 +525,8 @@ function CosmeticsBuilderPage() {
                     ))}
                   </section>
 
-                  <section className="space-y-3">
+                  {/* MATERIAL SECTION — HIDDEN per user request (no longer needed). */}
+                  {/* <section className="space-y-3">
                     <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
                       <Layers className="h-3.5 w-3.5" /> Material
                     </h3>
@@ -518,31 +546,104 @@ function CosmeticsBuilderPage() {
                         </button>
                       ))}
                     </div>
-                  </section>
+                  </section> */}
 
                   <section className="space-y-3">
                     <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
                       <Droplets className="h-3.5 w-3.5" /> Capacity
                     </h3>
-                    <div className="grid grid-cols-3 gap-2">
-                      {CAPACITIES.map(cap => (
-                        <button
-                          key={cap.size}
-                          onClick={() => setSelectedCapacity(cap)}
-                          className={`p-3 rounded-xl border transition-all flex flex-col items-center justify-center gap-1 ${
-                            selectedCapacity.size === cap.size
-                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                              : "bg-secondary/15 border-border hover:border-gold/30"
-                          }`}
-                        >
-                          <div className="w-1 rounded-full bg-gold/60 transition-all" style={{ height: `${cap.scaleFactor * 24}px` }} />
-                          <div className="text-xs font-bold text-foreground">{cap.size}</div>
-                        </button>
-                      ))}
+                    {/* Capacity ranges: 15-50ml, 75-200ml, 200-500ml, plus an
+                        "Others" tile that opens a numeric input so the user
+                        can type any ml value (1-1000). Selecting a tile
+                        instantly picks the range; the input only appears
+                        below when "Others" is active. */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {CAPACITY_RANGES.map(range => {
+                        const isSelected =
+                          selectedCapacity.id === range.id ||
+                          // Back-compat: legacy CAPACITIES entries (no `id`)
+                          // can still match by size string.
+                          (range.size === selectedCapacity.size && !range.id);
+                        return (
+                          <button
+                            key={range.id}
+                            onClick={() => {
+                              setSelectedCapacity(range);
+                              // Reset the custom input when switching ranges
+                              // so the placeholder is clean for re-entry.
+                              if (!range.isCustom) {
+                                setCustomCapacity("");
+                              } else {
+                                // Focus the input the moment "Others" is picked.
+                                setTimeout(() => customCapacityRef.current?.focus(), 0);
+                              }
+                            }}
+                            className={`p-3 rounded-xl border transition-all flex items-center justify-center gap-2 ${
+                              isSelected
+                                ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+                                : "bg-secondary/15 border-border hover:border-gold/30"
+                            }`}
+                          >
+                            <div className="text-xs font-bold text-foreground">{range.size}</div>
+                            {isSelected && (
+                              <Check className="h-3.5 w-3.5 text-gold" />
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
+
+                    {/* Custom-ml input — only visible when "Others" is the
+                        active capacity. The value is parsed and clamped to
+                        1-1000 ml. When non-empty, the displayed capacity in
+                        the preview and review modal switches to the custom
+                        value. */}
+                    {selectedCapacity.isCustom && (
+                      <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label
+                          htmlFor="custom-capacity-input"
+                          className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+                        >
+                          Enter your preferred size (ml)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            ref={customCapacityRef}
+                            id="custom-capacity-input"
+                            type="number"
+                            min={1}
+                            max={1000}
+                            inputMode="numeric"
+                            placeholder="e.g. 75"
+                            value={customCapacity}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              // Allow the field to be cleared; otherwise only
+                              // accept positive integers up to 1000.
+                              if (v === "") {
+                                setCustomCapacity("");
+                                return;
+                              }
+                              const n = Number(v);
+                              if (Number.isFinite(n) && n > 0 && n <= 1000) {
+                                setCustomCapacity(v);
+                              }
+                            }}
+                            className="w-28 px-3 py-2 rounded-lg bg-secondary/15 border border-border focus:border-gold focus:outline-none text-xs text-foreground"
+                          />
+                          <span className="text-xs text-muted-foreground">ml</span>
+                        </div>
+                        {customCapacity && (
+                          <p className="mt-1.5 text-[10px] text-gold font-medium">
+                            Selected custom size: {customCapacity}ml
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </section>
 
-                  <section className="space-y-3">
+                  {/* COLOR & FINISH SECTION — HIDDEN per user request (no longer needed). */}
+                  {/* <section className="space-y-3">
                     <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
                       <Palette className="h-3.5 w-3.5" /> Color & Finish
                     </h3>
@@ -569,12 +670,14 @@ function CosmeticsBuilderPage() {
                         </button>
                       ))}
                     </div>
-                  </section>
+                  </section> */}
                 </>
               )}
 
-              {/* ───────── CAP TAB ───────── */}
-              {activeTab === "cap" && (
+              {/* ───────── CAP TAB — HIDDEN per user request. The tab itself
+                  was removed from the TABS array, so this branch never
+                  matches. Kept as a comment for future reference. ───────── */}
+              {/* {activeTab === "cap" && (
                 <section className="space-y-3">
                   <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
                     <Award className="h-3.5 w-3.5" /> Cap & Closure
@@ -601,7 +704,7 @@ function CosmeticsBuilderPage() {
                     ))}
                   </div>
                 </section>
-              )}
+              )} */}
 
               {/* ───────── FRAGRANCE TAB ───────── */}
               {activeTab === "fragrance" && (
@@ -805,6 +908,146 @@ function CosmeticsBuilderPage() {
                 </>
               )}
 
+              {/* ───────── OTHERS TAB (Quantity + Client Suggestions) ─────────
+                  This tab is the LAST step before submitting the quotation.
+                  It collects:
+                    1. Order Quantity (50–100,000 units) — used to derive a
+                       pricing tier and reflected in the review modal.
+                    2. Your Suggestions — free-form textarea (500-char cap)
+                       where the client can describe any extra needs
+                       (packaging constraints, deadlines, regulatory notes,
+                       etc). Optional, but flows through to the review modal
+                       when non-empty. */}
+              {activeTab === "others" && (
+                <>
+                  {/* Order Quantity section */}
+                  <section className="space-y-4">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <Hash className="h-3.5 w-3.5" /> Order Quantity
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Minimum order 50 units. Higher quantities unlock better wholesale tiers.
+                    </p>
+
+                    {/* Stepper */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label="Decrease quantity by 50"
+                        onClick={() => setQuantity(q => Math.max(50, q - 50))}
+                        disabled={quantity <= 50}
+                        className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-all ${
+                          quantity <= 50
+                            ? "border-border text-muted-foreground/30 cursor-not-allowed"
+                            : "border-border hover:border-gold/40 hover:bg-secondary/40 text-foreground active:scale-95"
+                        }`}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="number"
+                        min={50}
+                        max={100000}
+                        step={50}
+                        value={quantity}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          if (!Number.isFinite(n)) return;
+                          // Clamp into [50, 100000]. Allow the input to briefly
+                          // hold an out-of-range value during typing, but only
+                          // commit numbers in range.
+                          if (n >= 50 && n <= 100000) setQuantity(n);
+                          else if (n < 50) setQuantity(50);
+                          else if (n > 100000) setQuantity(100000);
+                        }}
+                        className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-secondary/15 border border-border focus:border-gold focus:outline-none text-sm font-bold text-center text-foreground"
+                      />
+                      <button
+                        type="button"
+                        aria-label="Increase quantity by 50"
+                        onClick={() => setQuantity(q => Math.min(100000, q + 50))}
+                        disabled={quantity >= 100000}
+                        className={`w-10 h-10 rounded-lg border flex items-center justify-center transition-all ${
+                          quantity >= 100000
+                            ? "border-border text-muted-foreground/30 cursor-not-allowed"
+                            : "border-border hover:border-gold/40 hover:bg-secondary/40 text-foreground active:scale-95"
+                        }`}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Quick-pick chips */}
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                        Quick Picks
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {[100, 250, 500, 1000, 2500, 5000].map(q => (
+                          <button
+                            key={q}
+                            type="button"
+                            onClick={() => setQuantity(q)}
+                            className={`px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-all ${
+                              quantity === q
+                                ? "bg-gold/10 border-gold text-gold"
+                                : "bg-secondary/15 border-border text-muted-foreground hover:border-gold/30 hover:text-foreground"
+                            }`}
+                          >
+                            {q.toLocaleString()}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Live tier hint */}
+                    <div className="text-[10px] text-muted-foreground">
+                      Tier: <span className="text-gold font-medium">
+                        {quantity >= 5000
+                          ? "Mass Production (best tier)"
+                          : quantity >= 1000
+                          ? "Bulk Wholesale"
+                          : quantity >= 250
+                          ? "Mid-Range MOQ"
+                          : "Pilot Run"}
+                      </span>
+                    </div>
+                  </section>
+
+                  {/* Your Suggestions section */}
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold flex items-center gap-2">
+                      <FileText className="h-3.5 w-3.5" /> Your Suggestions
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Optional. Tell us anything we should know — packaging constraints, regulatory
+                      needs, deadlines, target markets, etc. (max {USER_DESCRIPTION_MAX} characters)
+                    </p>
+                    <div className="relative">
+                      <textarea
+                        value={userDescription}
+                        maxLength={USER_DESCRIPTION_MAX}
+                        onChange={(e) => setUserDescription(e.target.value)}
+                        placeholder="e.g. Need FDA-compliant packaging for US launch in Q4 2026, prefer recycled materials, and would like a metallic finish on the cap..."
+                        rows={6}
+                        className="w-full px-3 py-2.5 rounded-lg bg-secondary/15 border border-border focus:border-gold focus:outline-none text-xs text-foreground resize-none leading-relaxed"
+                      />
+                      {/* Counter — bottom-right of textarea. Turns gold at 90% of
+                          the cap to warn the user they're close to the limit. */}
+                      <div
+                        className={`absolute bottom-2 right-3 text-[10px] font-mono ${
+                          userDescription.length >= USER_DESCRIPTION_MAX * 0.9
+                            ? "text-gold font-bold"
+                            : "text-muted-foreground/60"
+                        }`}
+                      >
+                        {userDescription.length}/{USER_DESCRIPTION_MAX}
+                      </div>
+                    </div>
+                  </section>
+                </>
+              )}
+
             </motion.div>
           </AnimatePresence>
         </div>
@@ -896,7 +1139,7 @@ function CosmeticsBuilderPage() {
             <ContainerPreview
               containerName={selectedContainer.name}
               colorHex={selectedColor.hex}
-              capacity={selectedCapacity.size}
+              capacity={selectedCapacity.isCustom && customCapacity ? `${customCapacity}ml` : selectedCapacity.size}
               brandName={brandName}
               productName={selectedProduct.name}
               resolvedTheme={resolvedTheme}
@@ -909,8 +1152,7 @@ function CosmeticsBuilderPage() {
           {[
             { label: selectedProduct.name,    icon: <Package className="h-3 w-3 text-gold" /> },
             { label: selectedContainer.name,  icon: <Layers className="h-3 w-3 text-gold" /> },
-            { label: selectedCapacity.size,   icon: <Droplets className="h-3 w-3 text-gold" /> },
-            { label: selectedColor.name,      icon: <Palette className="h-3 w-3 text-gold" /> },
+            { label: selectedCapacity.isCustom && customCapacity ? `${customCapacity}ml` : selectedCapacity.size, icon: <Droplets className="h-3 w-3 text-gold" /> },
           ].map(badge => (
             <div
               key={badge.label}
@@ -1012,7 +1254,10 @@ function CosmeticsBuilderPage() {
                       </p>
                     </div>
 
-                    {/* Spec sections (no price card) */}
+                    {/* Spec sections (no price card). Material, Color & Finish, and Cap Type
+                          were removed from the UI per user request, so they no
+                          longer appear here either. Capacity shows the custom
+                          ml value when "Others" is selected. */}
                     <div className="grid grid-cols-2 gap-x-8 gap-y-5 mb-6 text-xs">
                       <div className="col-span-2">
                         <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
@@ -1024,26 +1269,18 @@ function CosmeticsBuilderPage() {
 
                       <div className="col-span-2 mt-3">
                         <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
-                          Container & Material
+                          Container
                         </h4>
                       </div>
                       <SpecRow label="Container Type" value={selectedContainer.name} />
-                      <SpecRow label="Material" value={selectedMaterial.name} />
-
-                      <div className="col-span-2 mt-3">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
-                          Capacity & Color
-                        </h4>
-                      </div>
-                      <SpecRow label="Capacity" value={selectedCapacity.size} />
-                      <SpecRow label="Color & Finish" value={selectedColor.name} />
-
-                      <div className="col-span-2 mt-3">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
-                          Cap
-                        </h4>
-                      </div>
-                      <SpecRow label="Cap Type" value={selectedCap.name} />
+                      <SpecRow
+                        label="Capacity"
+                        value={
+                          selectedCapacity.isCustom && customCapacity
+                            ? `${customCapacity}ml`
+                            : selectedCapacity.size
+                        }
+                      />
 
                       <div className="col-span-2 mt-3">
                         <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
@@ -1084,6 +1321,35 @@ function CosmeticsBuilderPage() {
                       <SpecRow label="Label Style" value={selectedLabel.name} />
                       <SpecRow label="Label Font" value={labelFont} />
                       <SpecRow label="Label Shape" value={labelShape} />
+
+                      {/* Order Details — collected in the "Others" tab. The
+                          tier hint is auto-derived from quantity so the
+                          reviewer can see the expected pricing band at a
+                          glance. Client Suggestions only renders when the
+                          user typed something (it's optional). */}
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Order Details
+                        </h4>
+                      </div>
+                      <SpecRow label="Order Quantity" value={`${quantity.toLocaleString()} units`} />
+                      <SpecRow
+                        label="Tier Hint"
+                        value={
+                          quantity >= 5000
+                            ? "Mass Production (best tier)"
+                            : quantity >= 1000
+                            ? "Bulk Wholesale"
+                            : quantity >= 250
+                            ? "Mid-Range MOQ"
+                            : "Pilot Run"
+                        }
+                      />
+                      {userDescription.trim().length > 0 && (
+                        <div className="col-span-2">
+                          <SpecRow label="Client Suggestions" value={userDescription.trim()} />
+                        </div>
+                      )}
                     </div>
 
                     {/* Action buttons (no price card) */}
