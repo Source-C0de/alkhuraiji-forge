@@ -56,7 +56,10 @@ export const useBuilderStore = create<BuilderState>((set) => ({
   bottleMaterial: "Glass",
   bottleSilhouette: "",
   bottleCapacity: "100ml",
-  capStyle: "cap-paris-round",
+  // Start with NO cap selected — the user explicitly picks one in the Cap tab.
+  // (Previously defaulted to "cap-paris-round", which caused the cap to render
+  // immediately on page load and confused users who had not yet chosen anything.)
+  capStyle: "",
   capColor: "Transparent",
   pumpType: "",
   bottleColor: "Transparent",
@@ -86,12 +89,13 @@ export const useBuilderStore = create<BuilderState>((set) => ({
   setBottleMaterial: (bottleMaterial) => set({ bottleMaterial }),
   setBottleSilhouette: (bottleSilhouette) => set({ bottleSilhouette }),
   setBottleCapacity: (bottleCapacity) => set({ bottleCapacity }),
-  // Mutual exclusion rule: a cap and a pump cannot be active at the same time.
-  // - setCapStyle: when a cap is selected, clear the pump
-  // - setPumpType: when a pump is selected, clear the cap
-  setCapStyle: (capStyle) => set({ capStyle, pumpType: "" }),
+  // Cap and pump are now INDEPENDENT — a user can select both at the same
+  // time. The preview canvas stacks pump above the bottle and cap above the
+  // pump so both render simultaneously. Each setter only updates its own
+  // field; nothing is cleared.
+  setCapStyle: (capStyle) => set({ capStyle }),
   setCapColor: (capColor) => set({ capColor }),
-  setPumpType: (pumpType) => set({ pumpType, capStyle: "" }),
+  setPumpType: (pumpType) => set({ pumpType }),
   setBottleColor: (bottleColor) => set({ bottleColor }),
   updateLabel: (label) =>
     set((state) => ({ label: { ...state.label, ...label } })),

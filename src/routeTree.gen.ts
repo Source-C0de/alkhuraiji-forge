@@ -31,6 +31,7 @@ import { Route as ClientNewRequestRouteImport } from './routes/client/new-reques
 import { Route as ClientMessagingRouteImport } from './routes/client/messaging'
 import { Route as ClientDocumentsRouteImport } from './routes/client/documents'
 import { Route as ClientDesignApprovalsRouteImport } from './routes/client/design-approvals'
+import { Route as BuilderPerfumeRouteImport } from './routes/builder.perfume'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as AdminBuilderRouteImport } from './routes/admin/builder'
 
@@ -144,6 +145,11 @@ const ClientDesignApprovalsRoute = ClientDesignApprovalsRouteImport.update({
   path: '/design-approvals',
   getParentRoute: () => ClientRoute,
 } as any)
+const BuilderPerfumeRoute = BuilderPerfumeRouteImport.update({
+  id: '/perfume',
+  path: '/perfume',
+  getParentRoute: () => BuilderRoute,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
   path: '/content',
@@ -159,7 +165,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
-  '/builder': typeof BuilderRoute
+  '/builder': typeof BuilderRouteWithChildren
   '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/cosmetics': typeof CosmeticsRoute
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/builder/perfume': typeof BuilderPerfumeRoute
   '/client/design-approvals': typeof ClientDesignApprovalsRoute
   '/client/documents': typeof ClientDocumentsRoute
   '/client/messaging': typeof ClientMessagingRoute
@@ -184,7 +191,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/builder': typeof BuilderRoute
+  '/builder': typeof BuilderRouteWithChildren
   '/contact': typeof ContactRoute
   '/cosmetics': typeof CosmeticsRoute
   '/industries': typeof IndustriesRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/builder/perfume': typeof BuilderPerfumeRoute
   '/client/design-approvals': typeof ClientDesignApprovalsRoute
   '/client/documents': typeof ClientDocumentsRoute
   '/client/messaging': typeof ClientMessagingRoute
@@ -210,7 +218,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
-  '/builder': typeof BuilderRoute
+  '/builder': typeof BuilderRouteWithChildren
   '/client': typeof ClientRouteWithChildren
   '/contact': typeof ContactRoute
   '/cosmetics': typeof CosmeticsRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/builder/perfume': typeof BuilderPerfumeRoute
   '/client/design-approvals': typeof ClientDesignApprovalsRoute
   '/client/documents': typeof ClientDocumentsRoute
   '/client/messaging': typeof ClientMessagingRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/builder/perfume'
     | '/client/design-approvals'
     | '/client/documents'
     | '/client/messaging'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/builder/perfume'
     | '/client/design-approvals'
     | '/client/documents'
     | '/client/messaging'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/builder/perfume'
     | '/client/design-approvals'
     | '/client/documents'
     | '/client/messaging'
@@ -315,7 +327,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
-  BuilderRoute: typeof BuilderRoute
+  BuilderRoute: typeof BuilderRouteWithChildren
   ClientRoute: typeof ClientRouteWithChildren
   ContactRoute: typeof ContactRoute
   CosmeticsRoute: typeof CosmeticsRoute
@@ -480,6 +492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientDesignApprovalsRouteImport
       parentRoute: typeof ClientRoute
     }
+    '/builder/perfume': {
+      id: '/builder/perfume'
+      path: '/perfume'
+      fullPath: '/builder/perfume'
+      preLoaderRoute: typeof BuilderPerfumeRouteImport
+      parentRoute: typeof BuilderRoute
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/content'
@@ -510,6 +529,17 @@ const AdminRouteChildren: AdminRouteChildren = {
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface BuilderRouteChildren {
+  BuilderPerfumeRoute: typeof BuilderPerfumeRoute
+}
+
+const BuilderRouteChildren: BuilderRouteChildren = {
+  BuilderPerfumeRoute: BuilderPerfumeRoute,
+}
+
+const BuilderRouteWithChildren =
+  BuilderRoute._addFileChildren(BuilderRouteChildren)
 
 interface ClientRouteChildren {
   ClientDesignApprovalsRoute: typeof ClientDesignApprovalsRoute
@@ -546,7 +576,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
-  BuilderRoute: BuilderRoute,
+  BuilderRoute: BuilderRouteWithChildren,
   ClientRoute: ClientRouteWithChildren,
   ContactRoute: ContactRoute,
   CosmeticsRoute: CosmeticsRoute,

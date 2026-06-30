@@ -1,0 +1,2070 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useMotionValue } from "framer-motion";
+import {
+  Droplet,
+  Sparkles,
+  Home,
+  Box,
+  Check,
+  ShieldCheck,
+  Layers,
+  Award,
+  ArrowRight,
+  Unlock,
+} from "lucide-react";
+import { useAdminStore } from "@/store/adminStore";
+import { useBuilderStore } from "@/store/useBuilderStore";
+import { useTheme } from "@/components/ThemeProvider";
+import baseImg from "@/assets/shape/base.png";
+import circleGlass from "@/assets/shape/circle_glass.png";
+import cylindricalGlass from "@/assets/shape/cyclindaric_glass.png";
+import ovalGlass from "@/assets/shape/oval_glass.png";
+import squareGlass from "@/assets/shape/square_glass.png";
+
+// Pumps with collar (pwc)
+import blackPwc from "@/assets/pumps/black_pwc.jpg";
+import goldPwc from "@/assets/pumps/gold_pwc.jpg";
+import rosePwc from "@/assets/pumps/rose_pwc.jpg";
+import silverPwc from "@/assets/pumps/silver_pwc.jpg";
+
+// Pumps without collar (pwtc)
+import blackPwtc from "@/assets/pumps/black_pwtc.jpg";
+import goldPwtc from "@/assets/pumps/gold_pwtc.jpg";
+import rosePwtc from "@/assets/pumps/rose_pwtc.jpg";
+import silverPwtc from "@/assets/pumps/silver_pwtc.jpg";
+
+// Step collar (sc)
+import blackSc from "@/assets/pumps/black_sc.jpg";
+import goldSc from "@/assets/pumps/gold_sc.jpg";
+import silverSc from "@/assets/pumps/silver_sc.jpg";
+
+// Caps - organized by shape compatibility
+import globOvalCap from "@/assets/caps/glob_oval_cap.jpg";
+import kanoCap from "@/assets/caps/kano_cap.jpg";
+import kingCap from "@/assets/caps/king_cap.jpg";
+import ligaCylinderCap from "@/assets/caps/liga_cylinder_cap.jpg";
+import nobelCylinderCap from "@/assets/caps/nobel_cylinder_cap.jpg";
+import parisRoundCap from "@/assets/caps/paris_round_cap.jpg";
+import prismSquareCap from "@/assets/caps/prism_square_cap.jpg";
+import topDesenCap from "@/assets/caps/top_desen_konsept_m_cap.jpg";
+import weedSquareCap from "@/assets/caps/weed_square_cap.jpg";
+
+const SHAPE_IMAGES: Record<string, string> = {
+  Round: circleGlass,
+  Cylindrical: cylindricalGlass,
+  Oval: ovalGlass,
+  Square: squareGlass,
+};
+
+const getShapeImage = (name: string) => {
+  if (name.includes("Round") || name.includes("Circle")) return circleGlass;
+  if (name.includes("Cylinder") || name.includes("Cylindrical")) return cylindricalGlass;
+  if (name.includes("Oval")) return ovalGlass;
+  if (name.includes("Square") || name.includes("Cube")) return squareGlass;
+  return null;
+};
+
+// Convert a hex color to an HSL hue value (0-360)
+const hexToHue = (hex: string): number => {
+  const cleaned = hex.replace("#", "");
+  if (cleaned.length !== 6) return 0;
+  const r = parseInt(cleaned.substring(0, 2), 16) / 255;
+  const g = parseInt(cleaned.substring(2, 4), 16) / 255;
+  const b = parseInt(cleaned.substring(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return 0;
+  const d = max - min;
+  let h = 0;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  h = Math.round(h * 60);
+  if (h < 0) h += 360;
+  return h;
+};
+
+// Build a CSS filter that tints the bottle image based on the selected color
+const getColorFilter = (colorName: string): string => {
+  switch (colorName) {
+    case "Transparent":
+      return "none";
+    case "Black Frosted":
+      return "grayscale(100%) brightness(0.45) contrast(1.1)";
+    case "Amber":
+      return "sepia(100%) saturate(250%) hue-rotate(-15deg) brightness(0.95)";
+    case "Emerald":
+      return "sepia(100%) saturate(300%) hue-rotate(75deg) brightness(0.9)";
+    case "Royal Blue":
+      return "sepia(100%) saturate(350%) hue-rotate(175deg) brightness(0.85)";
+    case "Rose Gold":
+      return "sepia(60%) saturate(220%) hue-rotate(310deg) brightness(1.05)";
+    case "White Matte":
+      return "grayscale(100%) brightness(1.25) contrast(0.9)";
+    case "Gradient Luxe":
+      return "sepia(80%) saturate(300%) hue-rotate(-10deg) brightness(1.1)";
+    default:
+      return "none";
+  }
+};
+
+export const Route = createFileRoute("/builder/perfume")({
+  component: BuilderPage,
+});
+
+const CATEGORIES = [
+  {
+    id: "perfume",
+    name: "Perfume",
+    description: "Design your custom signature fragrance",
+    icon: Droplet,
+  },
+  {
+    id: "cosmetics",
+    name: "Cosmetics",
+    description: "Premium skincare and makeup products",
+    icon: Sparkles,
+  },
+  { id: "home", name: "Home Fragrance", description: "Luxury candles and diffusers", icon: Home },
+  {
+    id: "personal",
+    name: "Personal Care",
+    description: "Bath, body, and grooming essentials",
+    icon: Box,
+  },
+];
+
+// Note: MATERIALS, CAPACITIES, BOTTLE_COLORS, and CAP_COLORS are no longer
+// defined here. They are now read from `useAdminStore()` inside `BuilderPage`
+// so that admin toggles flow through to the live configurator.
+
+// Cap structure: organized by bottle shape compatibility
+// Each cap belongs to one or more shape categories (round, square, oval, cylinder, universal)
+type CapShape = "round" | "square" | "oval" | "cylinder" | "universal";
+
+interface CapVariant {
+  id: string; // unique id used in store
+  name: string; // display name
+  price: number;
+  image: string;
+  shapes: CapShape[]; // which bottle silhouettes this cap fits
+}
+
+interface CapCategory {
+  id: CapShape;
+  name: string;
+  description: string;
+  variants: CapVariant[];
+}
+
+const CAP_CATEGORIES: CapCategory[] = [
+  {
+    id: "round",
+    name: "Round Caps",
+    description: "Caps designed for round / circular bottles",
+    variants: [
+      {
+        id: "cap-paris-round",
+        name: "Paris Round",
+        price: 25,
+        image: parisRoundCap,
+        shapes: ["round", "universal"],
+      },
+      { id: "cap-king", name: "King", price: 28, image: kingCap, shapes: ["round", "universal"] },
+    ],
+  },
+  {
+    id: "square",
+    name: "Square Caps",
+    description: "Caps designed for square / cube bottles",
+    variants: [
+      {
+        id: "cap-prism-square",
+        name: "Prism Square",
+        price: 32,
+        image: prismSquareCap,
+        shapes: ["square", "universal"],
+      },
+      {
+        id: "cap-weed-square",
+        name: "Weed Square",
+        price: 28,
+        image: weedSquareCap,
+        shapes: ["square", "universal"],
+      },
+    ],
+  },
+  {
+    id: "oval",
+    name: "Oval Caps",
+    description: "Caps designed for oval bottles",
+    variants: [
+      {
+        id: "cap-glob-oval",
+        name: "Glob Oval",
+        price: 26,
+        image: globOvalCap,
+        shapes: ["oval", "round", "universal"],
+      },
+    ],
+  },
+  {
+    id: "cylinder",
+    name: "Cylinder Caps",
+    description: "Caps designed for cylindrical bottles",
+    variants: [
+      {
+        id: "cap-liga-cylinder",
+        name: "Liga Cylinder",
+        price: 24,
+        image: ligaCylinderCap,
+        shapes: ["cylinder", "universal"],
+      },
+      {
+        id: "cap-nobel-cylinder",
+        name: "Nobel Cylinder",
+        price: 35,
+        image: nobelCylinderCap,
+        shapes: ["cylinder", "universal"],
+      },
+    ],
+  },
+  {
+    id: "universal",
+    name: "Universal Caps",
+    description: "Premium caps compatible with all bottle shapes",
+    variants: [{ id: "cap-kano", name: "Kano", price: 22, image: kanoCap, shapes: ["universal"] }],
+  },
+];
+
+// Lookup map for fast image retrieval by cap id
+const CAP_IMAGES: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  CAP_CATEGORIES.forEach((cat) => {
+    cat.variants.forEach((v) => {
+      map[v.id] = v.image;
+    });
+  });
+  return map;
+})();
+
+const getCapPrice = (capId: string): number => {
+  for (const cat of CAP_CATEGORIES) {
+    const v = cat.variants.find((x) => x.id === capId);
+    if (v) return v.price;
+  }
+  return 15;
+};
+
+// Returns the shape key (round/square/oval/cylinder/universal) for a bottle silhouette
+const getBottleShapeKey = (silhouette: string): CapShape => {
+  const sil = silhouette.toLowerCase();
+  if (sil.includes("round") || sil.includes("circle") || sil.includes("prestige")) return "round";
+  if (sil.includes("square") || sil.includes("cube")) return "square";
+  if (sil.includes("oval")) return "oval";
+  if (sil.includes("cylinder") || sil.includes("cylindrical")) return "cylinder";
+  return "universal";
+};
+
+// Returns cap variant objects that match the given bottle shape
+const getCompatibleCaps = (silhouette: string): CapVariant[] => {
+  const shapeKey = getBottleShapeKey(silhouette);
+  const compatible: CapVariant[] = [];
+  CAP_CATEGORIES.forEach((cat) => {
+    cat.variants.forEach((v) => {
+      if (v.shapes.includes(shapeKey) || v.shapes.includes("universal")) {
+        compatible.push(v);
+      }
+    });
+  });
+  return compatible;
+};
+
+// See note above: CAP_COLORS is now read from useAdminStore() inside BuilderPage.
+
+// Pump structure: 3 categories, each with color variants.
+// Image suffix: pwc = pump with collar, pwtc = pump without collar, sc = step collar
+type PumpColor = "Black" | "Gold" | "Rose" | "Silver";
+
+interface PumpVariant {
+  id: string; // unique id used in store
+  name: string; // display name
+  color: PumpColor;
+  price: number;
+  image: string;
+}
+
+interface PumpCategory {
+  id: "pwc" | "pwtc" | "sc";
+  name: string;
+  description: string;
+  variants: PumpVariant[];
+}
+
+const PUMP_CATEGORIES: PumpCategory[] = [
+  {
+    id: "pwc",
+    name: "Pump with Collar",
+    description: "Premium spray pump with decorative collar neck",
+    variants: [
+      { id: "pwc-black", name: "Black", color: "Black", price: 18, image: blackPwc },
+      // { id: "pwc-gold", name: "Gold", color: "Gold", price: 28, image: goldPwc },
+      // { id: "pwc-rose", name: "Rose", color: "Rose", price: 26, image: rosePwc },
+      { id: "pwc-silver", name: "Silver", color: "Silver", price: 22, image: silverPwc },
+    ],
+  },
+  // {
+  //   id: "pwtc",
+  //   name: "Pump without Collar",
+  //   description: "Sleek minimalist spray pump, no collar",
+  //   variants: [
+  //     { id: "pwtc-black", name: "Black", color: "Black", price: 14, image: blackPwtc },
+  //     { id: "pwtc-gold", name: "Gold", color: "Gold", price: 22, image: goldPwtc },
+  //     { id: "pwtc-rose", name: "Rose", color: "Rose", price: 20, image: rosePwtc },
+  //     { id: "pwtc-silver", name: "Silver", color: "Silver", price: 18, image: silverPwtc },
+  //   ],
+  // },
+  // {
+  //   id: "sc",
+  //   name: "Step Collar",
+  //   description: "Stepped collar for premium threaded closures",
+  //   variants: [
+  //     { id: "sc-black", name: "Black", color: "Black", price: 16, image: blackSc },
+  //     { id: "sc-gold", name: "Gold", color: "Gold", price: 24, image: goldSc },
+  //     { id: "sc-silver", name: "Silver", color: "Silver", price: 20, image: silverSc },
+  //   ],
+  // },
+];
+
+// Lookup map for fast image retrieval by pump id
+const PUMP_IMAGES: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  PUMP_CATEGORIES.forEach((cat) => {
+    cat.variants.forEach((v) => {
+      map[v.id] = v.image;
+    });
+  });
+  return map;
+})();
+
+const getPumpPrice = (pumpId: string): number => {
+  for (const cat of PUMP_CATEGORIES) {
+    const v = cat.variants.find((x) => x.id === pumpId);
+    if (v) return v.price;
+  }
+  return 10;
+};
+
+const PACKAGING_TYPES = [
+  { name: "Standard Soft Box"},
+  { name: "Hard Box"},
+  // { name: "Magnetic Luxury Box", price: 45 },
+  // { name: "Drawer Style Box", price: 35 },
+  // { name: "Premium Rigid Box", price: 50 },
+];
+
+const PACKAGING_FINISHES = [
+  { name: "Texture"},
+  { name: "Print"},
+  { name: "Sticker"},
+  { name: "Others"},
+];
+
+const PACKAGING_ADDONS = [
+  // { name: "Foil Stamping", price: 15 },
+  // { name: "Embossing", price: 15 },
+  // { name: "Spot UV", price: 12 },
+  // { name: "Ribbon Wrap", price: 18 },
+];
+
+const NOTES = {
+  // top: ["Citrus", "Bergamot", "Lemon", "Lavender", "Mint"],
+  // middle: ["Rose", "Jasmine", "Oud", "Cinnamon", "Vanilla"],
+  // base: ["Musk", "Sandalwood", "Amber", "Patchouli", "Leather"],
+    top: ["French","Niche","Amber","Others"]
+};
+
+const INTENSITIES = [
+  { name: "Light"},
+  { name: "Balanced" },
+  { name: "Strong"},
+  { name: "Signature Intense" },
+];
+
+const FONTS = ["Modern Sans", "Elegant Serif", "Minimal Script"];
+const SHAPES = ["Rectangle", "Rounded", "Vertical Strip"];
+
+function BuilderPage() {
+  const [activeTab, setActiveTab] = useState("bottle"); // bottle, cap, fragrance, packaging, branding
+
+  // Review & submit modal state
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [lastTab, setLastTab] = useState<string>("branding"); // remembered for the "Modify" button
+
+  const { theme } = useTheme();
+  const [resolvedTheme, setResolvedTheme] = useState("dark");
+
+  useEffect(() => {
+    if (theme === "system") {
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setResolvedTheme(isDark ? "dark" : "light");
+    } else {
+      setResolvedTheme(theme || "dark");
+    }
+  }, [theme]);
+
+  // Ref for the custom-capacity input in the Bottle tab (focused when "Others" is clicked)
+  const customCapacityRef = useRef<HTMLInputElement>(null);
+
+  const store = useBuilderStore();
+  const {
+    builderBottles,
+    builderMaterials,
+    builderCapacities,
+    builderColors,
+    capColors,
+    showBottleMaterials,
+    showBottleCapacity,
+    showBottleColor,
+    showCapColor,
+  } = useAdminStore();
+  const activeBottles = builderBottles.filter((b) => b.active);
+
+  // Materials / capacities / bottle colors / cap colors are admin-controlled.
+  // Filter to active items and skip entire sections when their visibility
+  // flag is off. This is what makes admin toggles visible on this page.
+  const materials = builderMaterials.filter((m) => m.active).map((m) => m.name);
+  const capacities = builderCapacities.filter((c) => c.active).map((c) => c.name);
+  const bottleColors = builderColors
+    .filter((c) => c.active)
+    .map((c) => ({ name: c.name, hex: c.hex, price: c.price ?? 0 }));
+  const capColorsList = capColors
+    .filter((c) => c.active)
+    .map((c) => ({ name: c.name, hex: c.hex, price: c.price ?? 0 }));
+
+  const TABS = ["bottle", "cap", "fragrance", "packaging", "branding"];
+  const activeIndex = TABS.indexOf(activeTab);
+  const handlePrevTab = () => {
+    if (activeIndex > 0) {
+      setActiveTab(TABS[activeIndex - 1]);
+    }
+  };
+  const handleNextTab = () => {
+    if (activeIndex < TABS.length - 1) {
+      setActiveTab(TABS[activeIndex + 1]);
+    }
+  };
+
+  const getCapacityScale = (capacity: string) => {
+    switch (capacity) {
+      case "10ml":
+        return 0.65;
+      case "30ml":
+        return 0.75;
+      case "50ml":
+        return 0.85;
+      case "75ml":
+        return 0.92;
+      case "100ml":
+        return 1.0;
+      case "150ml":
+        return 1.08;
+      case "250ml":
+        return 1.18;
+      default:
+        return 1.0;
+    }
+  };
+  const scale = getCapacityScale(store.bottleCapacity);
+
+  // FIXED CANVAS SLOT — every silhouette renders inside the SAME
+  // bounding box so they all line up identically in the preview.
+  //
+  //   • bottle slot: 280 × 416 (bottom 65% of the canvas)
+  //   • pump slot : 280 × 96  (middle 15%)
+  //   • cap slot  : 280 × 128 (top 20%)
+  //   • canvas   : 280 × 640
+  //
+  // Each uploaded silhouette PNG is rendered with object-contain inside
+  // the 280 × 416 bottle slot, anchored to the bottom-center. Because
+  // the slot never changes size, Round / Square / Oval / Cylindrical
+  // (and any future admin-uploaded shape) all land in exactly the same
+  // horizontal/vertical position.
+  const CANVAS_WIDTH = "280px";
+  const CANVAS_HEIGHT = "640px";
+  const BOTTLE_SLOT_W = "280px";
+  const BOTTLE_SLOT_H = "416px";
+  const BOTTLE_SLICE = "416px"; // 65% of 640
+  const PUMP_SLICE = "96px"; // 15% of 640
+  const CAP_SLICE = "128px"; // 20% of 640
+  // The per-silhouette "borderRadius" hint is still exposed via dims
+  // because some downstream effects (e.g. shadow tint) use it, but the
+  // slot dimensions are NO LONGER driven by the silhouette.
+  const dims = {
+    width: CANVAS_WIDTH,
+    height: BOTTLE_SLOT_H,
+    borderRadius: "24px",
+  };
+  const shapeImage = getShapeImage(store.bottleSilhouette);
+
+  // Parallax rotation tracking for immersive Stage
+  const rotateY = useMotionValue(0);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    rotateY.set(x * 0.1);
+  };
+  const handleMouseLeave = () => {
+    rotateY.set(0);
+  };
+
+  // Fragrance Layer Multi-Notes Toggles
+  const toggleFragranceNote = (layer: "top" | "middle" | "base", note: string) => {
+    const current = store.fragrance[layer] || [];
+    if (current.includes(note)) {
+      store.updateFragrance({ [layer]: current.filter((n) => n !== note) });
+    } else {
+      if (current.length < 3) {
+        store.updateFragrance({ [layer]: [...current, note] });
+      }
+    }
+  };
+
+  // Box Presentation Addons
+  const toggleAddon = (addon: string) => {
+    const current = store.packaging.addons || [];
+    if (current.includes(addon)) {
+      store.updatePackaging({ addons: current.filter((a) => a !== addon) });
+    } else {
+      store.updatePackaging({ addons: [...current, addon] });
+    }
+  };
+
+  // Pricing Engine Calculations in SAR (Saudi Riyals)
+  const getSelectionsWithPrices = () => {
+    const bottleBase = 35; // Base shape wholesale cost
+
+    const matPrice =
+      store.bottleMaterial === "Crystal"
+        ? 35
+        : store.bottleMaterial === "Frosted Glass"
+          ? 15
+          : store.bottleMaterial === "Glass"
+            ? 10
+            : store.bottleMaterial === "Matte Glass"
+              ? 20
+              : store.bottleMaterial === "Recycled"
+                ? 12
+                : 5;
+
+    const colPrice = bottleColors.find((c) => c.name === store.bottleColor)?.price ?? 0;
+
+    const capStylePrice = getCapPrice(store.capStyle) || 15;
+    const capColorPrice =
+      store.capStyle === "Colored Cap"
+        ? (capColorsList.find((c) => c.name === store.capColor)?.price ?? 0)
+        : 0;
+    const capPrice = capStylePrice + capColorPrice;
+
+    const pumpPrice = getPumpPrice(store.pumpType) || 10;
+
+    // Scent Blend custom selection calculation
+    const noteCount =
+      (store.fragrance.top?.length || 0) +
+      (store.fragrance.middle?.length || 0) +
+      (store.fragrance.base?.length || 0);
+    const notesPrice = noteCount * 4;
+    const intensityPrice =
+      INTENSITIES.find((i) => i.name === store.fragrance.intensity)?.price || 35;
+    const fragranceTotalPrice = notesPrice + intensityPrice;
+
+    // Presentation box pricing
+    const boxPrice = PACKAGING_TYPES.find((p) => p.name === store.packaging.type)?.price || 15;
+    const finishPrice =
+      PACKAGING_FINISHES.find((p) => p.name === store.packaging.finish)?.price || 10;
+    const addonsPrice = (store.packaging.addons || []).reduce(
+      (sum, ad) => sum + (PACKAGING_ADDONS.find((a) => a.name === ad)?.price || 0),
+      0,
+    );
+    const packagingTotalPrice = boxPrice + finishPrice + addonsPrice;
+
+    const brandPrice = 5; // customized layout imprint charge
+
+    const unitPriceBeforeDiscount =
+      bottleBase +
+      matPrice +
+      colPrice +
+      capPrice +
+      pumpPrice +
+      fragranceTotalPrice +
+      packagingTotalPrice +
+      brandPrice;
+
+    // B2B Wholesale discount multiplier
+    let discount = 0;
+    if (store.quantity >= 5000) discount = 0.4;
+    else if (store.quantity >= 1000) discount = 0.25;
+    else if (store.quantity >= 500) discount = 0.15;
+
+    const finalUnitPrice = Number((unitPriceBeforeDiscount * (1 - discount)).toFixed(2));
+    const totalPrice = Number((finalUnitPrice * store.quantity).toFixed(0));
+
+    return {
+      bottleBase,
+      matPrice,
+      colPrice,
+      capPrice,
+      pumpPrice,
+      fragranceTotalPrice,
+      packagingTotalPrice,
+      brandPrice,
+      unitPrice: finalUnitPrice,
+      totalPrice,
+      discountPercent: Math.round(discount * 100),
+    };
+  };
+
+  const pricing = getSelectionsWithPrices();
+
+  // Per-step completion for the 5 tabs (bottle, cap, fragrance, packaging,
+  // branding). Each step returns { completed, total, isComplete }. The
+  // header shows a small green check next to each tab when its step is
+  // complete, and an overall % badge at the top of the sidebar.
+  const getStepProgress = (stepId: string) => {
+    switch (stepId) {
+      case "bottle": {
+        // Bottle is complete when the user has picked a silhouette, a
+        // material, a capacity (or a custom size), and a color.
+        const checks = [
+          !!store.bottleSilhouette,
+          !!store.bottleMaterial,
+          !!store.bottleCapacity,
+          store.bottleColor !== "Transparent",
+        ];
+        const completed = checks.filter(Boolean).length;
+        return { completed, total: checks.length, isComplete: completed === checks.length };
+      }
+      case "cap": {
+        // Cap step is complete when EITHER a cap OR a pump has been picked
+        // (since they're now independent and either one finishes the top).
+        const hasCap = !!store.capStyle;
+        const hasPump = !!store.pumpType;
+        const isComplete = hasCap || hasPump;
+        return { completed: isComplete ? 1 : 0, total: 1, isComplete };
+      }
+      case "fragrance": {
+        // Fragrance is complete when at least one note is selected AND
+        // the intensity has been changed from the default "Balanced".
+        const hasNotes =
+          (store.fragrance.top?.length || 0) +
+            (store.fragrance.middle?.length || 0) +
+            (store.fragrance.base?.length || 0) >
+          0;
+        const hasIntensity = store.fragrance.intensity && store.fragrance.intensity !== "Balanced";
+        const checks = [hasNotes, !!hasIntensity];
+        const completed = checks.filter(Boolean).length;
+        return { completed, total: checks.length, isComplete: completed === checks.length };
+      }
+      case "packaging": {
+        // Packaging is complete when both type AND finish are non-default.
+        const checks = [
+          !!store.packaging.type && store.packaging.type !== "Standard Box",
+          !!store.packaging.finish && store.packaging.finish !== "Texture",
+        ];
+        const completed = checks.filter(Boolean).length;
+        return { completed, total: checks.length, isComplete: completed === checks.length };
+      }
+      case "branding": {
+        // Branding is complete when the brand name has been customized,
+        // a non-default font is chosen, and a non-default label shape.
+        const checks = [
+          !!store.label.name && store.label.name.trim().length > 0 && store.label.name !== "L'ELEGANCE",
+          !!store.label.font && store.label.font !== "Modern Sans",
+          !!store.label.shape && store.label.shape !== "Rectangle",
+        ];
+        const completed = checks.filter(Boolean).length;
+        return { completed, total: checks.length, isComplete: completed === checks.length };
+      }
+      default:
+        return { completed: 0, total: 1, isComplete: false };
+    }
+  };
+
+  // Overall completion: weighted sum of all 5 steps (each step counts
+  // equally toward 100%). This drives the badge at the top of the sidebar.
+  const TABS_WITH_PROGRESS = ["bottle", "cap", "fragrance", "packaging", "branding"];
+  const overallProgress = (() => {
+    let done = 0;
+    let total = 0;
+    TABS_WITH_PROGRESS.forEach((t) => {
+      const p = getStepProgress(t);
+      done += p.completed;
+      total += p.total;
+    });
+    return Math.round((done / total) * 100);
+  })();
+
+  return (
+    <div className="h-screen w-screen bg-background text-foreground flex flex-col lg:flex-row overflow-hidden relative transition-colors duration-300">
+      {/* Dynamic luxury dark space highlight backdrop */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#f9f9fb] via-[#f0f0f5] to-[#e4e4eb] dark:from-[#0d0d1e] dark:via-[#05050a] dark:to-[#020205] pointer-events-none z-0 transition-all duration-300" />
+
+      {/* Catalog Home - links back to the /builder layout catalog landing */}
+      <Link
+        to="/builder"
+        className="absolute top-6 left-6 z-50 px-4 py-2 rounded-full border border-border bg-secondary/30 hover:bg-secondary/50 hover:border-gold/30 transition-all text-xs font-medium uppercase tracking-wider text-muted-foreground hover:text-foreground"
+      >
+        ← Catalogs
+      </Link>
+
+      {/* ================= COLUMN 1: LEFT SIDEBAR OPTIONS (380px) ================= */}
+      <aside className="w-full lg:w-[480px] lg:flex-shrink-0 border-r border-border bg-card/90 backdrop-blur-3xl z-10 flex flex-col h-screen pt-20 transition-colors duration-300">
+        {/* Brand configuration text entry */}
+        <div className="p-6 border-b border-border flex-shrink-0">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-soft">
+              Premium OEM/ODM
+            </span>
+            <span className="text-xs font-semibold text-gold bg-gold/10 px-2 py-0.5 rounded-full">
+              {overallProgress}% Complete
+            </span>
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-display text-2xl font-light text-foreground">Your Brand Design</h2>
+            <input
+              type="text"
+              value={store.label.name}
+              onChange={(e) => store.updateLabel({ name: e.target.value.toUpperCase() })}
+              placeholder="ENTER BRAND NAME..."
+              className="w-full bg-secondary/30 border border-border focus:border-gold rounded-lg px-4 py-2.5 text-xs outline-none text-foreground tracking-widest font-medium uppercase transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* Tab Buttons (Bottle, Cap, Fragrance, Packaging, Branding) */}
+        <div className="flex border-b border-border bg-secondary/10 overflow-x-auto scrollbar-hide flex-shrink-0">
+          {[
+            { id: "bottle", label: "Bottle" },
+            { id: "cap", label: "Cap" },
+            { id: "fragrance", label: "Fragrance" },
+            { id: "packaging", label: "Packaging" },
+            { id: "branding", label: "Branding" },
+          ].map((tab) => {
+            const stepProgress = getStepProgress(tab.id);
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 py-3 px-4 text-center text-[10px] font-bold uppercase tracking-wider transition-colors relative whitespace-nowrap flex items-center justify-center gap-1.5 ${
+                  activeTab === tab.id
+                    ? "text-gold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+                {/* Per-step completion indicator: a small green check when the
+                    step is fully complete, or a partial-progress pip when it
+                    has some progress but isn't done yet. */}
+                {stepProgress.isComplete ? (
+                  <span
+                    className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-emerald-500/90 text-white shadow-sm shadow-emerald-500/30"
+                    title={`Step complete (${stepProgress.completed}/${stepProgress.total})`}
+                  >
+                    <Check className="h-2 w-2 stroke-[3]" />
+                  </span>
+                ) : stepProgress.completed > 0 ? (
+                  <span
+                    className="inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-gold/25 border border-gold/40 text-[8px] font-bold text-gold"
+                    title={`In progress (${stepProgress.completed}/${stepProgress.total})`}
+                  >
+                    {stepProgress.completed}
+                  </span>
+                ) : null}
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeStepLine"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-gold-soft"
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic configuration tabs body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide pb-24">
+          <AnimatePresence mode="wait">
+            {/* 1. BOTTLE SHAPE & SPECIFICATIONS */}
+            {activeTab === "bottle" && (
+              <motion.div
+                key="bottle-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    1. Silhouette Shape
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {activeBottles.map((bottle) => {
+                      const shapeImg = getShapeImage(bottle.name);
+                      return (
+                        <button
+                          key={bottle.id}
+                          onClick={() => store.setBottleSilhouette(bottle.name)}
+                          className={`p-4 rounded-xl border text-left transition-all duration-300 relative group overflow-hidden flex items-center gap-3 ${
+                            store.bottleSilhouette === bottle.name
+                              ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold"
+                              : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                          }`}
+                        >
+                          {shapeImg ? (
+                            <img
+                              src={shapeImg}
+                              alt={bottle.name}
+                              className="h-12 w-12 object-contain flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded bg-muted/50 border border-border" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold text-foreground mb-1 truncate">
+                              {bottle.name}
+                            </div>
+                            <div className="text-[9px] text-muted-foreground uppercase truncate">
+                              {bottle.category}
+                            </div>
+                          </div>
+                          {store.bottleSilhouette === bottle.name && (
+                            <div className="absolute right-3 top-3 h-4 w-4 bg-gold rounded-full flex items-center justify-center text-black">
+                              <Check className="h-2.5 w-2.5 stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {showBottleMaterials && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                      2. Material Selection
+                    </h3>
+                    {materials.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        {materials.map((mat) => (
+                          <button
+                            key={mat}
+                            onClick={() => store.setBottleMaterial(mat)}
+                            className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
+                              store.bottleMaterial === mat
+                                ? "bg-gold/10 border-gold text-gold font-semibold"
+                                : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                            }`}
+                          >
+                            {mat}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground italic">
+                        No material options available.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {showBottleCapacity && (() => {
+                  const isCustomCapacity =
+                    !!store.bottleCapacity && !capacities.includes(store.bottleCapacity);
+                  return (
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                        3. Capacity
+                      </h3>
+                      {capacities.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          {capacities.map((cap) => (
+                            <button
+                              key={cap}
+                              onClick={() => store.setBottleCapacity(cap)}
+                              className={`py-2.5 rounded-lg border text-center text-xs font-medium transition-all ${
+                                store.bottleCapacity === cap
+                                  ? "bg-gold/10 border-gold text-gold font-bold"
+                                  : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                              }`}
+                            >
+                              {cap}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!isCustomCapacity) {
+                                store.setBottleCapacity("");
+                              }
+                              setTimeout(() => customCapacityRef.current?.focus(), 0);
+                            }}
+                            className={`py-2.5 rounded-lg border text-center text-xs font-medium transition-all ${
+                              isCustomCapacity
+                                ? "bg-gold/10 border-gold text-gold font-bold"
+                                : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                            }`}
+                          >
+                            Others
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-muted-foreground italic">
+                          No capacity options available.
+                        </p>
+                      )}
+
+                      <div className="mt-3">
+                        <label
+                          htmlFor="custom-capacity"
+                          className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+                        >
+                          Enter your preferred size (ml)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            ref={customCapacityRef}
+                            id="custom-capacity"
+                            type="number"
+                            min={1}
+                            max={1000}
+                            inputMode="numeric"
+                            placeholder="e.g. 75"
+                            value={
+                              store.bottleCapacity && !capacities.includes(store.bottleCapacity)
+                                ? store.bottleCapacity.replace(/ml$/i, "")
+                                : ""
+                            }
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (v === "") {
+                                store.setBottleCapacity("");
+                                return;
+                              }
+                              const n = Number(v);
+                              if (Number.isFinite(n) && n > 0 && n <= 1000) {
+                                store.setBottleCapacity(`${n}ml`);
+                              }
+                            }}
+                            className="w-28 px-3 py-2 rounded-lg bg-secondary/15 border border-border focus:border-gold focus:outline-none text-xs text-foreground"
+                          />
+                          <span className="text-xs text-muted-foreground">ml</span>
+                        </div>
+                        {isCustomCapacity && (
+                          <p className="mt-1.5 text-[10px] text-gold font-medium">
+                            Selected custom size: {store.bottleCapacity}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {showBottleColor && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                      4. Glass Color & Finish
+                    </h3>
+                    {bottleColors.length > 0 ? (
+                      <div className="grid grid-cols-4 gap-3">
+                        {bottleColors.map((color) => (
+                          <button
+                            key={color.name}
+                            onClick={() => store.setBottleColor(color.name)}
+                            className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
+                              store.bottleColor === color.name
+                                ? "border-gold bg-secondary/30"
+                                : "border-transparent hover:bg-secondary/20"
+                            }`}
+                          >
+                            <div
+                              className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
+                              style={{ background: color.hex }}
+                            >
+                              {store.bottleColor === color.name && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <Check className="h-4 w-4 text-gold" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[9px] text-muted-foreground text-center truncate w-full">
+                              {color.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground italic">
+                        No bottle color options available.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* 2. CAPS & PUMPS */}
+            {activeTab === "cap" && (
+              <motion.div
+                key="cap-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">
+                    Cap Crown Style
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mb-4">
+                    Showing caps compatible with your selected bottle shape:{" "}
+                    <span className="text-gold font-semibold">{store.bottleSilhouette}</span>
+                  </p>
+
+                  <div className="space-y-5">
+                    {CAP_CATEGORIES.map((cat) => {
+                      // Filter variants to those that match the current bottle shape
+                      const compatibleVariants = cat.variants.filter((v) => {
+                        const shapeKey = getBottleShapeKey(store.bottleSilhouette);
+                        return v.shapes.includes(shapeKey) || v.shapes.includes("universal");
+                      });
+                      if (compatibleVariants.length === 0) return null;
+                      return (
+                        <div key={cat.id}>
+                          <div className="flex items-baseline justify-between mb-2">
+                            <div>
+                              <div className="text-xs font-bold text-foreground">{cat.name}</div>
+                              <div className="text-[9px] text-muted-foreground">
+                                {cat.description}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {compatibleVariants.map((v) => {
+                              const isSelected = store.capStyle === v.id;
+                              return (
+                                <button
+                                  key={v.id}
+                                  onClick={() => store.setCapStyle(v.id)}
+                                  className={`p-2 rounded-lg border text-center transition-all ${
+                                    isSelected
+                                      ? "bg-gold/10 border-gold shadow-[0_0_10px_rgba(212,175,55,0.15)]"
+                                      : "bg-secondary/15 border-border hover:border-gold/30"
+                                  }`}
+                                >
+                                  <div className="w-full aspect-square mb-1.5 flex items-center justify-center overflow-hidden rounded bg-background/40">
+                                    <img
+                                      src={v.image}
+                                      alt={v.name}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  </div>
+                                  <div className="text-[10px] font-semibold text-foreground leading-tight">
+                                    {v.name}
+                                  </div>
+                                  <div className="text-[8px] text-gold font-bold mt-0.5">
+                                    +{v.price}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {store.capStyle === "Colored Cap" && showCapColor && (
+                  <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                      Cap Color Selection
+                    </h3>
+                    {capColorsList.length > 0 ? (
+                      <div className="grid grid-cols-4 gap-3">
+                        {capColorsList.map((color) => (
+                          <button
+                            key={color.name}
+                            onClick={() => store.setCapColor(color.name)}
+                            className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all ${
+                              store.capColor === color.name
+                                ? "border-gold bg-secondary/30"
+                                : "border-transparent hover:bg-secondary/20"
+                            }`}
+                          >
+                            <div
+                              className="w-10 h-10 rounded-full border border-border shadow-lg relative overflow-hidden"
+                              style={{ background: color.hex }}
+                            >
+                              {store.capColor === color.name && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <Check className="h-4 w-4 text-gold" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[9px] text-muted-foreground text-center truncate w-full">
+                              {color.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground italic">
+                        No cap color options available.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">
+                    Pump & Atomizer Accents
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mb-4">
+                    Choose a category and color — the pump renders live in the preview above.
+                  </p>
+
+                  <div className="space-y-5">
+                    {PUMP_CATEGORIES.map((cat) => (
+                      <div key={cat.id}>
+                        <div className="flex items-baseline justify-between mb-2">
+                          <div>
+                            <div className="text-xs font-bold text-foreground">{cat.name}</div>
+                            <div className="text-[9px] text-muted-foreground">
+                              {cat.description}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {cat.variants.map((v) => {
+                            const isSelected = store.pumpType === v.id;
+                            return (
+                              <button
+                                key={v.id}
+                                onClick={() => store.setPumpType(v.id)}
+                                className={`p-2 rounded-lg border text-center transition-all ${
+                                  isSelected
+                                    ? "bg-gold/10 border-gold shadow-[0_0_10px_rgba(212,175,55,0.15)]"
+                                    : "bg-secondary/15 border-border hover:border-gold/30"
+                                }`}
+                              >
+                                <div className="w-full aspect-square mb-1.5 flex items-center justify-center overflow-hidden rounded bg-background/40">
+                                  <img
+                                    src={v.image}
+                                    alt={v.name}
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                                <div className="text-[10px] font-semibold text-foreground leading-tight">
+                                  {v.name}
+                                </div>
+                                <div className="text-[8px] text-gold font-bold mt-0.5">
+                                  +{v.price}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 3. FRAGRANCE NOTE COMPOSITION */}
+            {activeTab === "fragrance" && (
+              <motion.div
+                key="fragrance-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-1">
+                    Olfactive Note Mixer
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground mb-4">
+                    Select up to 3 luxury notes per composition layer (+4 SAR per note).
+                  </p>
+
+                  {/* Top, Middle, Base Notes Layers */}
+                  {(Object.keys(NOTES) as Array<"top" | "middle" | "base">).map((layer) => {
+                    const selected = store.fragrance[layer] || [];
+                    return (
+                      <div key={layer} className="space-y-2.5 mb-4">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground capitalize">
+                          {layer} Notes
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {NOTES[layer].map((note) => {
+                            const isAct = selected.includes(note);
+                            return (
+                              <button
+                                key={note}
+                                onClick={() => toggleFragranceNote(layer, note)}
+                                className={`px-4 py-2 rounded-full border text-[10px] font-medium transition-all ${
+                                  isAct
+                                    ? "bg-gold/20 border-gold text-gold shadow-[inset_0_0_0_1px_rgba(212,175,55,0.2)]"
+                                    : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                                }`}
+                              >
+                                {note}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Scent Intensity & Blend
+                  </h3>
+                  <div className="space-y-2.5">
+                    {INTENSITIES.map((int) => (
+                      <button
+                        key={int.name}
+                        onClick={() => store.updateFragrance({ intensity: int.name })}
+                        className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
+                          store.fragrance.intensity === int.name
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                        }`}
+                      >
+                        <div>
+                          <div className="text-xs font-semibold text-foreground">{int.name}</div>
+                          <div className="text-[9px] text-muted-foreground mt-0.5">
+                            Custom scent density composition
+                          </div>
+                        </div>
+                        <div className="text-xs font-bold text-gold">+{int.price} SAR</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 4. OUTER PACKAGING DESIGN */}
+            {activeTab === "packaging" && (
+              <motion.div
+                key="packaging-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Outer Box Style
+                  </h3>
+                  <div className="space-y-2.5">
+                    {PACKAGING_TYPES.map((pack) => (
+                      <button
+                        key={pack.name}
+                        onClick={() => store.updatePackaging({ type: pack.name })}
+                        className={`w-full p-4 rounded-xl border text-left flex justify-between items-center transition-all ${
+                          store.packaging.type === pack.name
+                            ? "bg-gold/10 border-gold shadow-[0_0_15px_rgba(212,175,55,0.1)] text-gold"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                        }`}
+                      >
+                        <div>
+                          <div className="text-xs font-semibold text-foreground">{pack.name}</div>
+                          <div className="text-[9px] text-muted-foreground mt-0.5">
+                            Heavy cardboard wholesale box base
+                          </div>
+                        </div>
+                        <div className="text-xs font-bold text-gold">+{pack.price} SAR</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Box Texture & Finish
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {PACKAGING_FINISHES.map((finish) => (
+                      <button
+                        key={finish.name}
+                        onClick={() => store.updatePackaging({ finish: finish.name })}
+                        className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
+                          store.packaging.finish === finish.name
+                            ? "bg-gold/10 border-gold text-gold"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                        }`}
+                      >
+                        {finish.name} (+{finish.price} SAR)
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Embellishments & Add-ons
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {PACKAGING_ADDONS.map((addon) => {
+                      const isAct = (store.packaging.addons || []).includes(addon.name);
+                      return (
+                        <button
+                          key={addon.name}
+                          onClick={() => toggleAddon(addon.name)}
+                          className={`p-3 rounded-lg border text-center text-xs font-medium transition-all ${
+                            isAct
+                              ? "bg-gold/10 border-gold text-gold"
+                              : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                          }`}
+                        >
+                          {addon.name} (+{addon.price} SAR)
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div> */}
+              </motion.div>
+            )}
+
+            {/* 5. BRANDING & FONTS */}
+            {activeTab === "branding" && (
+              <motion.div
+                key="branding-wizard"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Branding Typography
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {FONTS.map((font) => (
+                      <button
+                        key={font}
+                        onClick={() => store.updateLabel({ font })}
+                        className={`py-3 rounded-lg border text-center text-[10px] transition-all ${
+                          store.label.font === font
+                            ? "bg-gold/10 border-gold text-gold font-semibold"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                        }`}
+                        style={{ fontFamily: font === "Elegant Serif" ? "serif" : "sans-serif" }}
+                      >
+                        {font}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gold mb-3">
+                    Label Silhouette
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {SHAPES.map((shape) => (
+                      <button
+                        key={shape}
+                        onClick={() => store.updateLabel({ shape })}
+                        className={`py-3 rounded-lg border text-center text-xs font-medium transition-all ${
+                          store.label.shape === shape
+                            ? "bg-gold/10 border-gold text-gold"
+                            : "bg-secondary/15 border-border hover:border-gold/30 text-foreground"
+                        }`}
+                      >
+                        {shape}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Sticky Segment Navigation Controls */}
+        <div className="border-t border-border bg-background/80 p-4 flex items-center justify-between gap-3 flex-shrink-0 z-20 transition-colors duration-300">
+          <button
+            onClick={handlePrevTab}
+            disabled={activeIndex === 0}
+            className={`flex-1 py-3 px-4 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+              activeIndex === 0
+                ? "border-border text-muted-foreground/30 cursor-not-allowed"
+                : "border-border hover:border-gold/30 hover:bg-secondary/40 text-foreground active:scale-[0.98]"
+            }`}
+          >
+            ← Previous
+          </button>
+          {activeIndex === TABS.length - 1 ? (
+            <button
+              onClick={() => {
+                setLastTab(activeTab);
+                setReviewOpen(true);
+              }}
+              className="flex-1 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] shadow-gold-glow"
+            >
+              Submit Quotation <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={handleNextTab}
+              className="flex-1 py-3 px-4 rounded-xl bg-gold hover:bg-gold-soft text-black text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] shadow-gold-glow"
+            >
+              Next →
+            </button>
+          )}
+        </div>
+      </aside>
+
+      {/* ================= COLUMN 2: IMMERSIVE 3D INTERACTIVE Viewport (CENTER) ================= */}
+      <main
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="flex-1 h-screen flex flex-col justify-center items-center relative p-8 select-none z-0"
+      >
+        {/* Overhead Spotlighting Gold Glow effect */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[550px] bg-gradient-to-b from-gold/15 to-transparent blur-[80px] pointer-events-none rounded-full" />
+
+        {/* ================= IMMERSIVE 3D PRODUCT-DESIGNER STAGE =================
+            The preview is presented as a large, framed product-designer canvas.
+            - Animated gradient backdrop with a soft overhead spotlight
+            - Subtle floor grid (perspective lines) for depth
+            - Floor reflection of the bottle (mirrored, low opacity)
+            - Dynamic shape label chip floating above the bottle
+            - Tilt-on-cursor parallax preserved from previous build
+            - The actual bottle/cap/pump stack is unchanged internally —
+              only the surrounding stage chrome is upgraded.
+        ======================================================================= */}
+        <div className="relative w-full max-w-3xl h-[78vh] flex items-center justify-center perspective-1200">
+          {/* ===== Stage frame: outer card with thin gold border + vignette ===== */}
+          <div className="absolute inset-0 rounded-[28px] overflow-hidden border border-gold/15 bg-gradient-to-b from-secondary/30 via-background/40 to-secondary/20 shadow-[0_30px_120px_-20px_rgba(0,0,0,0.9)]">
+            {/* Animated radial spotlight from above */}
+            <motion.div
+              className="absolute -top-32 left-1/2 -translate-x-1/2 w-[120%] h-[70%] bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.18)_0%,rgba(212,175,55,0.05)_35%,transparent_70%)] pointer-events-none"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            {/* Soft side glows for depth */}
+            <div className="absolute top-1/3 -left-20 w-72 h-72 bg-gold/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-1/4 -right-20 w-72 h-72 bg-gold-soft/10 rounded-full blur-[100px] pointer-events-none" />
+            {/* Perspective floor grid lines */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-1/2 pointer-events-none opacity-[0.18]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(212,175,55,0.5) 1px, transparent 1px), linear-gradient(to bottom, rgba(212,175,55,0.5) 1px, transparent 1px)",
+                backgroundSize: "60px 60px",
+                transform: "perspective(600px) rotateX(60deg)",
+                transformOrigin: "bottom center",
+                maskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)",
+              }}
+            />
+            {/* Horizontal "horizon" line where the floor meets the wall */}
+            <div className="absolute left-0 right-0 bottom-1/2 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent pointer-events-none" />
+            {/* Vignette to focus the eye on the product */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
+            {/* Corner crosshairs (designer / blueprint feel) */}
+            {[
+              "top-4 left-4 border-t border-l",
+              "top-4 right-4 border-t border-r",
+              "bottom-4 left-4 border-b border-l",
+              "bottom-4 right-4 border-b border-r",
+            ].map((pos) => (
+              <div
+                key={pos}
+                className={`absolute ${pos} w-5 h-5 border-gold/40 pointer-events-none`}
+              />
+            ))}
+          </div>
+
+          {/* ===== Floating product (bottle + cap/pump + reflection) ===== */}
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+            style={{ rotateY, transformStyle: "preserve-3d" }}
+            className="relative w-full h-full flex items-center justify-center"
+          >
+            {/* Floor reflection of the full assembly.
+                Mirrored vertically, faded out, blurred — gives the illusion
+                the bottle is sitting on a glossy surface inside the stage. */}
+            <div
+              className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+              style={{
+                bottom: "8%",
+                width: "60%",
+                height: "55%",
+                transform: "translateX(-50%) scaleY(-1)",
+                opacity: 0.18,
+                filter: "blur(6px)",
+                WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
+                maskImage: "linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 85%)",
+              }}
+            >
+              <div
+                className="w-full h-full"
+                style={{
+                  filter: getColorFilter(store.bottleColor),
+                }}
+              >
+                {shapeImage && (
+                  <img
+                    src={shapeImage}
+                    alt=""
+                    aria-hidden
+                    className="w-full h-full object-contain"
+                  />
+                )}
+                {PUMP_IMAGES[store.pumpType] && (
+                  <img
+                    src={PUMP_IMAGES[store.pumpType]}
+                    alt=""
+                    aria-hidden
+                    className="absolute left-1/2 -translate-x-1/2"
+                    style={{
+                      top: 0,
+                      width: "35%",
+                      height: "49%",
+                      objectFit: "contain",
+                      objectPosition: "center bottom",
+                    }}
+                  />
+                )}
+                {CAP_IMAGES[store.capStyle] && (
+                  <img
+                    src={CAP_IMAGES[store.capStyle]}
+                    alt=""
+                    aria-hidden
+                    className="absolute left-1/2 -translate-x-1/2"
+                    style={{
+                      top: 0,
+                      width: "55%",
+                      height: "77%",
+                      objectFit: "contain",
+                      objectPosition: "center bottom",
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Ground contact shadow (elliptical, soft) */}
+            <div
+              className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+              style={{
+                bottom: "8%",
+                width: `calc(${dims.width} * 1.05)`,
+                height: `calc(${dims.width} * 0.12)`,
+                background:
+                  "radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 45%, transparent 75%)",
+                filter: "blur(8px)",
+                zIndex: 5,
+              }}
+            />
+
+            {/* ===== Dynamic shape label chip (top of stage) ===== */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={store.bottleSilhouette}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35 }}
+                className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-background/70 backdrop-blur-md shadow-lg"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold">
+                  {store.bottleSilhouette}
+                </span>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* ===== Spec readout chip (bottom of stage) ===== */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2 rounded-full border border-border/60 bg-background/60 backdrop-blur-md text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="text-gold-soft">{store.bottleMaterial}</span>
+              <span className="h-3 w-px bg-border" />
+              <span className="text-foreground">{store.bottleColor}</span>
+              <span className="h-3 w-px bg-border" />
+              <span>
+                {store.bottleCapacity && store.bottleCapacity !== "100ml"
+                  ? store.bottleCapacity
+                  : "100ml"}
+              </span>
+            </div>
+
+            {/* ===== Layered bottle/cap/pump canvas (3-slice stack) =====
+                ============================================================
+                The preview canvas is a 400×640 unit grid (scaled by `s`)
+                split into three vertical slices that stack exactly on
+                top of one another, all centered on the same axis:
+
+                  ┌──────────────────────────────┐  ← top (z-30: CAP)
+                  │   CAP SLICE   (400 × 128)   │  20% of total height
+                  ├──────────────────────────────┤
+                  │   PUMP SLICE  (400 × 96)    │  15% of total height
+                  ├──────────────────────────────┤
+                  │   BOTTLE SLICE (400 × 416)  │  65% of total height
+                  └──────────────────────────────┘  ← bottom (z-10: BOTTLE)
+
+                Layer rules:
+                - BASE LAYER (z-10): Bottle. Anchored to the BOTTLE
+                  slice. The bottle's top-of-shoulders touches the top
+                  pixel row of this slice. Always rendered.
+                - MID LAYER (z-20): Pump. Anchored to the PUMP slice.
+                  The pump's collar bottom touches the bottom pixel row
+                  of this slice (so the visible pump base sits flush
+                  against the top of the bottle slice). Renders ONLY
+                  when a pump is selected AND no cap is active.
+                - TOP LAYER (z-30): Cap. Anchored to the CAP slice.
+                  The cap graphic is centered horizontally and
+                  vertically inside this slice. Renders ONLY when a cap
+                  is selected AND no pump is active.
+
+                Because the slices are pixel-aligned to the same canvas,
+                the cap/pump bottom edge and the bottle's top edge share
+                the same Y-coordinate, producing a flush stack with no
+                visible gap.
+                ============================================================ */}
+            {(() => {
+              // Both cap and pump can now be active at the same time. They
+              // each render in their own slice and are stacked top-to-bottom
+              // by z-index: bottle (10) → pump (20) → cap (30).
+              const showPump = !!PUMP_IMAGES[store.pumpType];
+              const showCap = !!CAP_IMAGES[store.capStyle];
+              const bottleSlice = BOTTLE_SLICE;
+              const canvasH = CANVAS_HEIGHT;
+              const capH = CAP_SLICE;
+              const pumpH = PUMP_SLICE;
+              const canvasW = CANVAS_WIDTH;
+              return (
+                <div
+                  className="relative"
+                  style={{
+                    width: canvasW,
+                    height: canvasH,
+                  }}
+                >
+                  {/* LAYER 0 (z-0): Base wireframe placeholder — always visible.
+                      Shows base.png as the fixed frame/placeholder when no bottle
+                      is selected. Once the user picks a silhouette, this stays as
+                      a subtle reference frame behind the actual bottle image. */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    style={{ zIndex: 0 }}
+                  >
+                    <img
+                      src={baseImg}
+                      alt="Bottle placeholder"
+                      draggable={false}
+                      className="max-w-full max-h-full object-contain select-none"
+                      style={{
+                        opacity: shapeImage ? 0.35 : 0.9,
+                        transition: "opacity 0.4s ease",
+                      }}
+                    />
+                  </div>
+
+                  {/* BASE LAYER (z-10): Bottle — anchored to BOTTOM 65%
+                      slice. The bottle's top-of-shoulders touches the
+                      top pixel row of the bottle slice. Only rendered
+                      when the user has selected a silhouette. */}
+                  <div
+                    className="absolute left-0 right-0 bottom-0"
+                    style={{
+                      height: bottleSlice,
+                      zIndex: 10,
+                    }}
+                  >
+                    {shapeImage ? (
+                      <motion.img
+                        key={`bottle-${store.bottleSilhouette}`}
+                        src={shapeImage}
+                        alt={store.bottleSilhouette}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale }}
+                        transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                        style={{
+                          width: BOTTLE_SLOT_W,
+                          height: BOTTLE_SLOT_H,
+                          filter: getColorFilter(store.bottleColor),
+                          transition: "filter 0.6s ease",
+                        }}
+                        // object-contain + object-bottom-center pins every
+                        // silhouette to the SAME rectangle regardless of the
+                        // PNG's intrinsic aspect ratio, so the bottle never
+                        // shifts up/down or left/right when the shape changes.
+                        className="object-contain object-bottom drop-shadow-[0_40px_120px_rgba(0,0,0,0.9)]"
+                      />
+                    ) : null}
+                  </div>
+
+                  {/* MID LAYER (z-20): Pump — anchored to MIDDLE 15%
+                      slice. Bottom edge of the pump collar touches the
+                      bottom pixel row of this slice, which is the same
+                      Y-coordinate as the top of the bottle slice — so
+                      the pump's base sits flush on the bottle's
+                      shoulder line. */}
+                  <AnimatePresence>
+                    {showPump && (
+                      <div
+                        key={`pump-${store.pumpType}`}
+                        className="absolute left-0 right-0 flex items-end justify-center"
+                        style={{
+                          bottom: bottleSlice, // = top of bottle slice
+                          height: pumpH,
+                          zIndex: 20,
+                        }}
+                      >
+                        <motion.img
+                          src={PUMP_IMAGES[store.pumpType]}
+                          alt="Pump"
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0, scale }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                          style={{
+                            width: BOTTLE_SLOT_W,
+                            height: pumpH,
+                            display: "block",
+                            objectFit: "contain",
+                            objectPosition: "center bottom",
+                          }}
+                          className="drop-shadow-[0_12px_36px_rgba(0,0,0,0.7)]"
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* TOP LAYER (z-30): Cap — anchored above the pump (when present) so
+                      bottle → pump → cap stack top-to-bottom. When the pump
+                      is NOT selected, the cap sits flush on the bottle's
+                      top, exactly as before. */}
+                  <AnimatePresence>
+                    {showCap && (
+                      <div
+                        key={`cap-${store.capStyle}`}
+                        className="absolute left-0 right-0 bottom-0"
+                        style={{
+                          // Stack: if a pump is active, cap sits on top of the
+                          // pump slice; otherwise cap sits flush on the bottle.
+                          bottom: showPump
+                            ? `calc(${bottleSlice} + ${pumpH})`
+                            : bottleSlice,
+                          height: capH,
+                          zIndex: 30,
+                        }}
+                      >
+                        <motion.img
+                          src={CAP_IMAGES[store.capStyle]}
+                          alt="Cap"
+                          initial={{ opacity: 0, y: -25 }}
+                          animate={{ opacity: 1, y: 0, scale }}
+                          exit={{ opacity: 0, y: -25 }}
+                          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            display: "block",
+                            objectFit: "contain",
+                            objectPosition: "center bottom",
+                            transform: "translateY(20px)",
+                          }}
+                          className="drop-shadow-[0_18px_48px_rgba(0,0,0,0.8)]"
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })()}
+          </motion.div>
+        </div>
+
+        {/* Quality Badging */}
+        <div className="absolute bottom-16 flex gap-6 z-10">
+          {[
+            { icon: ShieldCheck, text: "GMP Certified" },
+            { icon: Award, text: "IFRA Compliant" },
+            { icon: Layers, text: "Sustainably Sourced" },
+          ].map((badge) => (
+            <div
+              key={badge.text}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-card/25 backdrop-blur-md shadow-lg text-[10px] text-muted-foreground transition-colors duration-300"
+            >
+              <badge.icon className="h-3.5 w-3.5 text-gold" />
+              <span>{badge.text}</span>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Review & Submit Modal */}
+      <AnimatePresence>
+        {reviewOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 240, damping: 24 }}
+              className="w-full max-w-2xl my-8 bg-card border border-gold/20 rounded-2xl shadow-2xl relative overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-gold to-gold-soft h-1.5" />
+              <div className="p-8">
+                {submitted ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center mx-auto mb-6">
+                      <Check className="h-8 w-8 text-gold stroke-[2.5]" />
+                    </div>
+                    <h2 className="font-display text-2xl font-bold mb-2">
+                      Quotation Request Sent
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Your specification document has been emailed to:
+                    </p>
+                    <p className="text-sm font-mono text-gold mb-8">
+                      fshahriar@alkhuraii-afpc.com
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-8">
+                      Our luxury manufacturing consultant will respond within 24
+                      hours.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setReviewOpen(false);
+                        setSubmitted(false);
+                      }}
+                      className="w-full py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow text-xs"
+                    >
+                      Return to Builder
+                    </button>
+                  </div>
+                ) : submitting ? (
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 border-4 border-gold/30 border-t-gold rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      Sending your specification document...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Document header */}
+                    <div className="text-center mb-6 pb-6 border-b border-border">
+                      <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold mb-2">
+                        Private Label Specification Document
+                      </div>
+                      <h2 className="font-display text-3xl font-bold mb-1">
+                        {store.label.name || "UNTITLED BRAND"}
+                      </h2>
+                      <p className="text-xs text-muted-foreground">
+                        Prepared on{" "}
+                        {new Date().toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* Spec sections */}
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-5 mb-6 text-xs">
+                      <div className="col-span-2">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Bottle Configuration
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Silhouette"
+                        value={store.bottleSilhouette || "—"}
+                      />
+                      <SpecRow
+                        label="Material"
+                        value={store.bottleMaterial || "—"}
+                      />
+                      <SpecRow
+                        label="Capacity"
+                        value={store.bottleCapacity || "—"}
+                      />
+                      <SpecRow
+                        label="Color & Finish"
+                        value={store.bottleColor || "—"}
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Cap & Pump
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Cap Style"
+                        value={
+                          (() => {
+                            for (const cat of CAP_CATEGORIES) {
+                              const v = cat.variants.find(
+                                (x) => x.id === store.capStyle,
+                              );
+                              if (v) return v.name;
+                            }
+                            return store.capStyle || "—";
+                          })()
+                        }
+                      />
+                      <SpecRow
+                        label="Pump"
+                        value={
+                          (() => {
+                            for (const cat of PUMP_CATEGORIES) {
+                              const v = cat.variants.find(
+                                (x) => x.id === store.pumpType,
+                              );
+                              if (v) return `${cat.name} – ${v.name}`;
+                            }
+                            return store.pumpType || "—";
+                          })()
+                        }
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Fragrance Composition
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Top Notes"
+                        value={(store.fragrance.top || []).join(", ") || "—"}
+                      />
+                      <SpecRow
+                        label="Intensity"
+                        value={store.fragrance.intensity || "Balanced"}
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Packaging
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Box Type"
+                        value={store.packaging.type || "—"}
+                      />
+                      <SpecRow
+                        label="Finish"
+                        value={store.packaging.finish || "—"}
+                      />
+
+                      <div className="col-span-2 mt-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold mb-2">
+                          Branding
+                        </h4>
+                      </div>
+                      <SpecRow
+                        label="Brand Name"
+                        value={store.label.name || "—"}
+                      />
+                      <SpecRow
+                        label="Label Font"
+                        value={store.label.font || "—"}
+                      />
+                      <SpecRow
+                        label="Label Shape"
+                        value={store.label.shape || "—"}
+                      />
+                    </div>
+
+                    {/* Estimated price summary */}
+                    {/* <div className="bg-secondary/20 border border-border rounded-xl p-4 mb-6 flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Estimated Wholesale / Unit
+                        </div>
+                        <div className="font-display text-2xl font-bold text-gold">
+                          {pricing.unitPrice.toFixed(2)} SAR
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Total (MOQ {store.quantity.toLocaleString()})
+                        </div>
+                        <div className="font-display text-2xl font-bold text-foreground">
+                          {pricing.totalPrice.toLocaleString()}{" "}
+                          <span className="text-xs text-gold-soft">SAR</span>
+                        </div>
+                      </div>
+                    </div> */}
+
+                    {/* Action buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setReviewOpen(false);
+                          setActiveTab(lastTab);
+                        }}
+                        className="flex-1 py-3 rounded-xl border border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:border-gold/30 transition-all"
+                      >
+                        ← Modify
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSubmitting(true);
+                          setTimeout(() => {
+                            setSubmitting(false);
+                            setSubmitted(true);
+                            // TODO: replace with real API call to POST /api/send-quotation
+                            //       with body containing all store selections + pricing.
+                            //       The API will email the document to fshahriar@alkhuraii-afpc.com.
+                          }, 1500);
+                        }}
+                        className="flex-1 py-3 rounded-xl bg-gold hover:bg-gold-soft text-black font-bold uppercase tracking-wider transition-all shadow-gold-glow text-xs"
+                      >
+                        Submit & Email →
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function SpecRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-start gap-4 py-1.5 border-b border-border/40">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className="text-xs font-medium text-foreground text-right max-w-[60%]">
+        {value}
+      </span>
+    </div>
+  );
+}
