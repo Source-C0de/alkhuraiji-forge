@@ -1,16 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-} from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/i18n/context";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { LiveSupportWidget } from "@/components/support/LiveSupportWidget";
 
 function NotFoundComponent() {
   return (
@@ -22,7 +18,10 @@ function NotFoundComponent() {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
-          <Link to="/" className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+          >
             Go home
           </Link>
         </div>
@@ -38,15 +37,25 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="font-display text-xl font-semibold">This page didn't load</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Something went wrong. Try refreshing or head back home.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Something went wrong. Try refreshing or head back home.
+        </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
           >
             Try again
           </button>
-          <a href="/" className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold">Go home</a>
+          <a
+            href="/"
+            className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold"
+          >
+            Go home
+          </a>
         </div>
       </div>
     </div>
@@ -62,8 +71,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const isAdminOrClient = router.state.location.pathname.startsWith("/admin") || router.state.location.pathname.startsWith("/client");
-  const isBuilder = router.state.location.pathname.startsWith("/builder") || router.state.location.pathname.startsWith("/cosmetics");
+  const isAdminOrClient =
+    router.state.location.pathname.startsWith("/admin") ||
+    router.state.location.pathname.startsWith("/client");
+  const isBuilder =
+    router.state.location.pathname.startsWith("/builder") ||
+    router.state.location.pathname.startsWith("/cosmetics");
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -74,7 +87,8 @@ function RootComponent() {
             <main className="flex-1 flex flex-col">
               <Outlet />
             </main>
-            {!isAdminOrClient && <Footer />}
+            {!isAdminOrClient && !isBuilder && <Footer />}
+            <LiveSupportWidget />
           </div>
         </I18nProvider>
       </ThemeProvider>

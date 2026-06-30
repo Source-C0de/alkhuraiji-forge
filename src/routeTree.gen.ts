@@ -32,8 +32,11 @@ import { Route as ClientMessagingRouteImport } from './routes/client/messaging'
 import { Route as ClientDocumentsRouteImport } from './routes/client/documents'
 import { Route as ClientDesignApprovalsRouteImport } from './routes/client/design-approvals'
 import { Route as BuilderPerfumeRouteImport } from './routes/builder.perfume'
+import { Route as AdminSupportRouteImport } from './routes/admin/support'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as AdminBuilderRouteImport } from './routes/admin/builder'
+import { Route as ClientSupportTicketIdRouteImport } from './routes/client/support.$ticketId'
+import { Route as AdminSupportTicketIdRouteImport } from './routes/admin/support.$ticketId'
 
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
@@ -150,6 +153,11 @@ const BuilderPerfumeRoute = BuilderPerfumeRouteImport.update({
   path: '/perfume',
   getParentRoute: () => BuilderRoute,
 } as any)
+const AdminSupportRoute = AdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/content',
   path: '/content',
@@ -159,6 +167,16 @@ const AdminBuilderRoute = AdminBuilderRouteImport.update({
   id: '/builder',
   path: '/builder',
   getParentRoute: () => AdminRoute,
+} as any)
+const ClientSupportTicketIdRoute = ClientSupportTicketIdRouteImport.update({
+  id: '/$ticketId',
+  path: '/$ticketId',
+  getParentRoute: () => ClientSupportRoute,
+} as any)
+const AdminSupportTicketIdRoute = AdminSupportTicketIdRouteImport.update({
+  id: '/$ticketId',
+  path: '/$ticketId',
+  getParentRoute: () => AdminSupportRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -174,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/support': typeof AdminSupportRouteWithChildren
   '/builder/perfume': typeof BuilderPerfumeRoute
   '/client/design-approvals': typeof ClientDesignApprovalsRoute
   '/client/documents': typeof ClientDocumentsRoute
@@ -184,9 +203,11 @@ export interface FileRoutesByFullPath {
   '/client/projects': typeof ClientProjectsRoute
   '/client/samples': typeof ClientSamplesRoute
   '/client/settings': typeof ClientSettingsRoute
-  '/client/support': typeof ClientSupportRoute
+  '/client/support': typeof ClientSupportRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/client/': typeof ClientIndexRoute
+  '/admin/support/$ticketId': typeof AdminSupportTicketIdRoute
+  '/client/support/$ticketId': typeof ClientSupportTicketIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -199,6 +220,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/support': typeof AdminSupportRouteWithChildren
   '/builder/perfume': typeof BuilderPerfumeRoute
   '/client/design-approvals': typeof ClientDesignApprovalsRoute
   '/client/documents': typeof ClientDocumentsRoute
@@ -209,9 +231,11 @@ export interface FileRoutesByTo {
   '/client/projects': typeof ClientProjectsRoute
   '/client/samples': typeof ClientSamplesRoute
   '/client/settings': typeof ClientSettingsRoute
-  '/client/support': typeof ClientSupportRoute
+  '/client/support': typeof ClientSupportRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/client': typeof ClientIndexRoute
+  '/admin/support/$ticketId': typeof AdminSupportTicketIdRoute
+  '/client/support/$ticketId': typeof ClientSupportTicketIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -227,6 +251,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/admin/builder': typeof AdminBuilderRoute
   '/admin/content': typeof AdminContentRoute
+  '/admin/support': typeof AdminSupportRouteWithChildren
   '/builder/perfume': typeof BuilderPerfumeRoute
   '/client/design-approvals': typeof ClientDesignApprovalsRoute
   '/client/documents': typeof ClientDocumentsRoute
@@ -237,9 +262,11 @@ export interface FileRoutesById {
   '/client/projects': typeof ClientProjectsRoute
   '/client/samples': typeof ClientSamplesRoute
   '/client/settings': typeof ClientSettingsRoute
-  '/client/support': typeof ClientSupportRoute
+  '/client/support': typeof ClientSupportRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/client/': typeof ClientIndexRoute
+  '/admin/support/$ticketId': typeof AdminSupportTicketIdRoute
+  '/client/support/$ticketId': typeof ClientSupportTicketIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -256,6 +283,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/admin/support'
     | '/builder/perfume'
     | '/client/design-approvals'
     | '/client/documents'
@@ -269,6 +297,8 @@ export interface FileRouteTypes {
     | '/client/support'
     | '/admin/'
     | '/client/'
+    | '/admin/support/$ticketId'
+    | '/client/support/$ticketId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -281,6 +311,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/admin/support'
     | '/builder/perfume'
     | '/client/design-approvals'
     | '/client/documents'
@@ -294,6 +325,8 @@ export interface FileRouteTypes {
     | '/client/support'
     | '/admin'
     | '/client'
+    | '/admin/support/$ticketId'
+    | '/client/support/$ticketId'
   id:
     | '__root__'
     | '/'
@@ -308,6 +341,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/admin/builder'
     | '/admin/content'
+    | '/admin/support'
     | '/builder/perfume'
     | '/client/design-approvals'
     | '/client/documents'
@@ -321,6 +355,8 @@ export interface FileRouteTypes {
     | '/client/support'
     | '/admin/'
     | '/client/'
+    | '/admin/support/$ticketId'
+    | '/client/support/$ticketId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -499,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BuilderPerfumeRouteImport
       parentRoute: typeof BuilderRoute
     }
+    '/admin/support': {
+      id: '/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/content': {
       id: '/admin/content'
       path: '/content'
@@ -513,18 +556,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBuilderRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/client/support/$ticketId': {
+      id: '/client/support/$ticketId'
+      path: '/$ticketId'
+      fullPath: '/client/support/$ticketId'
+      preLoaderRoute: typeof ClientSupportTicketIdRouteImport
+      parentRoute: typeof ClientSupportRoute
+    }
+    '/admin/support/$ticketId': {
+      id: '/admin/support/$ticketId'
+      path: '/$ticketId'
+      fullPath: '/admin/support/$ticketId'
+      preLoaderRoute: typeof AdminSupportTicketIdRouteImport
+      parentRoute: typeof AdminSupportRoute
+    }
   }
 }
+
+interface AdminSupportRouteChildren {
+  AdminSupportTicketIdRoute: typeof AdminSupportTicketIdRoute
+}
+
+const AdminSupportRouteChildren: AdminSupportRouteChildren = {
+  AdminSupportTicketIdRoute: AdminSupportTicketIdRoute,
+}
+
+const AdminSupportRouteWithChildren = AdminSupportRoute._addFileChildren(
+  AdminSupportRouteChildren,
+)
 
 interface AdminRouteChildren {
   AdminBuilderRoute: typeof AdminBuilderRoute
   AdminContentRoute: typeof AdminContentRoute
+  AdminSupportRoute: typeof AdminSupportRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBuilderRoute: AdminBuilderRoute,
   AdminContentRoute: AdminContentRoute,
+  AdminSupportRoute: AdminSupportRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -541,6 +612,18 @@ const BuilderRouteChildren: BuilderRouteChildren = {
 const BuilderRouteWithChildren =
   BuilderRoute._addFileChildren(BuilderRouteChildren)
 
+interface ClientSupportRouteChildren {
+  ClientSupportTicketIdRoute: typeof ClientSupportTicketIdRoute
+}
+
+const ClientSupportRouteChildren: ClientSupportRouteChildren = {
+  ClientSupportTicketIdRoute: ClientSupportTicketIdRoute,
+}
+
+const ClientSupportRouteWithChildren = ClientSupportRoute._addFileChildren(
+  ClientSupportRouteChildren,
+)
+
 interface ClientRouteChildren {
   ClientDesignApprovalsRoute: typeof ClientDesignApprovalsRoute
   ClientDocumentsRoute: typeof ClientDocumentsRoute
@@ -551,7 +634,7 @@ interface ClientRouteChildren {
   ClientProjectsRoute: typeof ClientProjectsRoute
   ClientSamplesRoute: typeof ClientSamplesRoute
   ClientSettingsRoute: typeof ClientSettingsRoute
-  ClientSupportRoute: typeof ClientSupportRoute
+  ClientSupportRoute: typeof ClientSupportRouteWithChildren
   ClientIndexRoute: typeof ClientIndexRoute
 }
 
@@ -565,7 +648,7 @@ const ClientRouteChildren: ClientRouteChildren = {
   ClientProjectsRoute: ClientProjectsRoute,
   ClientSamplesRoute: ClientSamplesRoute,
   ClientSettingsRoute: ClientSettingsRoute,
-  ClientSupportRoute: ClientSupportRoute,
+  ClientSupportRoute: ClientSupportRouteWithChildren,
   ClientIndexRoute: ClientIndexRoute,
 }
 
