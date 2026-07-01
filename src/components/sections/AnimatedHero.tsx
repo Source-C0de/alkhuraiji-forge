@@ -101,7 +101,7 @@ export function AnimatedHero() {
           className="mt-10 flex flex-wrap items-center gap-4"
         >
           <Link
-            to="/contact"
+            to="/builder"
             className="group inline-flex items-center gap-3 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.15em] text-primary-foreground shadow-gold-glow transition hover:opacity-90"
           >
             {t.common.getStarted}
